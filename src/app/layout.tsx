@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
@@ -25,6 +24,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            :root {
+              --background: #ffffff;
+              --foreground: #171717;
+            }
+            
+            @media (prefers-color-scheme: dark) {
+              :root {
+                --background: #0a0a0a;
+                --foreground: #ededed;
+              }
+            }
+            
+            body {
+              background: var(--background);
+              color: var(--foreground);
+              font-family: Arial, Helvetica, sans-serif;
+            }
+          `
+        }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

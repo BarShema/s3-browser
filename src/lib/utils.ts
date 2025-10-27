@@ -206,8 +206,7 @@ export function formatDate(date: Date): string {
       minute: "2-digit",
     }).format(date);
   } catch (error) {
-    console.error("Error formatting date:", error);
-    return (new Date).toLocaleDateString();
+    return new Date().toLocaleDateString();
   }
 }
 

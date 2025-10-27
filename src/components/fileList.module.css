@@ -1,0 +1,186 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.headerCheckbox {
+  grid-column: 1;
+}
+
+.headerName {
+  grid-column: span 5;
+}
+
+.headerSize {
+  grid-column: span 2;
+}
+
+.headerModified {
+  grid-column: span 3;
+}
+
+.headerActions {
+  grid-column: 1;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s;
+}
+
+.row:hover {
+  background: #f9fafb;
+}
+
+.row.selected {
+  background: #eff6ff;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+}
+
+.checkboxCell {
+  display: flex;
+  align-items: center;
+  grid-column: 1;
+}
+
+.iconCell {
+  display: flex;
+  flex-shrink: 0;
+  margin-right: 0.75rem;
+}
+
+.nameCell {
+  flex: 1;
+  min-width: 0;
+  grid-column: span 5;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nameCell > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameButton {
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.nameButton:hover {
+  color: #2563eb;
+}
+
+.nameInput {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.nameInput:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.sizeCell {
+  grid-column: span 2;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.modifiedCell {
+  grid-column: span 3;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.actionsCell {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.actionsGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.actionButton {
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.actionButton:hover {
+  color: #2563eb;
+}
+
+.actionButton.green:hover {
+  color: #16a34a;
+}
+
+.actionButton.yellow:hover {
+  color: #ca8a04;
+}
+
+.actionButton.red:hover {
+  color: #dc2626;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 0;
+  color: #6b7280;
+}
+
+.emptyIcon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+  color: #d1d5db;
+}
+

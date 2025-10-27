@@ -7,6 +7,7 @@ import { LogOut, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import styles from "./home.module.css";
 
 export default function Home() {
   const { user, signOut } = useAuth();
@@ -61,28 +62,25 @@ export default function Home() {
 
   return (
     <AuthGuard>
-      <main className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <div className="flex justify-between items-start">
+      <main className={styles.mainContainer}>
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <div className={styles.headerContent}>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className={styles.title}>
                   S3 File Browser
                 </h1>
-                <p className="text-gray-600">
+                <p className={styles.subtitle}>
                   Browse, manage, and organize your S3 files with ease
                 </p>
                 {bucketName && (
-                  <div className="mt-4 flex items-center gap-4">
-                    <span className="text-sm text-gray-500">
-                      Current Bucket:{" "}
-                      <span className="font-medium text-gray-700">
-                        {bucketName}
-                      </span>
+                  <div className={styles.bucketInfo}>
+                    <span className={styles.bucketLabel}>
+                      Current Bucket: <span className={styles.bucketName}>{bucketName}</span>
                     </span>
                     <button
                       onClick={() => setBucketName("")}
-                      className="text-sm text-blue-600 hover:text-blue-800 underline"
+                      className={styles.changeBucket}
                     >
                       Change Bucket
                     </button>
@@ -90,28 +88,21 @@ export default function Home() {
                 )}
               </div>
 
-              {/* User Menu */}
-              <div className="relative">
-                <div className="flex items-center space-x-3 bg-white rounded-lg border border-gray-200 px-4 py-2 shadow-sm">
-                  <User size={18} className="text-gray-500" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-900">
-                      {user?.username}
-                    </span>
-                    {user?.email && (
-                      <span className="text-xs text-gray-500">
-                        {user.email}
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="ml-4 px-3 py-1 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors flex items-center space-x-2 text-sm"
-                  >
-                    <LogOut size={14} />
-                    <span>Logout</span>
-                  </button>
+              <div className={styles.userMenu}>
+                <User size={18} style={{ color: "#6b7280" }} />
+                <div className={styles.userInfo}>
+                  <span className={styles.userName}>{user?.username}</span>
+                  {user?.email && (
+                    <span className={styles.userEmail}>{user.email}</span>
+                  )}
                 </div>
+                <button
+                  onClick={handleLogout}
+                  className={styles.logoutButton}
+                >
+                  <LogOut size={14} />
+                  <span>Logout</span>
+                </button>
               </div>
             </div>
           </div>
@@ -119,37 +110,33 @@ export default function Home() {
         {bucketName ? (
           <FileExplorer bucketName={bucketName} />
         ) : (
-          <div className="py-12">
+          <div className={styles.bucketSelectContainer}>
             {isLoadingBuckets ? (
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading buckets...</p>
+              <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
+                <p className={styles.loadingText}>Loading buckets...</p>
               </div>
             ) : buckets.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">No S3 buckets available</p>
-                <p className="text-sm text-gray-400">
+              <div className={styles.emptyState}>
+                <p className={styles.emptyText}>No S3 buckets available</p>
+                <p className={styles.emptySubtext}>
                   Please ensure your AWS credentials are configured correctly
                 </p>
               </div>
             ) : (
               <>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                <h2 className={styles.bucketSelectTitle}>
                   Select an S3 Bucket
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className={styles.bucketGrid}>
                   {buckets.map((bucket) => (
                     <button
                       key={bucket}
                       onClick={() => handleBucketSelect(bucket)}
-                      className="px-6 py-4 bg-white border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-500 transition-all text-left"
+                      className={styles.bucketCard}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-900">
-                          {bucket}
-                        </span>
-                        <span className="text-blue-600">→</span>
-                      </div>
+                      <span>{bucket}</span>
+                      <span className={styles.bucketArrow}>→</span>
                     </button>
                   ))}
                 </div>

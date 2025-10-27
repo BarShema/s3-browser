@@ -1,0 +1,201 @@
+.main {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.headerLeft {
+  flex: 1;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #666;
+}
+
+.bucketInfo {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bucketLabel {
+  font-size: 14px;
+  color: #666;
+}
+
+.bucketName {
+  font-weight: 500;
+  color: #333;
+}
+
+.changeBucket {
+  font-size: 14px;
+  color: #1976d2;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.changeBucket:hover {
+  color: #1565c0;
+}
+
+.userMenu {
+  position: relative;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 8px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.userEmail {
+  font-size: 12px;
+  color: #666;
+}
+
+.logoutButton {
+  margin-left: 16px;
+  padding: 4px 12px;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+  background: #fee2e2;
+}
+
+.bucketSelection {
+  padding: 48px 0;
+}
+
+.loadingContainer {
+  text-align: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  border-top-color: #1976d2;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  margin-top: 16px;
+  color: #666;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 0;
+}
+
+.emptyText {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.emptyHint {
+  font-size: 14px;
+  color: #999;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.bucketGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.bucketCard {
+  padding: 24px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bucketCard:hover {
+  background: #e3f2fd;
+  border-color: #1976d2;
+}
+
+.bucketCardContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bucketCardName {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.arrow {
+  color: #1976d2;
+}
+

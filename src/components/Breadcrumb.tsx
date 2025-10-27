@@ -1,4 +1,6 @@
-'use client';
+"use client";
+
+import styles from "./breadcrumb.module.css";
 
 interface BreadcrumbProps {
   currentPath: string;
@@ -6,38 +8,38 @@ interface BreadcrumbProps {
 }
 
 export function Breadcrumb({ currentPath, onPathClick }: BreadcrumbProps) {
-  const pathSegments = currentPath.split('/').filter(Boolean);
-  
+  const pathSegments = currentPath.split("/").filter(Boolean);
+
   const handlePathClick = (index: number) => {
-    const newPath = pathSegments.slice(0, index + 1).join('/');
+    const newPath = pathSegments.slice(0, index + 1).join("/");
     onPathClick(newPath);
   };
 
   return (
-    <div className="flex items-center space-x-2 p-4 border-b bg-gray-50">
+    <div className={styles.container}>
       <button
-        onClick={() => onPathClick('')}
-        className="text-blue-600 hover:text-blue-800 font-medium"
+        onClick={() => onPathClick("")}
+        className={styles.button}
       >
         Root
       </button>
-      
+
       {pathSegments.map((segment, index) => (
-        <div key={index} className="flex items-center space-x-2">
-          <span className="text-gray-400">/</span>
+        <div key={index} className={styles.segment}>
+          <span className={styles.separator}>/</span>
           <button
             onClick={() => handlePathClick(index)}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className={styles.button}
           >
             {segment}
           </button>
         </div>
       ))}
-      
+
       {currentPath && (
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400">/</span>
-          <span className="text-gray-600 font-medium">Current</span>
+        <div className={styles.segment}>
+          <span className={styles.separator}>/</span>
+          <span className={styles.current}>Current</span>
         </div>
       )}
     </div>

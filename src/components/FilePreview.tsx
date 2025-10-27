@@ -1,17 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Item, FileItem, DirectoryItem } from '@/lib/utils';
-import { getFileIcon, formatFileSize, formatDate, isImage, isVideo } from '@/lib/utils';
-import { 
-  Folder, 
-  File, 
-  Download, 
-  Trash2, 
-  Edit3, 
+import {
+  DirectoryItem, FileItem, formatDate, formatFileSize, isImage,
+  isVideo, Item
+} from "@/lib/utils";
+import {
+  Download,
+  Edit3,
   Eye,
-  MoreVertical 
-} from 'lucide-react';
+  File,
+  Folder,
+  Trash2
+} from "lucide-react";
+import { useState } from "react";
 
 interface FilePreviewProps {
   items: Item[];
@@ -37,7 +38,7 @@ export function FilePreview({
   onRename,
 }: FilePreviewProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
+  const [editValue, setEditValue] = useState("");
 
   const handleItemClick = (item: Item) => {
     if (item.isDirectory) {
@@ -57,7 +58,7 @@ export function FilePreview({
     if (checked) {
       onSelectionChange([...selectedItems, itemId]);
     } else {
-      onSelectionChange(selectedItems.filter(id => id !== itemId));
+      onSelectionChange(selectedItems.filter((id) => id !== itemId));
     }
   };
 
@@ -68,24 +69,24 @@ export function FilePreview({
 
   const finishRename = () => {
     if (editingItem && editValue.trim()) {
-      const item = items.find(i => i.id === editingItem);
+      const item = items.find((i) => i.id === editingItem);
       if (item && !item.isDirectory) {
         onRename(item as FileItem, editValue.trim());
       }
     }
     setEditingItem(null);
-    setEditValue('');
+    setEditValue("");
   };
 
   const cancelRename = () => {
     setEditingItem(null);
-    setEditValue('');
+    setEditValue("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       finishRename();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       cancelRename();
     }
   };
@@ -105,7 +106,9 @@ export function FilePreview({
         <div
           key={item.id}
           className={`relative group bg-white border rounded-lg overflow-hidden hover:shadow-lg transition-all cursor-pointer ${
-            selectedItems.includes(item.id) ? 'ring-2 ring-blue-500' : 'border-gray-200'
+            selectedItems.includes(item.id)
+              ? "ring-2 ring-blue-500"
+              : "border-gray-200"
           }`}
           onClick={() => handleItemClick(item)}
           onDoubleClick={() => handleItemDoubleClick(item)}
@@ -156,7 +159,10 @@ export function FilePreview({
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <div className="text-sm font-medium text-gray-900 truncate" title={item.name}>
+                <div
+                  className="text-sm font-medium text-gray-900 truncate"
+                  title={item.name}
+                >
                   {item.name}
                 </div>
               )}
@@ -164,7 +170,11 @@ export function FilePreview({
 
             {/* Metadata */}
             <div className="text-xs text-gray-500 space-y-1">
-              <div>{item.isDirectory ? 'Folder' : formatFileSize((item as FileItem).size)}</div>
+              <div>
+                {item.isDirectory
+                  ? "Folder"
+                  : formatFileSize((item as FileItem).size)}
+              </div>
               <div>{formatDate(item.lastModified)}</div>
             </div>
           </div>
@@ -184,7 +194,7 @@ export function FilePreview({
                   >
                     <Download size={14} />
                   </button>
-                  
+
                   {(isImage(item.name) || isVideo(item.name)) && (
                     <button
                       onClick={(e) => {
@@ -199,7 +209,7 @@ export function FilePreview({
                   )}
                 </>
               )}
-              
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -210,7 +220,7 @@ export function FilePreview({
               >
                 <Edit3 size={14} />
               </button>
-              
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();

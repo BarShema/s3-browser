@@ -10,6 +10,7 @@ import { UploadModal } from '@/components/UploadModal';
 import { EditModal } from '@/components/EditModal';
 import { FileItem, DirectoryItem, ViewMode } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import styles from './fileExplorer.module.css';
 
 interface FileExplorerProps {
   bucketName: string;
@@ -177,7 +178,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const allItems = [...directories, ...files];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
+    <div className={styles.container}>
       <Toolbar
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -194,11 +195,11 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
         onPathClick={handleBreadcrumbClick}
       />
 
-      <div className="p-4">
+      <div className={styles.content}>
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-2 text-gray-600">Loading...</span>
+          <div className={styles.loadingContainer}>
+            <div className={styles.loader}></div>
+            <span className={styles.loadingText}>Loading...</span>
           </div>
         ) : (
           <>
@@ -264,13 +265,13 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
       />
 
       {previewFile && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">{previewFile.name}</h3>
+        <div className={styles.previewOverlay}>
+          <div className={styles.previewContent}>
+            <div className={styles.previewHeader}>
+              <h3 className={styles.previewTitle}>{previewFile.name}</h3>
               <button
                 onClick={handleClosePreview}
-                className="text-gray-500 hover:text-gray-700"
+                className={styles.closeButton}
               >
                 ✕
               </button>
@@ -279,13 +280,13 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
               <img
                 src={`/api/s3/download?bucket=${bucketName}&key=${previewFile.key}`}
                 alt={previewFile.name}
-                className="max-w-full max-h-[70vh] object-contain"
+                className={styles.previewImage}
               />
             )}
             {isVideo(previewFile.name) && (
               <video
                 controls
-                className="max-w-full max-h-[70vh]"
+                className={styles.previewVideo}
               >
                 <source
                   src={`/api/s3/download?bucket=${bucketName}&key=${previewFile.key}`}

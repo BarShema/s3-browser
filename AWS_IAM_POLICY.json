@@ -2,6 +2,14 @@
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "S3FileBrowserBucketList",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "S3FileBrowserPermissions",
       "Effect": "Allow",
       "Action": [

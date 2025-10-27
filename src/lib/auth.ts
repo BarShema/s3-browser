@@ -74,6 +74,13 @@ export class AuthService {
    */
   static async getCurrentUser(): Promise<AuthUser | null> {
     return new Promise((resolve, reject) => {
+      // Check if Cognito is configured
+      if (!poolData.UserPoolId || !poolData.ClientId) {
+        console.warn('Cognito not configured');
+        resolve(null);
+        return;
+      }
+
       const cognitoUser = userPool.getCurrentUser();
       
       if (!cognitoUser) {
@@ -81,7 +88,14 @@ export class AuthService {
         return;
       }
 
+      // Add timeout to prevent hanging
+      const timeout = setTimeout(() => {
+        resolve(null);
+      }, 3000);
+
       cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
+        clearTimeout(timeout);
+        
         if (err || !session) {
           resolve(null);
           return;
@@ -92,13 +106,18 @@ export class AuthService {
           return;
         }
 
-        const user: AuthUser = {
-          username: session.getIdToken().payload['cognito:username'] || cognitoUser.getUsername(),
-          email: session.getIdToken().payload.email,
-          session: session,
-        };
+        try {
+          const user: AuthUser = {
+            username: session.getIdToken().payload['cognito:username'] || cognitoUser.getUsername(),
+            email: session.getIdToken().payload.email,
+            session: session,
+          };
 
-        resolve(user);
+          resolve(user);
+        } catch (error) {
+          console.error('Error extracting user info:', error);
+          resolve(null);
+        }
       });
     });
   }

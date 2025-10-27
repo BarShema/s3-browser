@@ -8,7 +8,22 @@
     "start": "next start",
     "lint": "eslint",
     "setup": "./setup.sh",
-    "create-iam-user": "./create-iam-user.sh"
+    "create-iam-user": "./create-iam-user.sh",
+    "pm2:dev": "./scripts/pm2-manage.sh start dev",
+    "pm2:stop:dev": "./scripts/pm2-manage.sh stop dev",
+    "pm2:restart:dev": "./scripts/pm2-manage.sh restart dev",
+    "pm2:logs:dev": "./scripts/pm2-manage.sh logs dev",
+    "pm2:status:dev": "./scripts/pm2-manage.sh status dev",
+    "pm2:prd": "./scripts/pm2-manage.sh start prd",
+    "pm2:stop:prd": "./scripts/pm2-manage.sh stop prd",
+    "pm2:restart:prd": "./scripts/pm2-manage.sh restart prd",
+    "pm2:logs:prd": "./scripts/pm2-manage.sh logs prd",
+    "pm2:status:prd": "./scripts/pm2-manage.sh status prd",
+    "pm2:lcl": "./scripts/pm2-manage.sh start lcl",
+    "pm2:stop:lcl": "./scripts/pm2-manage.sh stop lcl",
+    "pm2:restart:lcl": "./scripts/pm2-manage.sh restart lcl",
+    "pm2:logs:lcl": "./scripts/pm2-manage.sh logs lcl",
+    "pm2:status:lcl": "./scripts/pm2-manage.sh status lcl"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.917.0",
@@ -24,16 +39,14 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-dropzone": "^14.3.8",
-    "react-hot-toast": "^2.6.0"
+    "react-hot-toast": "^2.6.0",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/react": "^19",
+    "@types/react": "19.2.2",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.0.0",
-    "tailwindcss": "^4",
-    "typescript": "5.9.3"
+    "eslint-config-next": "16.0.0"
   }
 }

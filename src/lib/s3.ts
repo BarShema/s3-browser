@@ -1,14 +1,27 @@
-import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, CopyObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, CopyObjectCommand, HeadObjectCommand, ListBucketsCommand, HeadObjectCommandOutput } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
+// Get AWS credentials from environment
+const getS3Config = () => {
+  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const region = process.env.AWS_REGION || 'us-east-1';
+
+  if (!accessKeyId || !secretAccessKey) {
+    throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
+  }
+
+  return {
+    region,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+  };
+};
+
 // S3 Client configuration
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-  },
-});
+const s3Client = new S3Client(getS3Config());
 
 export interface S3File {
   key: string;
@@ -25,6 +38,31 @@ export interface S3Directory {
   name: string;
   lastModified: Date;
   isDirectory: boolean;
+}
+
+export interface S3Bucket {
+  name: string;
+  creationDate?: Date;
+}
+
+// List all S3 buckets
+export async function listBuckets(): Promise<S3Bucket[]> {
+  try {
+    const command = new ListBucketsCommand({});
+    const response = await s3Client.send(command);
+    
+    if (!response.Buckets) {
+      return [];
+    }
+
+    return response.Buckets.map(bucket => ({
+      name: bucket.Name || '',
+      creationDate: bucket.CreationDate,
+    }));
+  } catch (error) {
+    console.error('Error listing S3 buckets:', error);
+    throw new Error('Failed to list buckets');
+  }
 }
 
 // List objects in a bucket with optional prefix (folder)
@@ -146,7 +184,7 @@ export async function renameS3Object(bucket: string, oldKey: string, newKey: str
 }
 
 // Get file metadata
-export async function getFileMetadata(bucket: string, key: string): Promise<any> {
+export async function getFileMetadata(bucket: string, key: string): Promise<HeadObjectCommandOutput> {
   try {
     const command = new HeadObjectCommand({
       Bucket: bucket,

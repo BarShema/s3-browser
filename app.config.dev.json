@@ -1,0 +1,20 @@
+{
+  "name": "s3-browser-dev",
+  "script": "node_modules/next/dist/bin/next",
+  "args": "start --port 3002",
+  "instances": 1,
+  "exec_mode": "fork",
+  "error_file": "./logs/s3-browser-dev-error.log",
+  "out_file": "./logs/s3-browser-dev-out.log",
+  "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+  "merge_logs": true,
+  "env": {
+    "NODE_ENV": "development",
+    "PORT": "3002",
+    "NEXT_PUBLIC_ENV": "development"
+  },
+  "env_production": {
+    "NODE_ENV": "production"
+  }
+}
+

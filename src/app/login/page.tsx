@@ -11,15 +11,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn, isAuthenticated } = useAuth();
+  const { signIn, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect if already authenticated
-    if (isAuthenticated) {
-      router.push('/');
+    // Only redirect if not loading and authenticated
+    if (!authLoading && isAuthenticated) {
+      router.replace('/');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

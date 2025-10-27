@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { AuthService, AuthUser } from '@/lib/auth';
 
 interface AuthContextType {
@@ -17,17 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is already authenticated on mount
-    checkAuth();
-    
-    // Set up interval to check session validity
-    const interval = setInterval(checkAuth, 5 * 60 * 1000); // Check every 5 minutes
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const currentUser = await AuthService.getCurrentUser();
       setUser(currentUser);
@@ -37,7 +27,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Check if user is already authenticated on mount
+    checkAuth();
+    
+    // Set up interval to check session validity
+    const interval = setInterval(checkAuth, 5 * 60 * 1000); // Check every 5 minutes
+    
+    return () => clearInterval(interval);
+  }, [checkAuth]);
 
   const signIn = async (username: string, password: string) => {
     try {

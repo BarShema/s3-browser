@@ -1,0 +1,85 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3FileBrowserPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:GetObjectVersion",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::YOUR_BUCKET_NAME",
+        "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+      ]
+    }
+  ]
+}
+
+# Alternative: If you want to restrict to specific paths within the bucket
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3FileBrowserPermissionsRestricted",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "user-uploads/*",
+            "projects/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "S3FileBrowserObjectPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": [
+        "arn:aws:s3:::YOUR_BUCKET_NAME/user-uploads/*",
+        "arn:aws:s3:::YOUR_BUCKET_NAME/projects/*"
+      ]
+    }
+  ]
+}
+
+# Minimal permissions for a single, dedicated bucket
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowS3FileBrowserOperations",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME"
+    },
+    {
+      "Sid": "AllowS3FileObjectOperations",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+    }
+  ]
+}

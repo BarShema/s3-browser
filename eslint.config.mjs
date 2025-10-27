@@ -15,4 +15,13 @@ const eslintConfig = defineConfig([
   ]),
 ]);
 
-export default eslintConfig;
+const config = [
+  ...eslintConfig,
+  {
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
+];
+
+export default config;

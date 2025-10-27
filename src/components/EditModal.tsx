@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FileItem } from '@/lib/utils';
 import { Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import styles from './modal.module.css';
 
 interface EditModalProps {
   isOpen: boolean;
@@ -86,47 +87,47 @@ export function EditModal({ isOpen, onClose, onComplete, file, bucketName }: Edi
   if (!isOpen || !file) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-semibold">Edit: {file.name}</h2>
+    <div className={styles.overlay}>
+      <div className={`${styles.modal} ${styles.modalLarge}`}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Edit: {file.name}</h2>
           <button
             onClick={handleClose}
             disabled={isSaving}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            className={styles.closeButton}
           >
             <X size={24} />
           </button>
         </div>
 
-        <div className="flex-1 p-4">
+        <div className={styles.body}>
           {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-2 text-gray-600">Loading file content...</span>
+            <div className={styles.loader}>
+              <div className={styles.spinner}></div>
+              <span className={styles.loadingText}>Loading file content...</span>
             </div>
           ) : (
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full h-full p-4 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className={styles.textarea}
               placeholder="File content will appear here..."
             />
           )}
         </div>
 
-        <div className="flex justify-end space-x-3 p-4 border-t">
+        <div className={styles.footer}>
           <button
             onClick={handleClose}
             disabled={isSaving}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
+            className={styles.buttonCancel}
           >
             Cancel
           </button>
           <button
             onClick={saveFile}
             disabled={isSaving || isLoading}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={styles.buttonSave}
           >
             <Save size={16} />
             <span>{isSaving ? 'Saving...' : 'Save'}</span>

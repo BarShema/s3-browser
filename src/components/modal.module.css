@@ -65,6 +65,13 @@
   overflow: auto;
 }
 
+.flexContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .footer {
   display: flex;
   justify-content: flex-end;

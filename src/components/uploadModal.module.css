@@ -1,0 +1,128 @@
+.dropzone {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.dropzone.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.uploadIcon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+  color: #9ca3af;
+}
+
+.dropzoneText {
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.dropzoneHint {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.pathHint {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.fileList {
+  margin-top: 1.5rem;
+  flex: 1;
+  overflow: auto;
+}
+
+.fileListTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.fileListItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.fileIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.fileInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.fileSize {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.progressContainer {
+  margin-top: 0.25rem;
+}
+
+.progressBar {
+  width: 100%;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  height: 0.5rem;
+}
+
+.progressFill {
+  background: #2563eb;
+  height: 0.5rem;
+  border-radius: 9999px;
+  transition: width 0.3s;
+}
+
+.statusSuccess {
+  font-size: 0.75rem;
+  color: #16a34a;
+  margin-top: 0.25rem;
+}
+
+.statusError {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+.removeButton {
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.2s;
+}
+
+.removeButton:hover {
+  color: #dc2626;
+}
+

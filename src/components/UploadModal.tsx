@@ -4,6 +4,8 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Folder } from 'lucide-react';
 import toast from 'react-hot-toast';
+import styles from './modal.module.css';
+import uploadStyles from './uploadModal.module.css';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -108,59 +110,57 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Upload Files</h2>
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Upload Files</h2>
           <button
             onClick={handleClose}
             disabled={isUploading}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            className={styles.closeButton}
           >
             <X size={24} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className={styles.flexContainer}>
           {/* Drop Zone */}
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-              isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-            }`}
+            className={`${uploadStyles.dropzone} ${isDragActive ? uploadStyles.active : ''}`}
           >
             <input {...getInputProps()} />
-            <Upload size={48} className="mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600 mb-2">
+            <Upload size={48} className={uploadStyles.uploadIcon} />
+            <p className={uploadStyles.dropzoneText}>
               {isDragActive ? 'Drop files here' : 'Drag & drop files here, or click to select'}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className={uploadStyles.pathHint}>
               Upload to: {currentPath || 'Root'}
             </p>
           </div>
 
           {/* File List */}
           {uploadFiles.length > 0 && (
-            <div className="mt-6 flex-1 overflow-auto">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Files to Upload</h3>
-              <div className="space-y-2">
+            <div className={uploadStyles.fileList}>
+              <h3 className={uploadStyles.fileListTitle}>Files to Upload</h3>
+              <div>
                 {uploadFiles.map((uploadFile, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <File size={20} className="text-gray-500" />
+                  <div key={index} className={uploadStyles.fileListItem}>
+                    <File size={20} className={uploadStyles.fileIcon} />
                     
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900 truncate">
+                    <div className={uploadStyles.fileInfo}>
+                      <div className={uploadStyles.fileName}>
                         {uploadFile.file.name}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className={uploadStyles.fileSize}>
                         {(uploadFile.file.size / 1024 / 1024).toFixed(2)} MB
                       </div>
                       
                       {uploadFile.status === 'uploading' && (
-                        <div className="mt-1">
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className={uploadStyles.progressContainer}>
+                          <div className={uploadStyles.progressBar}>
                             <div 
-                              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                              className={uploadStyles.progressFill}
                               style={{ width: `${uploadFile.progress}%` }}
                             />
                           </div>
@@ -168,11 +168,11 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
                       )}
                       
                       {uploadFile.status === 'completed' && (
-                        <div className="text-xs text-green-600 mt-1">✓ Uploaded</div>
+                        <div className={uploadStyles.statusSuccess}>✓ Uploaded</div>
                       )}
                       
                       {uploadFile.status === 'error' && (
-                        <div className="text-xs text-red-600 mt-1">
+                        <div className={uploadStyles.statusError}>
                           ✗ {uploadFile.error}
                         </div>
                       )}
@@ -181,7 +181,7 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
                     {uploadFile.status === 'pending' && (
                       <button
                         onClick={() => removeFile(index)}
-                        className="text-gray-400 hover:text-red-600"
+                        className={uploadStyles.removeButton}
                       >
                         <X size={16} />
                       </button>
@@ -194,18 +194,19 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+        <div className={styles.footer}>
           <button
             onClick={handleClose}
             disabled={isUploading}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
+            className={styles.buttonCancel}
           >
             Cancel
           </button>
           <button
             onClick={startUpload}
             disabled={isUploading || uploadFiles.length === 0}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={styles.buttonSave}
+            style={{ width: 'auto' }}
           >
             {isUploading ? 'Uploading...' : `Upload ${uploadFiles.length} File(s)`}
           </button>

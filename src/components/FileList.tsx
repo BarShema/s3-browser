@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import { Item, FileItem, DirectoryItem } from '@/lib/utils';
-import { getFileIcon, formatFileSize, formatDate, isImage, isVideo } from '@/lib/utils';
+import { formatFileSize, formatDate, isImage, isVideo } from '@/lib/utils';
 import { 
   Folder, 
   File, 
   Download, 
   Trash2, 
   Edit3, 
-  Eye,
-  MoreVertical 
+  Eye
 } from 'lucide-react';
+import styles from './fileList.module.css';
 
 interface FileListProps {
   items: Item[];
@@ -100,58 +100,61 @@ export function FileList({
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <Folder size={48} className="mx-auto mb-4 text-gray-300" />
+      <div className={styles.emptyState}>
+        <Folder size={48} className={styles.emptyIcon} />
         <p>This folder is empty</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-1">
+    <div className={styles.container}>
       {/* Header */}
-      <div className="grid grid-cols-12 gap-4 py-2 px-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
-        <div className="col-span-1">
+      <div className={styles.header}>
+        <div className={styles.headerCheckbox}>
           <input
             type="checkbox"
             checked={selectedItems.length === items.length && items.length > 0}
             onChange={handleSelectAll}
-            className="rounded border-gray-300"
+            className={styles.checkbox}
           />
         </div>
-        <div className="col-span-5">Name</div>
-        <div className="col-span-2">Size</div>
-        <div className="col-span-3">Modified</div>
-        <div className="col-span-1">Actions</div>
+        <div className={styles.headerName}>Name</div>
+        <div className={styles.headerSize}>Size</div>
+        <div className={styles.headerModified}>Modified</div>
+        <div className={styles.headerActions}>Actions</div>
       </div>
 
       {/* Items */}
       {items.map((item) => (
         <div
           key={item.id}
-          className={`grid grid-cols-12 gap-4 py-3 px-4 hover:bg-gray-50 border-b border-gray-100 ${
-            selectedItems.includes(item.id) ? 'bg-blue-50' : ''
-          }`}
+          className={`${styles.row} ${selectedItems.includes(item.id) ? styles.selected : ''}`}
+          onClick={() => handleItemClick(item)}
+          onDoubleClick={() => handleItemDoubleClick(item)}
         >
-          <div className="col-span-1 flex items-center">
+          <div className={styles.checkboxCell}>
             <input
               type="checkbox"
               checked={selectedItems.includes(item.id)}
-              onChange={(e) => handleCheckboxChange(item.id, e.target.checked)}
-              className="rounded border-gray-300"
+              onChange={(e) => {
+                e.stopPropagation();
+                handleCheckboxChange(item.id, e.target.checked);
+              }}
+              className={styles.checkbox}
             />
           </div>
 
-          <div className="col-span-5 flex items-center space-x-3">
-            <div className="flex-shrink-0">
+          <div className={styles.nameCell}>
+            <div className={styles.iconCell}>
               {item.isDirectory ? (
-                <Folder size={20} className="text-blue-500" />
+                <Folder size={20} style={{ color: "#3b82f6" }} />
               ) : (
-                <File size={20} className="text-gray-500" />
+                <File size={20} style={{ color: "#6b7280" }} />
               )}
             </div>
             
-            <div className="flex-1 min-w-0">
+            <div>
               {editingItem === item.id ? (
                 <input
                   type="text"
@@ -159,36 +162,36 @@ export function FileList({
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={finishRename}
                   onKeyDown={handleKeyPress}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                  className={styles.nameInput}
                   autoFocus
                 />
               ) : (
-                <button
-                  onClick={() => handleItemClick(item)}
-                  onDoubleClick={() => handleItemDoubleClick(item)}
-                  className="text-left text-sm font-medium text-gray-900 hover:text-blue-600 truncate"
-                >
+                <div className={styles.nameButton}>
                   {item.name}
-                </button>
+                </div>
               )}
             </div>
           </div>
 
-          <div className="col-span-2 flex items-center text-sm text-gray-600">
+          <div className={styles.sizeCell}>
             {item.isDirectory ? '—' : formatFileSize((item as FileItem).size)}
           </div>
 
-          <div className="col-span-3 flex items-center text-sm text-gray-600">
+          <div className={styles.modifiedCell}>
             {formatDate(item.lastModified)}
           </div>
 
-          <div className="col-span-1 flex items-center justify-end">
-            <div className="flex items-center space-x-1">
+          <div className={styles.actionsCell}>
+            <div className={styles.actionsGroup}>
               {!item.isDirectory && (
                 <>
                   <button
-                    onClick={() => onDownload(item as FileItem)}
-                    className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDownload(item as FileItem);
+                    }}
+                    className={styles.actionButton}
                     title="Download"
                   >
                     <Download size={16} />
@@ -196,8 +199,11 @@ export function FileList({
                   
                   {(isImage(item.name) || isVideo(item.name)) && (
                     <button
-                      onClick={() => onFileClick(item as FileItem)}
-                      className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFileClick(item as FileItem);
+                      }}
+                      className={`${styles.actionButton} green`}
                       title="Preview"
                     >
                       <Eye size={16} />
@@ -207,16 +213,22 @@ export function FileList({
               )}
               
               <button
-                onClick={() => startRename(item)}
-                className="p-1 text-gray-400 hover:text-yellow-600 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startRename(item);
+                }}
+                className={`${styles.actionButton} yellow`}
                 title="Rename"
               >
                 <Edit3 size={16} />
               </button>
               
               <button
-                onClick={() => onDelete(item as FileItem)}
-                className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(item as FileItem);
+                }}
+                className={`${styles.actionButton} red`}
                 title="Delete"
               >
                 <Trash2 size={16} />

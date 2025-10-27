@@ -13,6 +13,8 @@ import {
   Trash2
 } from "lucide-react";
 import { useState } from "react";
+import styles from './filePreview.module.css';
+import { VideoThumbnail } from './VideoThumbnail';
 
 interface FilePreviewProps {
   items: Item[];
@@ -24,6 +26,7 @@ interface FilePreviewProps {
   onDownload: (file: FileItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
+  bucketName: string;
 }
 
 export function FilePreview({
@@ -36,6 +39,7 @@ export function FilePreview({
   onDownload,
   onDelete,
   onRename,
+  bucketName,
 }: FilePreviewProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -93,28 +97,24 @@ export function FilePreview({
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <Folder size={48} className="mx-auto mb-4 text-gray-300" />
+      <div className={styles.emptyState}>
+        <Folder size={48} className={styles.emptyIcon} />
         <p>This folder is empty</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className={styles.grid}>
       {items.map((item) => (
         <div
           key={item.id}
-          className={`relative group bg-white border rounded-lg overflow-hidden hover:shadow-lg transition-all cursor-pointer ${
-            selectedItems.includes(item.id)
-              ? "ring-2 ring-blue-500"
-              : "border-gray-200"
-          }`}
+          className={`${styles.item} ${selectedItems.includes(item.id) ? styles.selected : ''}`}
           onClick={() => handleItemClick(item)}
           onDoubleClick={() => handleItemDoubleClick(item)}
         >
           {/* Checkbox */}
-          <div className="absolute top-3 left-3 z-10">
+          <div className={styles.checkbox}>
             <input
               type="checkbox"
               checked={selectedItems.includes(item.id)}
@@ -122,31 +122,32 @@ export function FilePreview({
                 e.stopPropagation();
                 handleCheckboxChange(item.id, e.target.checked);
               }}
-              className="rounded border-gray-300"
             />
           </div>
 
           {/* Preview Area */}
-          <div className="aspect-square bg-gray-50 flex items-center justify-center">
+          <div className={styles.previewArea}>
             {item.isDirectory ? (
-              <Folder size={64} className="text-blue-500" />
+              <Folder size={64} style={{ color: "#3b82f6" }} />
             ) : isImage(item.name) ? (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <div className="text-gray-400 text-sm">Image Preview</div>
+              <div className={styles.previewPlaceholder}>
+                <div className={styles.previewPlaceholderText}>Image Preview</div>
               </div>
             ) : isVideo(item.name) ? (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <div className="text-gray-400 text-sm">Video Preview</div>
-              </div>
+              <VideoThumbnail 
+                src={`/api/s3/download?bucket=${bucketName}&key=${item.key}`}
+                alt={item.name}
+                bucketName={bucketName}
+              />
             ) : (
-              <File size={64} className="text-gray-500" />
+              <File size={64} style={{ color: "#6b7280" }} />
             )}
           </div>
 
           {/* Content */}
-          <div className="p-4">
+          <div className={styles.content}>
             {/* Name */}
-            <div className="mb-2">
+            <div className={styles.name}>
               {editingItem === item.id ? (
                 <input
                   type="text"
@@ -154,22 +155,19 @@ export function FilePreview({
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={finishRename}
                   onKeyDown={handleKeyPress}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={styles.nameInput}
                   autoFocus
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <div
-                  className="text-sm font-medium text-gray-900 truncate"
-                  title={item.name}
-                >
+                <div className={styles.nameText} title={item.name}>
                   {item.name}
                 </div>
               )}
             </div>
 
             {/* Metadata */}
-            <div className="text-xs text-gray-500 space-y-1">
+            <div className={styles.metadata}>
               <div>
                 {item.isDirectory
                   ? "Folder"
@@ -180,8 +178,8 @@ export function FilePreview({
           </div>
 
           {/* Actions */}
-          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="flex items-center space-x-1">
+          <div className={styles.actions}>
+            <div className={styles.actionsGroup}>
               {!item.isDirectory && (
                 <>
                   <button
@@ -189,7 +187,7 @@ export function FilePreview({
                       e.stopPropagation();
                       onDownload(item as FileItem);
                     }}
-                    className="p-1 bg-white rounded-full shadow-sm text-gray-400 hover:text-blue-600 transition-colors"
+                    className={styles.actionButton}
                     title="Download"
                   >
                     <Download size={14} />
@@ -201,7 +199,7 @@ export function FilePreview({
                         e.stopPropagation();
                         onFileClick(item as FileItem);
                       }}
-                      className="p-1 bg-white rounded-full shadow-sm text-gray-400 hover:text-green-600 transition-colors"
+                      className={`${styles.actionButton} green`}
                       title="Preview"
                     >
                       <Eye size={14} />
@@ -215,7 +213,7 @@ export function FilePreview({
                   e.stopPropagation();
                   startRename(item);
                 }}
-                className="p-1 bg-white rounded-full shadow-sm text-gray-400 hover:text-yellow-600 transition-colors"
+                className={`${styles.actionButton} yellow`}
                 title="Rename"
               >
                 <Edit3 size={14} />
@@ -226,7 +224,7 @@ export function FilePreview({
                   e.stopPropagation();
                   onDelete(item as FileItem);
                 }}
-                className="p-1 bg-white rounded-full shadow-sm text-gray-400 hover:text-red-600 transition-colors"
+                className={`${styles.actionButton} red`}
                 title="Delete"
               >
                 <Trash2 size={14} />

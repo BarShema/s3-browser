@@ -57,6 +57,12 @@
   padding: 2.5rem;
 }
 
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
 .errorMessage {
   background: rgba(220, 38, 38, 0.1);
   border: 1px solid rgba(248, 113, 113, 0.3);
@@ -159,6 +165,30 @@
 .loginButton:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.loginButtonLoading {
+  background-color: rgba(37, 99, 235, 0.5);
+}
+
+.spinnerIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  animation: spin 1s linear infinite;
+}
+
+.iconPath {
+  opacity: 0.75;
+}
+
+.iconCircle {
+  opacity: 0.25;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .loginFooter {

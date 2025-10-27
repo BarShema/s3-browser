@@ -108,6 +108,10 @@
   opacity: 1;
 }
 
+.item:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
 .actionsGroup {
   display: flex;
   align-items: center;

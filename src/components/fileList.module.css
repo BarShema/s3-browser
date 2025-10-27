@@ -6,7 +6,7 @@
 
 .header {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: 48px 1fr 120px 180px 120px;
   gap: 1rem;
   padding: 0.5rem 1rem;
   background: #f9fafb;
@@ -14,39 +14,46 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: #4b5563;
+  align-items: center;
 }
 
 .headerCheckbox {
   grid-column: 1;
+  margin: auto;
 }
 
 .headerName {
-  grid-column: span 5;
+  grid-column: 2;
 }
 
 .headerSize {
-  grid-column: span 2;
+  grid-column: 3;
+  text-align: center;
 }
 
 .headerModified {
-  grid-column: span 3;
+  grid-column: 4;
+  text-align: center;
 }
 
 .headerActions {
-  grid-column: 1;
+  grid-column: 5;
+  text-align: center;
 }
 
 .row {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: 48px 1fr 120px 180px 120px;
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #f3f4f6;
   transition: background-color 0.2s;
+  align-items: center;
+  cursor: pointer;
 }
 
 .row:hover {
-  background: #f9fafb;
+  background: #deefff;
 }
 
 .row.selected {
@@ -64,9 +71,10 @@
 }
 
 .checkboxCell {
+  grid-column: 1;
   display: flex;
   align-items: center;
-  grid-column: 1;
+  justify-content: center;
 }
 
 .iconCell {
@@ -76,16 +84,13 @@
 }
 
 .nameCell {
-  flex: 1;
-  min-width: 0;
-  grid-column: span 5;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .nameCell > div {
-  flex: 1;
   min-width: 0;
 }
 
@@ -94,17 +99,11 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: #111827;
-  background: none;
-  border: none;
-  cursor: pointer;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   min-width: 0;
-}
-
-.nameButton:hover {
-  color: #2563eb;
+  cursor: pointer;
 }
 
 .nameInput {
@@ -122,20 +121,23 @@
 }
 
 .sizeCell {
-  grid-column: span 2;
+  grid-column: 3;
   font-size: 0.875rem;
   color: #4b5563;
+  text-align: center;
 }
 
 .modifiedCell {
-  grid-column: span 3;
+  grid-column: 4;
   font-size: 0.875rem;
+  text-align: center;
   color: #4b5563;
 }
 
 .actionsCell {
-  grid-column: 1;
+  grid-column: 5;
   display: flex;
+  margin: auto;
   align-items: center;
   justify-content: flex-end;
 }

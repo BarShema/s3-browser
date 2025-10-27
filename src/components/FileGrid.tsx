@@ -12,6 +12,7 @@ import {
   Eye,
   MoreVertical 
 } from 'lucide-react';
+import styles from './fileGrid.module.css';
 
 interface FileGridProps {
   items: Item[];
@@ -92,26 +93,24 @@ export function FileGrid({
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <Folder size={48} className="mx-auto mb-4 text-gray-300" />
+      <div className={styles.emptyState}>
+        <Folder size={48} className={styles.emptyIcon} />
         <p>This folder is empty</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+    <div className={styles.grid}>
       {items.map((item) => (
         <div
           key={item.id}
-          className={`relative group p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer ${
-            selectedItems.includes(item.id) ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'
-          }`}
+          className={`${styles.item} ${selectedItems.includes(item.id) ? styles.selected : ''}`}
           onClick={() => handleItemClick(item)}
           onDoubleClick={() => handleItemDoubleClick(item)}
         >
           {/* Checkbox */}
-          <div className="absolute top-2 left-2">
+          <div className={styles.checkbox}>
             <input
               type="checkbox"
               checked={selectedItems.includes(item.id)}
@@ -119,21 +118,20 @@ export function FileGrid({
                 e.stopPropagation();
                 handleCheckboxChange(item.id, e.target.checked);
               }}
-              className="rounded border-gray-300"
             />
           </div>
 
           {/* Icon */}
-          <div className="flex justify-center mb-3">
+          <div className={styles.iconContainer}>
             {item.isDirectory ? (
-              <Folder size={48} className="text-blue-500" />
+              <Folder size={48} style={{ color: "#3b82f6" }} />
             ) : (
-              <File size={48} className="text-gray-500" />
+              <File size={48} style={{ color: "#6b7280" }} />
             )}
           </div>
 
           {/* Name */}
-          <div className="text-center">
+          <div className={styles.name}>
             {editingItem === item.id ? (
               <input
                 type="text"
@@ -141,26 +139,26 @@ export function FileGrid({
                 onChange={(e) => setEditValue(e.target.value)}
                 onBlur={finishRename}
                 onKeyDown={handleKeyPress}
-                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={styles.nameInput}
                 autoFocus
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
-              <div className="text-sm font-medium text-gray-900 truncate" title={item.name}>
+              <div className={styles.nameText} title={item.name}>
                 {item.name}
               </div>
             )}
           </div>
 
           {/* Size and Date */}
-          <div className="text-xs text-gray-500 text-center mt-1">
+          <div className={styles.metadata}>
             <div>{item.isDirectory ? 'Folder' : formatFileSize((item as FileItem).size)}</div>
             <div>{formatDate(item.lastModified)}</div>
           </div>
 
           {/* Actions */}
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="flex items-center space-x-1">
+          <div className={styles.actions}>
+            <div className={styles.actionsGroup}>
               {!item.isDirectory && (
                 <>
                   <button
@@ -168,7 +166,7 @@ export function FileGrid({
                       e.stopPropagation();
                       onDownload(item as FileItem);
                     }}
-                    className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                    className={styles.actionButton}
                     title="Download"
                   >
                     <Download size={14} />
@@ -180,7 +178,7 @@ export function FileGrid({
                         e.stopPropagation();
                         onFileClick(item as FileItem);
                       }}
-                      className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                      className={`${styles.actionButton} green`}
                       title="Preview"
                     >
                       <Eye size={14} />
@@ -194,7 +192,7 @@ export function FileGrid({
                   e.stopPropagation();
                   startRename(item);
                 }}
-                className="p-1 text-gray-400 hover:text-yellow-600 transition-colors"
+                className={`${styles.actionButton} yellow`}
                 title="Rename"
               >
                 <Edit3 size={14} />
@@ -205,7 +203,7 @@ export function FileGrid({
                   e.stopPropagation();
                   onDelete(item as FileItem);
                 }}
-                className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                className={`${styles.actionButton} red`}
                 title="Delete"
               >
                 <Trash2 size={14} />

@@ -59,4 +59,10 @@ Thumbs.db
 
 .history
 
-.vscode
+.vscode.env.credentials
+app.config.lcl.json
+app.config.*.json
+.env.credentials
+app.config.lcl.json
+app.config.dev.json
+app.config.prd.json

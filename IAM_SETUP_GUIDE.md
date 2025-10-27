@@ -43,8 +43,8 @@ The application needs the following S3 permissions:
 3. Add these to your `.env.local` file:
 
 ```env
-AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_ACCESS_KEY_ID=*
+AWS_SECRET_ACCESS_KEY=*
 AWS_REGION=us-east-1
 ```
 

@@ -163,8 +163,8 @@ The `.env.credentials` file will contain:
 # IAM User: s3-file-browser-user
 # S3 Bucket: my-bucket-name
 
-AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_ACCESS_KEY_ID=your_access_key_here
+AWS_SECRET_ACCESS_KEY=*
 AWS_REGION=us-east-1
 
 # Cognito Configuration (already configured)

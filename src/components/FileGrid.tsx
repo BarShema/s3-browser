@@ -8,9 +8,19 @@ import {
   isVideo,
   Item,
 } from "@/lib/utils";
-import { Download, Edit3, Eye, Folder, Trash2, Calculator } from "lucide-react";
+import {
+  Calculator,
+  Download,
+  Edit3,
+  Eye,
+  Folder,
+  Minus,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
+import { appConfig } from "@/config/app";
 import styles from "./fileGrid.module.css";
 
 interface FileGridProps {
@@ -25,6 +35,8 @@ interface FileGridProps {
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
   onDirectorySizeClick?: (directory: DirectoryItem) => void;
+  itemsPerRow: number;
+  onItemsPerRowChange: (count: number) => void;
 }
 
 export function FileGrid({
@@ -39,6 +51,8 @@ export function FileGrid({
   onDelete,
   onRename,
   onDirectorySizeClick,
+  itemsPerRow,
+  onItemsPerRowChange,
 }: FileGridProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -104,146 +118,187 @@ export function FileGrid({
   }
 
   return (
-    <div className={styles.grid}>
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className={`${styles.item} ${
-            selectedItems.includes(item.id) ? styles.selected : ""
-          }`}
-          onClick={() => handleItemClick(item)}
-          onDoubleClick={() => handleItemDoubleClick(item)}
-        >
-          {/* Checkbox */}
-          <div className={styles.checkbox}>
-            <input
-              type="checkbox"
-              checked={selectedItems.includes(item.id)}
-              onChange={(e) => {
-                e.stopPropagation();
-                handleCheckboxChange(item.id, e.target.checked);
-              }}
-            />
-          </div>
+    <div className={styles.container}>
+      {/* Grid Controls */}
+      <div className={styles.gridControlsButtons}>
+         <button
+           className={styles.gridControlButton}
+           onClick={() => onItemsPerRowChange(Math.max(appConfig.gridView.minItemsPerRow, itemsPerRow - 1))}
+           disabled={itemsPerRow <= appConfig.gridView.minItemsPerRow}
+           title="Decrease items per row"
+         >
+           <Minus size={16} />
+         </button>
+         <span className={styles.gridControlCount}>{itemsPerRow}</span>
+         <button
+           className={styles.gridControlButton}
+           onClick={() => onItemsPerRowChange(Math.min(appConfig.gridView.maxItemsPerRow, itemsPerRow + 1))}
+           disabled={itemsPerRow >= appConfig.gridView.maxItemsPerRow}
+           title="Increase items per row"
+         >
+           <Plus size={16} />
+         </button>
+      </div>
 
-          {/* Icon */}
-          <div className={styles.iconContainer}>
-            <FileIcon
-              filename={item.name}
-              isDirectory={item.isDirectory}
-              size={48}
-            />
-          </div>
-
-          {/* Name */}
-          <div className={styles.name}>
-            {editingItem === item.id ? (
+      {/* Grid */}
+      <div
+        className={styles.grid}
+        style={{ gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)` }}
+      >
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className={`${styles.item} ${
+              selectedItems.includes(item.id) ? styles.selected : ""
+            }`}
+            onClick={() => handleItemClick(item)}
+            onDoubleClick={() => handleItemDoubleClick(item)}
+          >
+            {/* Checkbox */}
+            <div className={styles.checkbox}>
               <input
-                type="text"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={finishRename}
-                onKeyDown={handleKeyPress}
-                className={styles.nameInput}
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
+                type="checkbox"
+                checked={selectedItems.includes(item.id)}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleCheckboxChange(item.id, e.target.checked);
+                }}
               />
-            ) : (
-              <div className={styles.nameText} title={item.name}>
-                {item.name}
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* Size and Date */}
-          <div className={styles.metadata}>
-            <div>
-              {item.isDirectory ? (
-                <div 
-                  className={`${styles.directorySize} ${
-                    (item as DirectoryItem).formattedSize === "Click to calculate" ? styles.clickableSize : ""
-                  }`}
+            {/* Icon */}
+            <div className={styles.iconContainer}>
+              <FileIcon
+                filename={item.name}
+                isDirectory={item.isDirectory}
+                size={48}
+              />
+            </div>
+
+            {/* Name */}
+            <div className={styles.name}>
+              {editingItem === item.id ? (
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={finishRename}
+                  onKeyDown={handleKeyPress}
+                  className={styles.nameInput}
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <div className={styles.nameText} title={item.name}>
+                  {item.name}
+                </div>
+              )}
+            </div>
+
+            {/* Size and Date */}
+            <div className={styles.metadata}>
+              <div>
+                {item.isDirectory ? (
+                  <div
+                    className={`${styles.directorySize} ${
+                      (item as DirectoryItem).formattedSize ===
+                      "Click to calculate"
+                        ? styles.clickableSize
+                        : ""
+                    }`}
+                    onClick={(e) => {
+                      if (
+                        (item as DirectoryItem).formattedSize ===
+                          "Click to calculate" &&
+                        onDirectorySizeClick
+                      ) {
+                        e.stopPropagation();
+                        onDirectorySizeClick(item as DirectoryItem);
+                      }
+                    }}
+                    title={
+                      (item as DirectoryItem).formattedSize ===
+                      "Click to calculate"
+                        ? "Click to calculate size"
+                        : ""
+                    }
+                  >
+                    {(item as DirectoryItem).formattedSize ===
+                    "Click to calculate" ? (
+                      <Calculator size={12} className={styles.calculateIcon} />
+                    ) : (
+                      (item as DirectoryItem).formattedSize ||
+                      "Click to calculate"
+                    )}
+                  </div>
+                ) : (
+                  formatFileSize((item as FileItem).size)
+                )}
+              </div>
+              <div>{formatDate(item.lastModified)}</div>
+            </div>
+
+            {/* Actions */}
+            <div className={styles.actions}>
+              <div className={styles.actionsGroup}>
+                <button
                   onClick={(e) => {
-                    if ((item as DirectoryItem).formattedSize === "Click to calculate" && onDirectorySizeClick) {
-                      e.stopPropagation();
-                      onDirectorySizeClick(item as DirectoryItem);
+                    e.stopPropagation();
+                    if (item.isDirectory) {
+                      onDirectoryDownload(item as DirectoryItem);
+                    } else {
+                      onDownload(item as FileItem);
                     }
                   }}
-                  title={(item as DirectoryItem).formattedSize === "Click to calculate" ? "Click to calculate size" : ""}
+                  className={styles.actionButton}
+                  title="Download"
                 >
-                  {(item as DirectoryItem).formattedSize === "Click to calculate" ? (
-                    <Calculator size={12} className={styles.calculateIcon} />
-                  ) : (
-                    (item as DirectoryItem).formattedSize || "Click to calculate"
-                  )}
-                </div>
-              ) : (
-                formatFileSize((item as FileItem).size)
-              )}
-            </div>
-            <div>{formatDate(item.lastModified)}</div>
-          </div>
+                  <Download size={14} />
+                </button>
 
-          {/* Actions */}
-          <div className={styles.actions}>
-            <div className={styles.actionsGroup}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (item.isDirectory) {
-                    onDirectoryDownload(item as DirectoryItem);
-                  } else {
-                    onDownload(item as FileItem);
-                  }
-                }}
-                className={styles.actionButton}
-                title="Download"
-              >
-                <Download size={14} />
-              </button>
+                {!item.isDirectory && (
+                  <>
+                    {(isImage(item.name) || isVideo(item.name)) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onFileClick(item as FileItem);
+                        }}
+                        className={`${styles.actionButton} green`}
+                        title="Preview"
+                      >
+                        <Eye size={14} />
+                      </button>
+                    )}
+                  </>
+                )}
 
-              {!item.isDirectory && (
-                <>
-                  {(isImage(item.name) || isVideo(item.name)) && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onFileClick(item as FileItem);
-                      }}
-                      className={`${styles.actionButton} green`}
-                      title="Preview"
-                    >
-                      <Eye size={14} />
-                    </button>
-                  )}
-                </>
-              )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    startRename(item);
+                  }}
+                  className={`${styles.actionButton} yellow`}
+                  title="Rename"
+                >
+                  <Edit3 size={14} />
+                </button>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  startRename(item);
-                }}
-                className={`${styles.actionButton} yellow`}
-                title="Rename"
-              >
-                <Edit3 size={14} />
-              </button>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(item as FileItem);
-                }}
-                className={`${styles.actionButton} red`}
-                title="Delete"
-              >
-                <Trash2 size={14} />
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(item as FileItem);
+                  }}
+                  className={`${styles.actionButton} red`}
+                  title="Delete"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

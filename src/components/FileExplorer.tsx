@@ -49,11 +49,11 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [directories, setDirectories] = useState<DirectoryItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('s3-browser-view-mode');
-      return (saved as ViewMode) || 'list';
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("s3-browser-view-mode");
+      return (saved as ViewMode) || "list";
     }
-    return 'list';
+    return "list";
   });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +83,28 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const [typeFilter, setTypeFilter] = useState("");
   const [extensionFilter, setExtensionFilter] = useState("");
 
+  // Sorting state
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
+    null
+  );
+
+  // Grid/Preview items per row state
+  const [gridItemsPerRow, setGridItemsPerRow] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("s3-browser-grid-items-per-row");
+      return saved ? parseInt(saved, 10) : appConfig.gridView.defaultItemsPerRow;
+    }
+    return appConfig.gridView.defaultItemsPerRow;
+  });
+  const [previewItemsPerRow, setPreviewItemsPerRow] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("s3-browser-preview-items-per-row");
+      return saved ? parseInt(saved, 10) : appConfig.previewView.defaultItemsPerRow;
+    }
+    return appConfig.previewView.defaultItemsPerRow;
+  });
+
   // Extract bucket and path from URL
   // URL format: /{bucket}/{path/to/directory}
   const getCurrentPath = useCallback(() => {
@@ -104,8 +126,24 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   // Handle view mode change and save to localStorage
   const handleViewModeChange = useCallback((mode: ViewMode) => {
     setViewMode(mode);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('s3-browser-view-mode', mode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("s3-browser-view-mode", mode);
+    }
+  }, []);
+
+  // Handle grid items per row change
+  const handleGridItemsPerRowChange = useCallback((newCount: number) => {
+    setGridItemsPerRow(newCount);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("s3-browser-grid-items-per-row", newCount.toString());
+    }
+  }, []);
+
+  // Handle preview items per row change
+  const handlePreviewItemsPerRowChange = useCallback((newCount: number) => {
+    setPreviewItemsPerRow(newCount);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("s3-browser-preview-items-per-row", newCount.toString());
     }
   }, []);
 
@@ -152,7 +190,13 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
             [dirKey]: {
               size: 0,
               objects: 0,
-              formattedSize: <X size={16} className={styles.errorIcon} onClick={() => calculateDirectorySize(directory)} />,
+              formattedSize: (
+                <X
+                  size={16}
+                  className={styles.errorIcon}
+                  onClick={() => calculateDirectorySize(directory)}
+                />
+              ),
               isLoading: false,
               hasError: true,
             },
@@ -189,7 +233,13 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
           [dirKey]: {
             size: 0,
             objects: 0,
-            formattedSize: <X size={16} className={styles.errorIcon} onClick={() => calculateDirectorySize(directory)} />,
+            formattedSize: (
+              <X
+                size={16}
+                className={styles.errorIcon}
+                onClick={() => calculateDirectorySize(directory)}
+              />
+            ),
             isLoading: false,
             hasError: true,
           },
@@ -606,124 +656,201 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     setIsPreviewOpen(false);
   };
 
-  const allItems = [...directoriesWithSizes, ...files];
+  // Sorting function
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      // Same column clicked - cycle through: asc -> desc -> null
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else if (sortDirection === "desc") {
+        setSortDirection(null);
+        setSortColumn(null);
+      } else {
+        setSortDirection("asc");
+      }
+    } else {
+      // Different column clicked - start with asc
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  // Apply sorting to items
+  const getSortedItems = (items: (FileItem | DirectoryItem)[]) => {
+    if (!sortColumn || !sortDirection) {
+      return items;
+    }
+
+    return [...items].sort((a, b) => {
+      // Always keep directories on top
+      if (a.isDirectory && !b.isDirectory) {
+        return -1;
+      }
+      if (!a.isDirectory && b.isDirectory) {
+        return 1;
+      }
+
+      // If both are directories or both are files, sort within their group
+      let aValue: string | number | Date;
+      let bValue: string | number | Date;
+
+      switch (sortColumn) {
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case "size":
+          aValue = a.isDirectory
+            ? (a as DirectoryItem).size || 0
+            : (a as FileItem).size || 0;
+          bValue = b.isDirectory
+            ? (b as DirectoryItem).size || 0
+            : (b as FileItem).size || 0;
+          break;
+        case "modified":
+          aValue = new Date(a.lastModified).getTime();
+          bValue = new Date(b.lastModified).getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  const allItems = getSortedItems([...directoriesWithSizes, ...files]);
 
   return (
     <div className={styles.container}>
-      <Toolbar
-        viewMode={viewMode}
-        onViewModeChange={handleViewModeChange}
-        onUpload={() => setIsUploadModalOpen(true)}
-        selectedCount={selectedItems.length}
-        onDelete={() => {
-          const selectedFiles = files.filter((f) =>
-            selectedItems.includes(f.id)
-          );
-          selectedFiles.forEach(handleDelete);
-        }}
-      />
+      <div className={styles.toolbarContainer}>
+        <Toolbar
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          onUpload={() => setIsUploadModalOpen(true)}
+          selectedCount={selectedItems.length}
+          onDelete={() => {
+            const selectedFiles = files.filter((f) =>
+              selectedItems.includes(f.id)
+            );
+            selectedFiles.forEach(handleDelete);
+          }}
+        />
 
-      <FilterControls
-        nameFilter={nameFilter}
-        typeFilter={typeFilter}
-        extensionFilter={extensionFilter}
-        onNameFilterChange={handleNameFilterChange}
-        onTypeFilterChange={handleTypeFilterChange}
-        onExtensionFilterChange={handleExtensionFilterChange}
-        onClearFilters={handleClearFilters}
-      />
+        <FilterControls
+          nameFilter={nameFilter}
+          typeFilter={typeFilter}
+          extensionFilter={extensionFilter}
+          onNameFilterChange={handleNameFilterChange}
+          onTypeFilterChange={handleTypeFilterChange}
+          onExtensionFilterChange={handleExtensionFilterChange}
+          onClearFilters={handleClearFilters}
+        />
 
-      <Breadcrumb
-        currentPath={currentPath}
-        bucketName={bucketName}
-        onPathClick={handleBreadcrumbClick}
-      />
+        <Breadcrumb
+          currentPath={currentPath}
+          bucketName={bucketName}
+          onPathClick={handleBreadcrumbClick}
+        />
 
-      <div className={styles.content}>
-        {isLoading ? (
-          <div className={styles.loadingContainer}>
-            <div className={styles.loader}></div>
-            <span className={styles.loadingText}>Loading...</span>
-          </div>
-        ) : (
-          <>
-            {viewMode === "list" && (
-              <FileList
-                items={allItems}
-                selectedItems={selectedItems}
-                onSelectionChange={setSelectedItems}
-                onDirectoryClick={handleDirectoryClick}
-                onFileClick={handleFileClick}
-                onFileDoubleClick={handleFileDoubleClick}
-                onDownload={handleDownload}
-                onDirectoryDownload={handleDirectoryDownload}
-                onDelete={handleDelete}
-                onRename={handleRename}
-                onDirectorySizeClick={calculateDirectorySize}
-              />
-            )}
+        <div className={styles.content}>
+          {isLoading ? (
+            <div className={styles.loadingContainer}>
+              <div className={styles.loader}></div>
+              <span className={styles.loadingText}>Loading...</span>
+            </div>
+          ) : (
+            <>
+              {viewMode === "list" && (
+                <FileList
+                  items={allItems}
+                  selectedItems={selectedItems}
+                  onSelectionChange={setSelectedItems}
+                  onDirectoryClick={handleDirectoryClick}
+                  onFileClick={handleFileClick}
+                  onFileDoubleClick={handleFileDoubleClick}
+                  onDownload={handleDownload}
+                  onDirectoryDownload={handleDirectoryDownload}
+                  onDelete={handleDelete}
+                  onRename={handleRename}
+                  onDirectorySizeClick={calculateDirectorySize}
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+              )}
 
-            {viewMode === "grid" && (
-              <FileGrid
-                items={allItems}
-                selectedItems={selectedItems}
-                onSelectionChange={setSelectedItems}
-                onDirectoryClick={handleDirectoryClick}
-                onFileClick={handleFileClick}
-                onFileDoubleClick={handleFileDoubleClick}
-                onDownload={handleDownload}
-                onDirectoryDownload={handleDirectoryDownload}
-                onDelete={handleDelete}
-                onRename={handleRename}
-                onDirectorySizeClick={calculateDirectorySize}
-              />
-            )}
+               {viewMode === "grid" && (
+                 <FileGrid
+                   items={allItems}
+                   selectedItems={selectedItems}
+                   onSelectionChange={setSelectedItems}
+                   onDirectoryClick={handleDirectoryClick}
+                   onFileClick={handleFileClick}
+                   onFileDoubleClick={handleFileDoubleClick}
+                   onDownload={handleDownload}
+                   onDirectoryDownload={handleDirectoryDownload}
+                   onDelete={handleDelete}
+                   onRename={handleRename}
+                   onDirectorySizeClick={calculateDirectorySize}
+                   itemsPerRow={gridItemsPerRow}
+                   onItemsPerRowChange={handleGridItemsPerRowChange}
+                 />
+               )}
 
-            {viewMode === "preview" && (
-              <FilePreview
-                items={allItems}
-                selectedItems={selectedItems}
-                onSelectionChange={setSelectedItems}
-                onDirectoryClick={handleDirectoryClick}
-                onFileClick={handleFileClick}
-                onFileDoubleClick={handleFileDoubleClick}
-                onDownload={handleDownload}
-                onDirectoryDownload={handleDirectoryDownload}
-                onDelete={handleDelete}
-                onRename={handleRename}
-                bucketName={bucketName}
-                onDirectorySizeClick={calculateDirectorySize}
-              />
-            )}
-          </>
-        )}
+               {viewMode === "preview" && (
+                 <FilePreview
+                   items={allItems}
+                   selectedItems={selectedItems}
+                   onSelectionChange={setSelectedItems}
+                   onDirectoryClick={handleDirectoryClick}
+                   onFileClick={handleFileClick}
+                   onFileDoubleClick={handleFileDoubleClick}
+                   onDownload={handleDownload}
+                   onDirectoryDownload={handleDirectoryDownload}
+                   onDelete={handleDelete}
+                   onRename={handleRename}
+                   bucketName={bucketName}
+                   onDirectorySizeClick={calculateDirectorySize}
+                   itemsPerRow={previewItemsPerRow}
+                   onItemsPerRowChange={handlePreviewItemsPerRowChange}
+                 />
+               )}
+            </>
+          )}
+        </div>
+
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          totalItems={totalItems}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
+
+        <UploadModal
+          isOpen={isUploadModalOpen}
+          onClose={() => setIsUploadModalOpen(false)}
+          onComplete={handleUploadComplete}
+          bucketName={bucketName}
+          currentPath={currentPath}
+        />
+
+        <EditModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onComplete={handleEditComplete}
+          file={editingFile}
+          bucketName={bucketName}
+        />
       </div>
-
-      <PaginationControls
-        currentPage={currentPage}
-        totalPages={totalPages}
-        itemsPerPage={itemsPerPage}
-        totalItems={totalItems}
-        onPageChange={handlePageChange}
-        onItemsPerPageChange={handleItemsPerPageChange}
-      />
-
-      <UploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        onComplete={handleUploadComplete}
-        bucketName={bucketName}
-        currentPath={currentPath}
-      />
-
-      <EditModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onComplete={handleEditComplete}
-        file={editingFile}
-        bucketName={bucketName}
-      />
-
       {/* Side Preview Panel */}
       <SidePreviewPanel
         file={previewFile}

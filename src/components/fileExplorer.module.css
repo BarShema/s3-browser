@@ -1,8 +1,14 @@
 .container {
-  background: var(--theme-bg-primary);
-  border-radius: 8px;
   box-shadow: var(--theme-shadow-sm);
+  display: flex;
+  gap: 10px;
+}
+
+.toolbarContainer {
   border: 1px solid var(--theme-border-primary);
+  border-radius: 8px;
+  width: 100%;
+  background: var(--theme-bg-primary);
 }
 
 .content {
@@ -135,4 +141,3 @@
   max-width: 100%;
   max-height: 70vh;
 }
-

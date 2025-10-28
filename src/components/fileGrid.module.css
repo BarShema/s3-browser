@@ -1,28 +1,56 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
-@media (min-width: 640px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+.gridControlsLabel {
+  font-weight: 500;
 }
 
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
+.gridControlsButtons {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
 }
 
-@media (min-width: 1280px) {}
+.gridControlButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--theme-border-primary);
+  border-radius: 6px;
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gridControlButton:hover:not(:disabled) {
+  background: var(--theme-hover-bg);
+  border-color: var(--theme-accent-primary);
+  color: var(--theme-accent-primary);
+}
+
+.gridControlButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gridControlCount {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--theme-text-primary);
+}
 
 .item {
   position: relative;

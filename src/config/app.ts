@@ -2,6 +2,20 @@ export const appConfig = {
   // Pagination
   defaultItemsPerPage: 20,
   
+  // Grid View Configuration
+  gridView: {
+    defaultItemsPerRow: 6,
+    minItemsPerRow: 1,
+    maxItemsPerRow: 9,
+  },
+  
+  // Preview View Configuration
+  previewView: {
+    defaultItemsPerRow: 7,
+    minItemsPerRow: 3,
+    maxItemsPerRow: 9,
+  },
+  
   // S3 Configuration
   tempBucketName: "idits-drive-tmp",
   

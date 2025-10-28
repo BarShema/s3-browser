@@ -9,7 +9,10 @@ import {
   Edit3, 
   Eye,
   Folder,
-  Calculator
+  Calculator,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown
 } from 'lucide-react';
 import { FileIcon } from './FileIcon';
 import styles from './fileList.module.css';
@@ -26,6 +29,9 @@ interface FileListProps {
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
   onDirectorySizeClick?: (directory: DirectoryItem) => void;
+  sortColumn?: string | null;
+  sortDirection?: 'asc' | 'desc' | null;
+  onSort?: (column: string) => void;
 }
 
 export function FileList({
@@ -40,6 +46,9 @@ export function FileList({
   onDelete,
   onRename,
   onDirectorySizeClick,
+  sortColumn,
+  sortDirection,
+  onSort,
 }: FileListProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -103,6 +112,19 @@ export function FileList({
     }
   };
 
+  const getSortIcon = (column: string) => {
+    if (sortColumn !== column) {
+      return <ChevronsUpDown size={14} className={styles.sortIcon} />;
+    }
+    if (sortDirection === 'asc') {
+      return <ChevronUp size={14} className={styles.sortIcon} />;
+    }
+    if (sortDirection === 'desc') {
+      return <ChevronDown size={14} className={styles.sortIcon} />;
+    }
+    return <ChevronsUpDown size={14} className={styles.sortIcon} />;
+  };
+
   if (items.length === 0) {
     return (
       <div className={styles.emptyState}>
@@ -124,9 +146,33 @@ export function FileList({
             className={styles.checkbox}
           />
         </div>
-        <div className={styles.headerName}>Name</div>
-        <div className={styles.headerSize}>Size</div>
-        <div className={styles.headerModified}>Modified</div>
+        <div className={styles.headerName}>
+          <button 
+            className={styles.headerButton}
+            onClick={() => onSort?.('name')}
+          >
+            Name
+            {getSortIcon('name')}
+          </button>
+        </div>
+        <div className={styles.headerSize}>
+          <button 
+            className={styles.headerButton}
+            onClick={() => onSort?.('size')}
+          >
+            Size
+            {getSortIcon('size')}
+          </button>
+        </div>
+        <div className={styles.headerModified}>
+          <button 
+            className={styles.headerButton}
+            onClick={() => onSort?.('modified')}
+          >
+            Modified
+            {getSortIcon('modified')}
+          </button>
+        </div>
         <div className={styles.headerActions}>Actions</div>
       </div>
 

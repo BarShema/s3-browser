@@ -95,7 +95,7 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className={styles.loginInput}
-                  placeholder="Enter your username"
+                  placeholder="Username"
                   required
                   disabled={isLoading}
                 />
@@ -114,7 +114,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={styles.loginInput}
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   required
                   disabled={isLoading}
                 />

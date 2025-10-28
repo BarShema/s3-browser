@@ -2,6 +2,8 @@
 
 import { Image } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getFileExtension } from "@/lib/utils";
+import styles from "./fileIcon.module.css";
 
 interface ImageThumbnailProps {
   src: string;
@@ -19,6 +21,10 @@ export function ImageThumbnail({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  
+  // Extract filename from src to get extension
+  const filename = src.split('/').pop() || '';
+  const extension = getFileExtension(filename);
 
   useEffect(() => {
     // Reset states when src changes
@@ -66,7 +72,7 @@ export function ImageThumbnail({
   }, [src, maxWidth, maxHeight]);
 
   return (
-    <>
+    <div className={styles.iconContainer} style={{ position: 'relative', width: '100%', height: '100%' }}>
       {hasError ? (
         <div
           style={{
@@ -114,6 +120,11 @@ export function ImageThumbnail({
           }}
         />
       )}
-    </>
+      {extension && (
+        <div className={styles.extensionBox}>
+          <span className={styles.extensionText}>{extension.toUpperCase()}</span>
+        </div>
+      )}
+    </div>
   );
 }

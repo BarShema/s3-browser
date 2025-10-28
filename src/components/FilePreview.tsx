@@ -10,7 +10,7 @@ import {
   isVideo,
   Item,
 } from "@/lib/utils";
-import { Download, Edit3, Eye, Folder, Trash2 } from "lucide-react";
+import { Download, Edit3, Eye, Folder, Trash2, Calculator } from "lucide-react";
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
 import styles from "./filePreview.module.css";
@@ -30,6 +30,7 @@ interface FilePreviewProps {
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
   bucketName: string;
+  onDirectorySizeClick?: (directory: DirectoryItem) => void;
 }
 
 export function FilePreview({
@@ -44,6 +45,7 @@ export function FilePreview({
   onDelete,
   onRename,
   bucketName,
+  onDirectorySizeClick,
 }: FilePreviewProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -182,9 +184,28 @@ export function FilePreview({
             {/* Metadata */}
             <div className={styles.metadata}>
               <div>
-                {item.isDirectory
-                  ? (item as DirectoryItem).formattedSize || "Calculating..."
-                  : formatFileSize((item as FileItem).size)}
+                {item.isDirectory ? (
+                  <div 
+                    className={`${styles.directorySize} ${
+                      (item as DirectoryItem).formattedSize === "Click to calculate" ? styles.clickableSize : ""
+                    }`}
+                    onClick={(e) => {
+                      if ((item as DirectoryItem).formattedSize === "Click to calculate" && onDirectorySizeClick) {
+                        e.stopPropagation();
+                        onDirectorySizeClick(item as DirectoryItem);
+                      }
+                    }}
+                    title={(item as DirectoryItem).formattedSize === "Click to calculate" ? "Click to calculate size" : ""}
+                  >
+                    {(item as DirectoryItem).formattedSize === "Click to calculate" ? (
+                      <Calculator size={12} className={styles.calculateIcon} />
+                    ) : (
+                      (item as DirectoryItem).formattedSize || "Click to calculate"
+                    )}
+                  </div>
+                ) : (
+                  formatFileSize((item as FileItem).size)
+                )}
               </div>
               <div>{formatDate(item.lastModified)}</div>
             </div>

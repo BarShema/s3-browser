@@ -1,0 +1,41 @@
+.iconContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.extensionBox {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: #374151;
+  color: white;
+  border-radius: 3px;
+  padding: 1px 3px;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  min-width: 16px;
+  text-align: center;
+  border: 1px solid #1f2937;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.extensionText {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive sizing for different icon sizes */
+.iconContainer[data-size="small"] .extensionBox {
+  font-size: 7px;
+  padding: 1px 2px;
+  min-width: 14px;
+}
+
+.iconContainer[data-size="large"] .extensionBox {
+  font-size: 9px;
+  padding: 2px 4px;
+  min-width: 18px;
+}

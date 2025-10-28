@@ -5,10 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const bucket = searchParams.get("bucket");
+    const drive = searchParams.get("drive");
 
-    if (!bucket) {
-      return NextResponse.json({ error: "Bucket name is required" }, { status: 400 });
+    if (!drive) {
+      return NextResponse.json({ error: "Drive name is required" }, { status: 400 });
     }
 
     let totalSize = 0;
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Calculate bucket size by iterating through all objects
     do {
       const command = new ListObjectsV2Command({
-        Bucket: bucket,
+        Bucket: drive,
         ContinuationToken: continuationToken,
         MaxKeys: 1000, // Process in batches for better performance
       });
@@ -38,17 +38,17 @@ export async function GET(request: NextRequest) {
     } while (continuationToken);
 
     return NextResponse.json({
-      bucket,
+      drive,
       totalSize,
       totalObjects,
       formattedSize: formatBytes(totalSize),
     });
 
   } catch (error: unknown) {
-    console.error("Error calculating bucket size:", error);
+    console.error("Error calculating drive size:", error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: `Failed to calculate bucket size: ${errorMessage}` },
+      { error: `Failed to calculate drive size: ${errorMessage}` },
       { status: 500 }
     );
   }

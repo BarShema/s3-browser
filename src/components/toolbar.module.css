@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 16px;
   border-bottom: 1px solid #e5e7eb;
   background: #f9fafb;
 }
@@ -10,12 +10,12 @@
 .buttonGroup {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .viewButton {
-  padding: 0.5rem;
-  border-radius: 0.375rem;
+  padding: 8px;
+  border-radius: 6px;
   background: none;
   border: none;
   cursor: pointer;
@@ -35,20 +35,20 @@
 .actionsGroup {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .deleteButton {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.75rem;
+  gap: 4px;
+  padding: 8px 12px;
   color: #dc2626;
   background: none;
   border: none;
   cursor: pointer;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 14px;
   transition: background-color 0.2s;
 }
 
@@ -59,14 +59,14 @@
 .uploadButton {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.75rem;
+  gap: 4px;
+  padding: 8px 12px;
   background: #2563eb;
   color: white;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 14px;
   transition: background-color 0.2s;
 }
 

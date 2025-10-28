@@ -8,7 +8,7 @@ import {
   isVideo,
   Item,
 } from "@/lib/utils";
-import { Download, Edit3, Eye, Folder, Trash2 } from "lucide-react";
+import { Download, Edit3, Eye, Folder, Trash2, Calculator } from "lucide-react";
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
 import styles from "./fileGrid.module.css";
@@ -24,6 +24,7 @@ interface FileGridProps {
   onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
+  onDirectorySizeClick?: (directory: DirectoryItem) => void;
 }
 
 export function FileGrid({
@@ -37,6 +38,7 @@ export function FileGrid({
   onDirectoryDownload,
   onDelete,
   onRename,
+  onDirectorySizeClick,
 }: FileGridProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -156,9 +158,28 @@ export function FileGrid({
           {/* Size and Date */}
           <div className={styles.metadata}>
             <div>
-              {item.isDirectory
-                ? (item as DirectoryItem).formattedSize || "Calculating..."
-                : formatFileSize((item as FileItem).size)}
+              {item.isDirectory ? (
+                <div 
+                  className={`${styles.directorySize} ${
+                    (item as DirectoryItem).formattedSize === "Click to calculate" ? styles.clickableSize : ""
+                  }`}
+                  onClick={(e) => {
+                    if ((item as DirectoryItem).formattedSize === "Click to calculate" && onDirectorySizeClick) {
+                      e.stopPropagation();
+                      onDirectorySizeClick(item as DirectoryItem);
+                    }
+                  }}
+                  title={(item as DirectoryItem).formattedSize === "Click to calculate" ? "Click to calculate size" : ""}
+                >
+                  {(item as DirectoryItem).formattedSize === "Click to calculate" ? (
+                    <Calculator size={12} className={styles.calculateIcon} />
+                  ) : (
+                    (item as DirectoryItem).formattedSize || "Click to calculate"
+                  )}
+                </div>
+              ) : (
+                formatFileSize((item as FileItem).size)
+              )}
             </div>
             <div>{formatDate(item.lastModified)}</div>
           </div>

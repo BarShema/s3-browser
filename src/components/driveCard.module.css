@@ -1,14 +1,14 @@
-.bucketCard {
+.driveCard {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 24px;
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
   min-height: 120px;
   position: relative;
   overflow: hidden;
@@ -21,38 +21,37 @@
 }
 
 
-.bucketHeader {
+.driveHeader {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-.bucketIcon {
+.driveIcon {
   color: #6b7280;
   flex-shrink: 0;
 }
 
-.bucketName {
-  font-size: 1.125rem;
+.driveName {
+  font-size: 18px;
   font-weight: 600;
   color: #111827;
   flex: 1;
 }
 
-.bucketInfo {
+.driveInfo {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2rem;
+  justify-content: end;
+  min-height: 32px;
 }
 
 .loadingState {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
   color: #6b7280;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .spinner {
@@ -67,7 +66,7 @@
 
 .errorText {
   color: #ef4444;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .sizeInfo {
@@ -75,27 +74,60 @@
 }
 
 .sizeValue {
-  font-size: 1.25rem;
+  font-size: 20px;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 0.25rem;
+  margin-bottom: 4px;
 }
 
 .objectsCount {
-  font-size: 0.875rem;
+  font-size: 14px;
   color: #6b7280;
 }
 
-.bucketArrow {
+.clickToCalculate {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+  margin-left: auto;
+  justify-content: center;
+}
+
+.clickToCalculate:hover {
+  background: #e5e7eb;
+  border-color: #6b7280;
+  color: #374151;
+}
+
+.calculateIcon {
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.clickToCalculate:hover .calculateIcon {
+  color: #3b82f6;
+}
+
+.calculateText {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.driveArrow {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 1.25rem;
+  top: 16px;
+  right: 16px;
+  font-size: 20px;
   color: #9ca3af;
   transition: color 0.2s ease;
 }
 
-.bucketCard:hover .bucketArrow {
+.bucketCard:hover .driveArrow {
   color: #3b82f6;
 }
 
@@ -103,6 +135,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

@@ -1,8 +1,8 @@
 "use client";
 
 import { AuthGuard } from "@/components/AuthGuard";
-import { BucketCard } from "@/components/BucketCard";
-import { bucketConfig } from "@/config/buckets";
+import { DriveCard } from "@/components/DriveCard";
+import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, User } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -12,10 +12,10 @@ import styles from "./home.module.css";
 export default function Home() {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const buckets = bucketConfig.buckets;
+  const drives = driveConfig.drives;
 
-  const handleBucketSelect = (bucket: string) => {
-    router.push(`/${bucket}`);
+  const handleDriveSelect = (drive: string) => {
+    router.push(`/${drive}`);
   };
 
   const handleLogout = async () => {
@@ -58,14 +58,14 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={styles.bucketSelectContainer}>
-            <h2 className={styles.bucketSelectTitle}>Select an S3 Bucket</h2>
-            <div className={styles.bucketGrid}>
-              {buckets.map((bucket) => (
-                <BucketCard
-                  key={bucket}
-                  bucket={bucket}
-                  onClick={() => handleBucketSelect(bucket)}
+          <div className={styles.driveSelectContainer}>
+            <h2 className={styles.driveSelectTitle}>Select a Drive</h2>
+            <div className={styles.driveGrid}>
+              {drives.map((drive) => (
+                <DriveCard
+                  key={drive}
+                  drive={drive}
+                  onClick={() => handleDriveSelect(drive)}
                 />
               ))}
             </div>

@@ -1,7 +1,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 16px;
 }
 
 @media (min-width: 640px) {
@@ -26,9 +26,9 @@
 
 .item {
   position: relative;
-  padding: 1rem;
+  padding: 16px;
   border: 1px solid transparent;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -48,14 +48,14 @@
 
 .checkbox {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
+  top: 8px;
+  left: 8px;
 }
 
 .iconContainer {
   display: flex;
   justify-content: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 12px;
 }
 
 .name {
@@ -64,10 +64,10 @@
 
 .nameInput {
   width: 100%;
-  padding: 0.25rem 0.5rem;
+  padding: 4px 8px;
   border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
+  border-radius: 4px;
+  font-size: 14px;
   text-align: center;
 }
 
@@ -78,7 +78,7 @@
 }
 
 .nameText {
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 500;
   color: #111827;
   text-overflow: ellipsis;
@@ -87,16 +87,40 @@
 }
 
 .metadata {
-  font-size: 0.75rem;
+  font-size: 12px;
   color: #6b7280;
   text-align: center;
-  margin-top: 0.25rem;
+  margin-top: 4px;
+}
+
+.clickableSize {
+  cursor: pointer;
+  color: #3b82f6;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.clickableSize:hover {
+  color: #1d4ed8;
+}
+
+.directorySize {
+  display: inline-block;
+}
+
+.calculateIcon {
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.clickableSize:hover .calculateIcon {
+  color: #3b82f6;
 }
 
 .actions {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 8px;
+  right: 8px;
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -112,11 +136,11 @@
 .actionsGroup {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .actionButton {
-  padding: 0.25rem;
+  padding: 4px;
   background: white;
   border-radius: 50%;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -144,13 +168,13 @@
 
 .emptyState {
   text-align: center;
-  padding: 3rem 0;
+  padding: 48px 0;
   color: #6b7280;
 }
 
 .emptyIcon {
-  width: 3rem;
-  height: 3rem;
-  margin: 0 auto 1rem;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
   color: #d1d5db;
 }

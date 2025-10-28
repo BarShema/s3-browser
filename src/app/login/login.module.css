@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 16px;
 }
 
 .loginContainer {
@@ -14,38 +14,38 @@
 
 .loginHeader {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 40px;
 }
 
 .iconContainer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 5rem;
-  height: 5rem;
+  width: 80px;
+  height: 80px;
   background: linear-gradient(to bottom right, rgb(59, 130, 246), rgb(79, 70, 229));
-  border-radius: 1rem;
-  margin-bottom: 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 24px;
   box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
 }
 
 .iconLock {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 36px;
+  height: 36px;
   color: white;
 }
 
 .loginTitle {
-  font-size: 2.25rem;
+  font-size: 36px;
   font-weight: 700;
   color: white;
-  margin-bottom: 0.75rem;
+  margin-bottom: 12px;
   letter-spacing: -0.025em;
 }
 
 .loginSubtitle {
   color: rgb(209, 213, 219);
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .loginForm {
@@ -68,27 +68,27 @@
   background: rgba(220, 38, 38, 0.1);
   border: 1px solid rgba(248, 113, 113, 0.3);
   color: rgb(254, 202, 202);
-  padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
+  padding: 16px 20px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 0.875rem;
+  gap: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 
 .errorIcon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
 .fieldLabel {
   display: block;
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 600;
   color: rgb(243, 244, 246);
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .inputWrapper {
@@ -97,11 +97,11 @@
 
 .inputIcon {
   position: absolute;
-  left: 1rem;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px;
   color: rgb(156, 163, 175);
   pointer-events: none;
 }
@@ -111,11 +111,11 @@
   padding: 10px 10px 10px 45px;
   background: rgba(255, 255, 255, .05);
   border: 1px solid rgba(255, 255, 255, .2);
-  border-radius: .75rem;
+  border-radius: .780px;
   color: white;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  font-size: 1rem;
+  font-size: 16px;
   transition: all .2s;
 }
 
@@ -138,8 +138,8 @@
   width: 100%;
   background: linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229));
   color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 0.75rem;
+  padding: 16px 24px;
+  border-radius: 12px;
   font-weight: 600;
   border: none;
   cursor: pointer;
@@ -170,9 +170,9 @@
 }
 
 .spinnerIcon {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-right: 0.75rem;
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
   animation: spin 1s linear infinite;
 }
 
@@ -196,7 +196,7 @@
 
 .loginFooter {
   text-align: center;
-  margin-top: 2rem;
-  font-size: 0.875rem;
+  margin-top: 32px;
+  font-size: 14px;
   color: rgb(156, 163, 175);
 }

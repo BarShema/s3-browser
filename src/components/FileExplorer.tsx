@@ -6,9 +6,8 @@ import { FileGrid } from "@/components/FileGrid";
 import { FileList } from "@/components/FileList";
 import { FilePreview } from "@/components/FilePreview";
 import { FilterControls } from "@/components/FilterControls";
-import { ImagePreview } from "@/components/ImagePreview";
 import { PaginationControls } from "@/components/PaginationControls";
-import { PDFPreview } from "@/components/PDFPreview";
+import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
 import { appConfig } from "@/config/app";
@@ -18,17 +17,13 @@ import {
   ViewMode,
   getFileExtension,
   isAudio as isAudioFile,
-  isEditableText,
   isImage as isImageFile,
-  isPDF,
   isVideo as isVideoFile,
 } from "@/lib/utils";
-import { Download, Edit3, FileText, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import styles from "./fileExplorer.module.css";
-import { VideoPreview } from "./VideoPreview";
 
 interface FileExplorerProps {
   bucketName: string;
@@ -59,8 +54,14 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingFile, setEditingFile] = useState<FileItem | null>(null);
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [directorySizes, setDirectorySizes] = useState<{
-    [key: string]: { size: number; objects: number; formattedSize: string };
+    [key: string]: {
+      size: number;
+      objects: number;
+      formattedSize: string;
+      isLoading?: boolean;
+    };
   }>({});
 
   // Pagination and filtering state
@@ -92,26 +93,66 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
 
   const currentPath = getCurrentPath();
 
-  // Function to fetch directory sizes asynchronously
-  const fetchDirectorySizes = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `/api/s3/directory-sizes?bucket=${encodeURIComponent(
-          bucketName
-        )}&prefix=${encodeURIComponent(currentPath)}`
-      );
+  // Function to calculate individual directory size on click
+  const calculateDirectorySize = useCallback(
+    async (directory: DirectoryItem) => {
+      const dirKey = directory.key;
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch directory sizes");
+      // If already calculated or calculating, return
+      if (directorySizes[dirKey] && !directorySizes[dirKey].isLoading) {
+        return;
       }
 
-      const data = await response.json();
-      setDirectorySizes(data.directorySizes || {});
-    } catch (error) {
-      console.error("Error fetching directory sizes:", error);
-      // Don't show error toast for directory sizes as it's not critical
-    }
-  }, [bucketName, currentPath]);
+      // Set loading state
+      setDirectorySizes((prev) => ({
+        ...prev,
+        [dirKey]: {
+          size: 0,
+          objects: 0,
+          formattedSize: "Calculating...",
+          isLoading: true,
+        },
+      }));
+
+      try {
+        const response = await fetch(
+          `/api/s3/directory-size?path=${encodeURIComponent(
+            `${bucketName}/${dirKey}`
+          )}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch directory size: ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+
+        setDirectorySizes((prev) => ({
+          ...prev,
+          [dirKey]: {
+            size: data.totalSize,
+            objects: data.totalObjects,
+            formattedSize: data.formattedSize,
+            isLoading: false,
+          },
+        }));
+      } catch (error) {
+        console.error("Error calculating directory size:", error);
+        setDirectorySizes((prev) => ({
+          ...prev,
+          [dirKey]: {
+            size: 0,
+            objects: 0,
+            formattedSize: "Error",
+            isLoading: false,
+          },
+        }));
+      }
+    },
+    [bucketName, directorySizes]
+  );
 
   const loadFiles = useCallback(
     async (path: string = "") => {
@@ -246,21 +287,15 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     loadFiles(currentPath);
   }, [currentPath, loadFiles]);
 
-  // Fetch directory sizes after files are loaded
-  useEffect(() => {
-    if (directories.length > 0) {
-      fetchDirectorySizes();
-    }
-  }, [directories, fetchDirectorySizes]);
-
   // Merge directory sizes with directory information
   const directoriesWithSizes = directories.map((dir) => {
     const sizeInfo = directorySizes[dir.key];
     return {
       ...dir,
       size: sizeInfo?.size || 0,
-      formattedSize: sizeInfo?.formattedSize || "Calculating...",
+      formattedSize: sizeInfo?.formattedSize || "Click to calculate",
       objectCount: sizeInfo?.objects || 0,
+      isLoading: sizeInfo?.isLoading || false,
     };
   });
 
@@ -347,9 +382,8 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   };
 
   const handleFileClick = (file: FileItem) => {
-    if (isImage(file.name) || isVideo(file.name)) {
-      setPreviewFile(file);
-    }
+    setPreviewFile(file);
+    setIsPreviewOpen(true);
   };
 
   const handleDownload = async (file: FileItem) => {
@@ -503,9 +537,14 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     setIsEditModalOpen(false);
     setEditingFile(null);
   };
+  const handleEdit = (file: FileItem) => {
+    setEditingFile(file);
+    setIsEditModalOpen(true);
+  };
 
   const handleClosePreview = () => {
     setPreviewFile(null);
+    setIsPreviewOpen(false);
   };
 
   const allItems = [...directoriesWithSizes, ...files];
@@ -561,6 +600,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
                 onDirectoryDownload={handleDirectoryDownload}
                 onDelete={handleDelete}
                 onRename={handleRename}
+                onDirectorySizeClick={calculateDirectorySize}
               />
             )}
 
@@ -576,6 +616,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
                 onDirectoryDownload={handleDirectoryDownload}
                 onDelete={handleDelete}
                 onRename={handleRename}
+                onDirectorySizeClick={calculateDirectorySize}
               />
             )}
 
@@ -592,6 +633,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
                 onDelete={handleDelete}
                 onRename={handleRename}
                 bucketName={bucketName}
+                onDirectorySizeClick={calculateDirectorySize}
               />
             )}
           </>
@@ -623,120 +665,49 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
         bucketName={bucketName}
       />
 
-      {previewFile && (
-        <div className={styles.previewOverlay} onClick={handleClosePreview}>
-          <div
-            className={styles.previewContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.previewHeader}>
-              <h3 className={styles.previewTitle}>{previewFile.name}</h3>
-              <div className={styles.previewActions}>
-                <button
-                  onClick={() => handleDownload(previewFile)}
-                  className={styles.actionButton}
-                  title="Download"
-                >
-                  <Download size={16} />
-                </button>
-                <button
-                  onClick={() => {
-                    setEditingFile(previewFile);
-                    setIsEditModalOpen(true);
-                    handleClosePreview();
-                  }}
-                  className={styles.actionButton}
-                  title="Rename"
-                >
-                  <Edit3 size={16} />
-                </button>
-                {isEditableText(previewFile.name) && (
-                  <button
-                    onClick={() => {
-                      setEditingFile(previewFile);
-                      setIsEditModalOpen(true);
-                      handleClosePreview();
-                    }}
-                    className={styles.actionButton}
-                    title="Edit Content"
-                  >
-                    <FileText size={16} />
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    handleDelete(previewFile);
-                    handleClosePreview();
-                  }}
-                  className={styles.actionButton}
-                  title="Delete"
-                >
-                  <Trash2 size={16} />
-                </button>
-                <button
-                  onClick={handleClosePreview}
-                  className={styles.closeButton}
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-            {isImage(previewFile.name) && (
-              <ImagePreview
-                src={`${bucketName}/${previewFile.key}`}
-                alt={previewFile.name}
-                className={styles.previewImage}
-                maxWidth={1000}
-                maxHeight={1000}
-              />
-            )}
-            {isVideo(previewFile.name) && (
-              <VideoPreview
-                src={`${bucketName}/${previewFile.key}`}
-                className={styles.previewVideo}
-              />
-            )}
-            {isPDF(previewFile.name) && (
-              <PDFPreview
-                src={`${bucketName}/${previewFile.key}`}
-                className={styles.previewImage}
-              />
-            )}
-          </div>
-        </div>
-      )}
+      {/* Side Preview Panel */}
+      <SidePreviewPanel
+        file={previewFile}
+        bucketName={bucketName}
+        isOpen={isPreviewOpen}
+        onClose={handleClosePreview}
+        onDownload={handleDownload}
+        onRename={handleRename}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
     </div>
   );
 }
 
-// Helper functions
-function isImage(filename: string): boolean {
-  const imageExtensions = [
-    "jpg",
-    "jpeg",
-    "png",
-    "gif",
-    "bmp",
-    "svg",
-    "webp",
-    "ico",
-    "tiff",
-  ];
-  const extension = filename.split(".").pop()?.toLowerCase() || "";
-  return imageExtensions.includes(extension);
-}
+// // Helper functions
+// function isImage(filename: string): boolean {
+//   const imageExtensions = [
+//     "jpg",
+//     "jpeg",
+//     "png",
+//     "gif",
+//     "bmp",
+//     "svg",
+//     "webp",
+//     "ico",
+//     "tiff",
+//   ];
+//   const extension = filename.split(".").pop()?.toLowerCase() || "";
+//   return imageExtensions.includes(extension);
+// }
 
-function isVideo(filename: string): boolean {
-  const videoExtensions = [
-    "mp4",
-    "avi",
-    "mov",
-    "wmv",
-    "flv",
-    "webm",
-    "mkv",
-    "m4v",
-  ];
-  const extension = filename.split(".").pop()?.toLowerCase() || "";
-  return videoExtensions.includes(extension);
-}
+// function isVideo(filename: string): boolean {
+//   const videoExtensions = [
+//     "mp4",
+//     "avi",
+//     "mov",
+//     "wmv",
+//     "flv",
+//     "webm",
+//     "mkv",
+//     "m4v",
+//   ];
+//   const extension = filename.split(".").pop()?.toLowerCase() || "";
+//   return videoExtensions.includes(extension);
+// }

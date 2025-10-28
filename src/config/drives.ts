@@ -1,10 +1,10 @@
 import { appConfig } from "./app";
 
-export const bucketConfig = {
-  buckets: [
+export const driveConfig = {
+  drives: [
     "idits-drive",
     "portfolio-files2"
   ],
-  tempBucket: appConfig.tempBucketName,
+  tempDrive: appConfig.tempBucketName,
   region: appConfig.region,
 };

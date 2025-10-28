@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getFileExtension } from "@/lib/utils";
+import styles from "./fileIcon.module.css";
 
 interface PDFPreviewProps {
   src: string;
@@ -11,6 +13,10 @@ export function PDFPreview({ src, className }: PDFPreviewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  
+  // Extract filename from src to get extension
+  const filename = src.split('/').pop() || '';
+  const extension = getFileExtension(filename);
 
   useEffect(() => {
     // Reset states when src changes
@@ -55,44 +61,45 @@ export function PDFPreview({ src, className }: PDFPreviewProps) {
     fetchPDFPreview();
   }, [src]);
 
-  if (hasError) {
-    return (
-      <div className={className} style={{ 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center",
-        background: "#f3f4f6",
-        color: "#9ca3af"
-      }}>
-        PDF preview unavailable
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className={className} style={{ 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center",
-        background: "#f3f4f6",
-        color: "#9ca3af"
-      }}>
-        Loading PDF preview...
-      </div>
-    );
-  }
-
   return (
-    <img 
-      src={imageUrl || ''} 
-      alt="PDF Preview"
-      className={className}
-      style={{
-        maxWidth: "100%",
-        maxHeight: "70vh",
-        objectFit: "contain"
-      }}
-    />
+    <div className={styles.iconContainer} style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {hasError ? (
+        <div className={className} style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          background: "#f3f4f6",
+          color: "#9ca3af"
+        }}>
+          PDF preview unavailable
+        </div>
+      ) : isLoading ? (
+        <div className={className} style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          background: "#f3f4f6",
+          color: "#9ca3af"
+        }}>
+          Loading PDF preview...
+        </div>
+      ) : (
+        <img 
+          src={imageUrl || ''} 
+          alt="PDF Preview"
+          className={className}
+          style={{
+            maxWidth: "100%",
+            maxHeight: "70vh",
+            objectFit: "contain"
+          }}
+        />
+      )}
+      {extension && (
+        <div className={styles.extensionBox}>
+          <span className={styles.extensionText}>{extension.toUpperCase()}</span>
+        </div>
+      )}
+    </div>
   );
 }

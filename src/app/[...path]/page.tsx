@@ -3,7 +3,7 @@
 import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
 import { FileExplorer } from "@/components/FileExplorer";
-import { bucketConfig } from "@/config/buckets";
+import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, User } from "lucide-react";
 import Link from "next/link";
@@ -20,7 +20,7 @@ export default function Home() {
     ? params.path[0] || ""
     : params.path || "";
 
-  const buckets = bucketConfig.buckets;
+  const buckets = driveConfig.drives;
 
   const handleBucketSelect = (bucket: string) => {
     router.push(`/${bucket}`);

@@ -12,8 +12,8 @@
 
 .spinner {
   display: inline-block;
-  width: 3rem;
-  height: 3rem;
+  width: 48px;
+  height: 48px;
   border: 2px solid #2563eb;
   border-top-color: transparent;
   border-radius: 50%;
@@ -27,7 +27,7 @@
 }
 
 .loadingText {
-  margin-top: 1rem;
+  margin-top: 16px;
   color: #4b5563;
 }
 

@@ -8,7 +8,8 @@ import {
   Trash2, 
   Edit3, 
   Eye,
-  Folder
+  Folder,
+  Calculator
 } from 'lucide-react';
 import { FileIcon } from './FileIcon';
 import styles from './fileList.module.css';
@@ -24,6 +25,7 @@ interface FileListProps {
   onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
+  onDirectorySizeClick?: (directory: DirectoryItem) => void;
 }
 
 export function FileList({
@@ -37,6 +39,7 @@ export function FileList({
   onDirectoryDownload,
   onDelete,
   onRename,
+  onDirectorySizeClick,
 }: FileListProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -173,10 +176,28 @@ export function FileList({
           </div>
 
           <div className={styles.sizeCell}>
-            {item.isDirectory 
-              ? (item as DirectoryItem).formattedSize || 'Calculating...'
-              : formatFileSize((item as FileItem).size)
-            }
+            {item.isDirectory ? (
+                <div 
+                  className={`${styles.directorySize} ${
+                    (item as DirectoryItem).formattedSize === "Click to calculate" ? styles.clickableSize : ""
+                  }`}
+                  onClick={(e) => {
+                    if ((item as DirectoryItem).formattedSize === "Click to calculate" && onDirectorySizeClick) {
+                      e.stopPropagation();
+                      onDirectorySizeClick(item as DirectoryItem);
+                    }
+                  }}
+                  title={(item as DirectoryItem).formattedSize === "Click to calculate" ? "Click to calculate size" : ""}
+                >
+                  {(item as DirectoryItem).formattedSize === "Click to calculate" ? (
+                    <Calculator size={14} className={styles.calculateIcon} />
+                  ) : (
+                    (item as DirectoryItem).formattedSize || "Click to calculate"
+                  )}
+                </div>
+            ) : (
+              formatFileSize((item as FileItem).size)
+            )}
           </div>
 
           <div className={styles.modifiedCell}>

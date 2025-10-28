@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { HardDrive, Loader2, Calculator } from "lucide-react";
+import { Calculator, HardDrive, Loader2 } from "lucide-react";
+import { useState } from "react";
 import styles from "./driveCard.module.css";
 
 interface DriveInfo {
@@ -24,14 +24,16 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
 
   const handleSizeClick = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering the main onClick
-    
+
     if (hasCalculated || isLoading) return;
-    
+
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/s3/drive-size?drive=${encodeURIComponent(drive)}`);
+      const response = await fetch(
+        `/api/s3/drive-size?drive=${encodeURIComponent(drive)}`
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to fetch drive size: ${response.statusText}`);
@@ -42,50 +44,48 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
       setHasCalculated(true);
     } catch (err) {
       console.error("Error fetching drive size:", err);
-      setError(err instanceof Error ? err.message : "Failed to load drive info");
+      setError(
+        err instanceof Error ? err.message : "Failed to load drive info"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <button
-      onClick={onClick}
-      className={styles.driveCard}
-    >
+    <button onClick={onClick} className={styles.driveCard}>
       <div className={styles.driveHeader}>
         <HardDrive size={24} className={styles.driveIcon} />
         <span className={styles.driveName}>{drive}</span>
       </div>
-      
-            <div className={styles.driveInfo}>
-              {isLoading ? (
-                <div className={styles.loadingState}>
-                  <Loader2 size={16} className={styles.spinner} />
-                  <span>Calculating size...</span>
-                </div>
-              ) : error ? (
-                <div className={styles.errorState}>
-                  <span className={styles.errorText}>Size unavailable</span>
-                </div>
-              ) : driveInfo ? (
-                <div className={styles.sizeInfo}>
-                  <div className={styles.sizeValue}>{driveInfo.formattedSize}</div>
-                  <div className={styles.objectsCount}>
-                    {driveInfo.totalObjects.toLocaleString()} files
-                  </div>
-                </div>
-              ) : (
-                <div 
-                  className={styles.clickToCalculate}
-                  onClick={handleSizeClick}
-                  title="Click to calculate size"
-                >
-                  <Calculator size={16} className={styles.calculateIcon} />
-                </div>
-              )}
+
+      <div className={styles.driveInfo}>
+        {isLoading ? (
+          <div className={styles.loadingState}>
+            <Loader2 size={16} className={styles.spinner} />
+          </div>
+        ) : error ? (
+          <div className={styles.errorState}>
+            <span className={styles.errorText}>Size unavailable</span>
+          </div>
+        ) : driveInfo ? (
+          <div className={styles.sizeInfo}>
+            <div className={styles.sizeValue}>{driveInfo.formattedSize}</div>
+            <div className={styles.objectsCount}>
+              {driveInfo.totalObjects.toLocaleString()} files
             </div>
-      
+          </div>
+        ) : (
+          <div
+            className={styles.clickToCalculate}
+            onClick={handleSizeClick}
+            title="Click to calculate size"
+          >
+            <Calculator size={16} className={styles.calculateIcon} />
+          </div>
+        )}
+      </div>
+
       <span className={styles.driveArrow}>→</span>
     </button>
   );

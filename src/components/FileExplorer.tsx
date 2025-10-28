@@ -20,6 +20,7 @@ import {
   isImage as isImageFile,
   isVideo as isVideoFile,
 } from "@/lib/utils";
+import { Loader2, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -47,7 +48,13 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const router = useRouter();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [directories, setDirectories] = useState<DirectoryItem[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('s3-browser-view-mode');
+      return (saved as ViewMode) || 'list';
+    }
+    return 'list';
+  });
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -59,8 +66,9 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     [key: string]: {
       size: number;
       objects: number;
-      formattedSize: string;
+      formattedSize: string | React.ReactNode;
       isLoading?: boolean;
+      hasError?: boolean;
     };
   }>({});
 
@@ -93,6 +101,14 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
 
   const currentPath = getCurrentPath();
 
+  // Handle view mode change and save to localStorage
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('s3-browser-view-mode', mode);
+    }
+  }, []);
+
   // Function to calculate individual directory size on click
   const calculateDirectorySize = useCallback(
     async (directory: DirectoryItem) => {
@@ -109,7 +125,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
         [dirKey]: {
           size: 0,
           objects: 0,
-          formattedSize: "Calculating...",
+          formattedSize: <Loader2 size={16} className={styles.spinner} />,
           isLoading: true,
         },
       }));
@@ -129,15 +145,43 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
 
         const data = await response.json();
 
-        setDirectorySizes((prev) => ({
-          ...prev,
-          [dirKey]: {
-            size: data.totalSize,
-            objects: data.totalObjects,
-            formattedSize: data.formattedSize,
-            isLoading: false,
-          },
-        }));
+        // Check if there's an error in the response
+        if (data.error) {
+          setDirectorySizes((prev) => ({
+            ...prev,
+            [dirKey]: {
+              size: 0,
+              objects: 0,
+              formattedSize: <X size={16} className={styles.errorIcon} onClick={() => calculateDirectorySize(directory)} />,
+              isLoading: false,
+              hasError: true,
+            },
+          }));
+
+          // Revert back to calculator after 5 seconds
+          setTimeout(() => {
+            setDirectorySizes((prev) => ({
+              ...prev,
+              [dirKey]: {
+                size: 0,
+                objects: 0,
+                formattedSize: "",
+                isLoading: false,
+                hasError: false,
+              },
+            }));
+          }, 5000);
+        } else {
+          setDirectorySizes((prev) => ({
+            ...prev,
+            [dirKey]: {
+              size: data.totalSize,
+              objects: data.totalObjects,
+              formattedSize: data.formattedSize,
+              isLoading: false,
+            },
+          }));
+        }
       } catch (error) {
         console.error("Error calculating directory size:", error);
         setDirectorySizes((prev) => ({
@@ -145,10 +189,25 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
           [dirKey]: {
             size: 0,
             objects: 0,
-            formattedSize: "Error",
+            formattedSize: <X size={16} className={styles.errorIcon} onClick={() => calculateDirectorySize(directory)} />,
             isLoading: false,
+            hasError: true,
           },
         }));
+
+        // Revert back to calculator after 5 seconds
+        setTimeout(() => {
+          setDirectorySizes((prev) => ({
+            ...prev,
+            [dirKey]: {
+              size: 0,
+              objects: 0,
+              formattedSize: "",
+              isLoading: false,
+              hasError: false,
+            },
+          }));
+        }, 5000);
       }
     },
     [bucketName, directorySizes]
@@ -553,7 +612,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     <div className={styles.container}>
       <Toolbar
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        onViewModeChange={handleViewModeChange}
         onUpload={() => setIsUploadModalOpen(true)}
         selectedCount={selectedItems.length}
         onDelete={() => {

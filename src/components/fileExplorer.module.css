@@ -25,6 +25,15 @@
   animation: spin 1s linear infinite;
 }
 
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.errorIcon {
+  color: #dc2626;
+  cursor: pointer;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

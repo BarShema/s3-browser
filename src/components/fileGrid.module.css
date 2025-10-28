@@ -22,16 +22,12 @@
   }
 }
 
-@media (min-width: 1280px) {
-  .grid {
-    grid-template-columns: repeat(8, 1fr);
-  }
-}
+@media (min-width: 1280px) {}
 
 .item {
   position: relative;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid transparent;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -42,6 +38,7 @@
 
 .item:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 }
 
 .item.selected {
@@ -157,4 +154,3 @@
   margin: 0 auto 1rem;
   color: #d1d5db;
 }
-

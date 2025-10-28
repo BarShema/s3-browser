@@ -5,7 +5,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 const getS3Config = () => {
   const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-  const region = process.env.AWS_REGION || 'us-east-1';
+  const region = process.env.AWS_REGION || 'eu-west-1';
 
   if (!accessKeyId || !secretAccessKey) {
     throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
@@ -99,9 +99,14 @@ export async function listS3Objects(bucket: string, prefix: string = ''): Promis
     if (response.CommonPrefixes) {
       for (const prefixObj of response.CommonPrefixes) {
         if (prefixObj.Prefix) {
+          // Extract directory name more reliably
+          const fullPath = prefixObj.Prefix;
+          const pathParts = fullPath.split('/').filter(Boolean);
+          const dirName = pathParts[pathParts.length - 1] || 'Unnamed Folder';
+          
           directories.push({
             key: prefixObj.Prefix,
-            name: prefixObj.Prefix.replace(prefix, '').replace(/\/$/, ''),
+            name: dirName,
             lastModified: new Date(),
             isDirectory: true,
           });

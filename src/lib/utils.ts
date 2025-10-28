@@ -8,6 +8,9 @@ export interface FileItem extends S3File {
 
 export interface DirectoryItem extends S3Directory {
   id: string;
+  size?: number;
+  formattedSize?: string;
+  objectCount?: number;
 }
 
 export type Item = FileItem | DirectoryItem;
@@ -205,7 +208,7 @@ export function formatDate(date: Date): string {
       hour: "2-digit",
       minute: "2-digit",
     }).format(date);
-  } catch (error) {
+  } catch {
     return new Date().toLocaleDateString();
   }
 }

@@ -135,7 +135,7 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
               {isDragActive ? 'Drop files here' : 'Drag & drop files here, or click to select'}
             </p>
             <p className={uploadStyles.pathHint}>
-              Upload to: {currentPath || 'Root'}
+              Upload to: {currentPath || bucketName}
             </p>
           </div>
 

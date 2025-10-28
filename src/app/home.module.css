@@ -52,7 +52,9 @@
   font-size: 0.875rem;
   color: #2563eb;
   background: none;
+  font-size: 12px;
   border: none;
+  margin: 5px;
   text-decoration: underline;
   cursor: pointer;
   padding: 0;
@@ -203,4 +205,3 @@
 .bucketArrow {
   color: #2563eb;
 }
-

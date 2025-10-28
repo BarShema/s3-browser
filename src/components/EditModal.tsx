@@ -30,7 +30,7 @@ export function EditModal({ isOpen, onClose, onComplete, file, bucketName }: Edi
     
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/s3/content?bucket=${bucketName}&key=${file.key}`);
+      const response = await fetch(`/api/s3/content?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`);
       if (!response.ok) {
         throw new Error('Failed to load file content');
       }

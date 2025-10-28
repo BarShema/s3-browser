@@ -15,61 +15,87 @@ export function VideoThumbnail({ src, alt, bucketName }: VideoThumbnailProps) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    
-    if (!video || !canvas) return;
+    // Reset states when src changes
+    setIsLoading(true);
+    setHasError(false);
+    setThumbnailUrl(null);
+    setVideoUrl(null);
 
-    const captureFrame = () => {
-      if (video.videoWidth > 0 && video.videoHeight > 0) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          setThumbnailUrl(dataUrl);
-          setIsLoading(false);
+    // Fetch the presigned URL from the API
+    const fetchVideoUrl = async () => {
+      try {
+        const response = await fetch(src);
+        if (!response.ok) {
+          throw new Error('Failed to get video URL');
         }
+        const data = await response.json();
+        const presignedUrl = data.downloadUrl;
+        setVideoUrl(presignedUrl);
+        
+        // Now load the video for thumbnail generation
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        
+        if (!video || !canvas) return;
+
+        const captureFrame = () => {
+          if (video.videoWidth > 0 && video.videoHeight > 0) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+              setThumbnailUrl(dataUrl);
+              setIsLoading(false);
+            }
+          }
+        };
+
+        const handleLoad = () => {
+          if (video.duration > 0) {
+            video.currentTime = Math.min(1, video.duration / 4);
+          }
+        };
+
+        const handleSeeked = () => {
+          captureFrame();
+        };
+
+        const handleError = () => {
+          setHasError(true);
+          setIsLoading(false);
+        };
+
+        video.addEventListener('loadedmetadata', handleLoad);
+        video.addEventListener('seeked', handleSeeked);
+        video.addEventListener('error', handleError);
+        
+        return () => {
+          video.removeEventListener('loadedmetadata', handleLoad);
+          video.removeEventListener('seeked', handleSeeked);
+          video.removeEventListener('error', handleError);
+        };
+      } catch (error) {
+        console.error('Error fetching video URL:', error);
+        setHasError(true);
+        setIsLoading(false);
       }
     };
 
-    const handleLoad = () => {
-      if (video.duration > 0) {
-        video.currentTime = Math.min(1, video.duration / 4);
-      }
-    };
-
-    const handleSeeked = () => {
-      captureFrame();
-    };
-
-    const handleError = () => {
-      setHasError(true);
-      setIsLoading(false);
-    };
-
-    video.addEventListener('loadedmetadata', handleLoad);
-    video.addEventListener('seeked', handleSeeked);
-    video.addEventListener('error', handleError);
-    
-    return () => {
-      video.removeEventListener('loadedmetadata', handleLoad);
-      video.removeEventListener('seeked', handleSeeked);
-      video.removeEventListener('error', handleError);
-    };
+    fetchVideoUrl();
   }, [src]);
 
   return (
     <>
       <video
         ref={videoRef}
-        src={src}
+        src={videoUrl || ''}
         style={{ display: 'none' }}
         muted
-        crossOrigin="anonymous"
       />
       <canvas ref={canvasRef} style={{ display: 'none' }} />
       

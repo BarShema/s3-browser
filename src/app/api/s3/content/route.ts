@@ -5,8 +5,16 @@ import { GetObjectCommand } from '@aws-sdk/client-s3';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const bucket = searchParams.get('bucket');
-    const key = searchParams.get('key');
+    const path = searchParams.get('path');
+
+    if (!path) {
+      return NextResponse.json({ error: 'Path is required' }, { status: 400 });
+    }
+
+    // Parse the path to extract bucket and key
+    const pathParts = path.split('/').filter(Boolean);
+    const bucket = pathParts[0];
+    const key = pathParts.slice(1).join('/');
 
     if (!bucket || !key) {
       return NextResponse.json({ error: 'Bucket and key are required' }, { status: 400 });

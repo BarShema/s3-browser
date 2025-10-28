@@ -1,60 +1,29 @@
 "use client";
 
+import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
 import { FileExplorer } from "@/components/FileExplorer";
+import { bucketConfig } from "@/config/buckets";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, User } from "lucide-react";
-import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
-import styles from "@/app/home.module.css";
 
 export default function Home() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const params = useParams();
-  const [bucketName, setBucketName] = useState("");
-  
-  // Get path from URL if we're in a nested route
-  const getPathFromUrl = () => {
-    if (!params.path) return '';
-    const pathSegments = Array.isArray(params.path) ? params.path : [params.path];
-    return pathSegments.join('/');
-  };
-  const [buckets, setBuckets] = useState<string[]>([]);
-  const [isLoadingBuckets, setIsLoadingBuckets] = useState(false);
 
-  useEffect(() => {
-    const loadBuckets = async () => {
-      setIsLoadingBuckets(true);
-      try {
-        const response = await fetch("/api/s3/buckets");
-        if (!response.ok) {
-          throw new Error("Failed to load buckets");
-        }
-        const data = await response.json();
-        setBuckets(data.buckets.map((b: { name: string }) => b.name));
-      } catch (error) {
-        console.error("Error loading buckets:", error);
-        toast.error("Failed to load S3 buckets");
-      } finally {
-        setIsLoadingBuckets(false);
-      }
-    };
+  // Get bucket name from URL path
+  const bucketName = Array.isArray(params.path)
+    ? params.path[0] || ""
+    : params.path || "";
 
-    loadBuckets();
-  }, []);
-
-  useEffect(() => {
-    const savedBucket = localStorage.getItem("s3-bucket-name");
-    if (savedBucket) {
-      setBucketName(savedBucket);
-    }
-  }, []);
+  const buckets = bucketConfig.buckets;
 
   const handleBucketSelect = (bucket: string) => {
-    setBucketName(bucket);
-    localStorage.setItem("s3-bucket-name", bucket);
+    router.push(`/${bucket}`);
   };
 
   const handleLogout = async () => {
@@ -75,23 +44,19 @@ export default function Home() {
           <div className={styles.header}>
             <div className={styles.headerContent}>
               <div>
-                <h1 className={styles.title}>
-                  S3 File Browser
-                </h1>
+                <h1 className={styles.title}>Idit File Browser</h1>
                 <p className={styles.subtitle}>
                   Browse, manage, and organize your S3 files with ease
                 </p>
                 {bucketName && (
                   <div className={styles.bucketInfo}>
                     <span className={styles.bucketLabel}>
-                      Current Bucket: <span className={styles.bucketName}>{bucketName}</span>
+                      Current Bucket:{" "}
+                      <span className={styles.bucketName}>{bucketName}</span>
+                      <Link href="/" className={styles.changeBucket}>
+                        Change
+                      </Link>
                     </span>
-                    <button
-                      onClick={() => setBucketName("")}
-                      className={styles.changeBucket}
-                    >
-                      Change Bucket
-                    </button>
                   </div>
                 )}
               </div>
@@ -104,10 +69,7 @@ export default function Home() {
                     <span className={styles.userEmail}>{user.email}</span>
                   )}
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className={styles.logoutButton}
-                >
+                <button onClick={handleLogout} className={styles.logoutButton}>
                   <LogOut size={14} />
                   <span>Logout</span>
                 </button>
@@ -115,45 +77,27 @@ export default function Home() {
             </div>
           </div>
 
-        {bucketName ? (
-          <FileExplorer bucketName={bucketName} />
-        ) : (
-          <div className={styles.bucketSelectContainer}>
-            {isLoadingBuckets ? (
-              <div className={styles.loadingContainer}>
-                <div className={styles.spinner}></div>
-                <p className={styles.loadingText}>Loading buckets...</p>
+          {bucketName ? (
+            <FileExplorer bucketName={bucketName} />
+          ) : (
+            <div className={styles.bucketSelectContainer}>
+              <h2 className={styles.bucketSelectTitle}>Select an S3 Bucket</h2>
+              <div className={styles.bucketGrid}>
+                {buckets.map((bucket) => (
+                  <button
+                    key={bucket}
+                    onClick={() => handleBucketSelect(bucket)}
+                    className={styles.bucketCard}
+                  >
+                    <span>{bucket}</span>
+                    <span className={styles.bucketArrow}>→</span>
+                  </button>
+                ))}
               </div>
-            ) : buckets.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p className={styles.emptyText}>No S3 buckets available</p>
-                <p className={styles.emptySubtext}>
-                  Please ensure your AWS credentials are configured correctly
-                </p>
-              </div>
-            ) : (
-              <>
-                <h2 className={styles.bucketSelectTitle}>
-                  Select an S3 Bucket
-                </h2>
-                <div className={styles.bucketGrid}>
-                  {buckets.map((bucket) => (
-                    <button
-                      key={bucket}
-                      onClick={() => handleBucketSelect(bucket)}
-                      className={styles.bucketCard}
-                    >
-                      <span>{bucket}</span>
-                      <span className={styles.bucketArrow}>→</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        <Toaster position="top-right" />
+          <Toaster position="top-right" />
         </div>
       </main>
     </AuthGuard>

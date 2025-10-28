@@ -70,7 +70,7 @@ export default function LoginPage() {
           <div className={styles.iconContainer}>
             <Lock className={styles.iconLock} />
           </div>
-          <h1 className={styles.loginTitle}>S3 File Browser</h1>
+          <h1 className={styles.loginTitle}>Idit File Browser</h1>
           <p className={styles.loginSubtitle}>Sign in to access your files</p>
         </div>
 

@@ -2,19 +2,21 @@
 
 import {
   DirectoryItem, FileItem, formatDate, formatFileSize, isImage,
-  isVideo, Item
+  isVideo, isPDF, Item
 } from "@/lib/utils";
 import {
   Download,
   Edit3,
   Eye,
-  File,
   Folder,
   Trash2
 } from "lucide-react";
 import { useState } from "react";
 import styles from './filePreview.module.css';
-import { VideoThumbnail } from './VideoThumbnail';
+import { ImageThumbnail } from './ImageThumbnail';
+import { VideoPreview } from './VideoPreview';
+import { PDFPreview } from './PDFPreview';
+import { FileIcon } from './FileIcon';
 
 interface FilePreviewProps {
   items: Item[];
@@ -24,6 +26,7 @@ interface FilePreviewProps {
   onFileClick: (file: FileItem) => void;
   onFileDoubleClick: (file: FileItem) => void;
   onDownload: (file: FileItem) => void;
+  onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
   bucketName: string;
@@ -37,6 +40,7 @@ export function FilePreview({
   onFileClick,
   onFileDoubleClick,
   onDownload,
+  onDirectoryDownload,
   onDelete,
   onRename,
   bucketName,
@@ -128,19 +132,26 @@ export function FilePreview({
           {/* Preview Area */}
           <div className={styles.previewArea}>
             {item.isDirectory ? (
-              <Folder size={64} style={{ color: "#3b82f6" }} />
+              <FileIcon filename={item.name} isDirectory={true} size={64} />
             ) : isImage(item.name) ? (
-              <div className={styles.previewPlaceholder}>
-                <div className={styles.previewPlaceholderText}>Image Preview</div>
-              </div>
-            ) : isVideo(item.name) ? (
-              <VideoThumbnail 
-                src={`/api/s3/download?bucket=${bucketName}&key=${item.key}`}
+              <ImageThumbnail 
+                src={`${bucketName}/${item.key}`}
                 alt={item.name}
-                bucketName={bucketName}
+                maxWidth={400}
+                maxHeight={400}
+              />
+            ) : isVideo(item.name) ? (
+              <VideoPreview 
+                src={`${bucketName}/${item.key}`}
+                className={styles.previewThumbnail}
+              />
+            ) : isPDF(item.name) ? (
+              <PDFPreview 
+                src={`${bucketName}/${item.key}`}
+                className={styles.previewThumbnail}
               />
             ) : (
-              <File size={64} style={{ color: "#6b7280" }} />
+              <FileIcon filename={item.name} size={64} />
             )}
           </div>
 
@@ -170,7 +181,7 @@ export function FilePreview({
             <div className={styles.metadata}>
               <div>
                 {item.isDirectory
-                  ? "Folder"
+                  ? (item as DirectoryItem).formattedSize || 'Calculating...'
                   : formatFileSize((item as FileItem).size)}
               </div>
               <div>{formatDate(item.lastModified)}</div>
@@ -180,19 +191,23 @@ export function FilePreview({
           {/* Actions */}
           <div className={styles.actions}>
             <div className={styles.actionsGroup}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (item.isDirectory) {
+                    onDirectoryDownload(item as DirectoryItem);
+                  } else {
+                    onDownload(item as FileItem);
+                  }
+                }}
+                className={styles.actionButton}
+                title="Download"
+              >
+                <Download size={14} />
+              </button>
+
               {!item.isDirectory && (
                 <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDownload(item as FileItem);
-                    }}
-                    className={styles.actionButton}
-                    title="Download"
-                  >
-                    <Download size={14} />
-                  </button>
-
                   {(isImage(item.name) || isVideo(item.name)) && (
                     <button
                       onClick={(e) => {

@@ -7,18 +7,27 @@
   background: #f9fafb;
 }
 
-.button {
-  color: #2563eb;
+.breadcrum {
   font-weight: 500;
   background: none;
   border: none;
-  cursor: pointer;
   padding: 0;
   font-size: 0.875rem;
+  cursor: default;
 }
 
-.button:hover {
+button.breadcrum {
+  color: #2563eb;
+  cursor: pointer;
+}
+
+button.breadcrum:hover {
   color: #1d4ed8;
+}
+
+button.breadcrum:disabled {
+  cursor: default;
+  color: #333;
 }
 
 .separator {
@@ -35,4 +44,3 @@
   color: #4b5563;
   font-weight: 500;
 }
-

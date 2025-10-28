@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Item, FileItem, DirectoryItem } from '@/lib/utils';
-import { getFileIcon, formatFileSize, formatDate, isImage, isVideo } from '@/lib/utils';
-import { 
-  Folder, 
-  File, 
-  Download, 
-  Trash2, 
-  Edit3, 
-  Eye,
-  MoreVertical 
-} from 'lucide-react';
-import styles from './fileGrid.module.css';
+import {
+  DirectoryItem,
+  FileItem,
+  formatDate,
+  formatFileSize,
+  isImage,
+  isVideo,
+  Item,
+} from "@/lib/utils";
+import { Download, Edit3, Eye, Folder, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { FileIcon } from "./FileIcon";
+import styles from "./fileGrid.module.css";
 
 interface FileGridProps {
   items: Item[];
@@ -22,6 +22,7 @@ interface FileGridProps {
   onFileClick: (file: FileItem) => void;
   onFileDoubleClick: (file: FileItem) => void;
   onDownload: (file: FileItem) => void;
+  onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
 }
@@ -34,11 +35,12 @@ export function FileGrid({
   onFileClick,
   onFileDoubleClick,
   onDownload,
+  onDirectoryDownload,
   onDelete,
   onRename,
 }: FileGridProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
+  const [editValue, setEditValue] = useState("");
 
   const handleItemClick = (item: Item) => {
     if (item.isDirectory) {
@@ -58,7 +60,7 @@ export function FileGrid({
     if (checked) {
       onSelectionChange([...selectedItems, itemId]);
     } else {
-      onSelectionChange(selectedItems.filter(id => id !== itemId));
+      onSelectionChange(selectedItems.filter((id) => id !== itemId));
     }
   };
 
@@ -69,24 +71,24 @@ export function FileGrid({
 
   const finishRename = () => {
     if (editingItem && editValue.trim()) {
-      const item = items.find(i => i.id === editingItem);
+      const item = items.find((i) => i.id === editingItem);
       if (item && !item.isDirectory) {
         onRename(item as FileItem, editValue.trim());
       }
     }
     setEditingItem(null);
-    setEditValue('');
+    setEditValue("");
   };
 
   const cancelRename = () => {
     setEditingItem(null);
-    setEditValue('');
+    setEditValue("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       finishRename();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       cancelRename();
     }
   };
@@ -105,7 +107,9 @@ export function FileGrid({
       {items.map((item) => (
         <div
           key={item.id}
-          className={`${styles.item} ${selectedItems.includes(item.id) ? styles.selected : ''}`}
+          className={`${styles.item} ${
+            selectedItems.includes(item.id) ? styles.selected : ""
+          }`}
           onClick={() => handleItemClick(item)}
           onDoubleClick={() => handleItemDoubleClick(item)}
         >
@@ -123,11 +127,11 @@ export function FileGrid({
 
           {/* Icon */}
           <div className={styles.iconContainer}>
-            {item.isDirectory ? (
-              <Folder size={48} style={{ color: "#3b82f6" }} />
-            ) : (
-              <File size={48} style={{ color: "#6b7280" }} />
-            )}
+            <FileIcon
+              filename={item.name}
+              isDirectory={item.isDirectory}
+              size={48}
+            />
           </div>
 
           {/* Name */}
@@ -152,26 +156,34 @@ export function FileGrid({
 
           {/* Size and Date */}
           <div className={styles.metadata}>
-            <div>{item.isDirectory ? 'Folder' : formatFileSize((item as FileItem).size)}</div>
+            <div>
+              {item.isDirectory
+                ? (item as DirectoryItem).formattedSize || 'Calculating...'
+                : formatFileSize((item as FileItem).size)}
+            </div>
             <div>{formatDate(item.lastModified)}</div>
           </div>
 
           {/* Actions */}
           <div className={styles.actions}>
             <div className={styles.actionsGroup}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (item.isDirectory) {
+                    onDirectoryDownload(item as DirectoryItem);
+                  } else {
+                    onDownload(item as FileItem);
+                  }
+                }}
+                className={styles.actionButton}
+                title="Download"
+              >
+                <Download size={14} />
+              </button>
+
               {!item.isDirectory && (
                 <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDownload(item as FileItem);
-                    }}
-                    className={styles.actionButton}
-                    title="Download"
-                  >
-                    <Download size={14} />
-                  </button>
-                  
                   {(isImage(item.name) || isVideo(item.name)) && (
                     <button
                       onClick={(e) => {
@@ -186,7 +198,7 @@ export function FileGrid({
                   )}
                 </>
               )}
-              
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -197,7 +209,7 @@ export function FileGrid({
               >
                 <Edit3 size={14} />
               </button>
-              
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();

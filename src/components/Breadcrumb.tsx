@@ -4,10 +4,15 @@ import styles from "./breadcrumb.module.css";
 
 interface BreadcrumbProps {
   currentPath: string;
+  bucketName: string;
   onPathClick: (path: string) => void;
 }
 
-export function Breadcrumb({ currentPath, onPathClick }: BreadcrumbProps) {
+export function Breadcrumb({
+  currentPath,
+  bucketName,
+  onPathClick,
+}: BreadcrumbProps) {
   const pathSegments = currentPath.split("/").filter(Boolean);
 
   const handlePathClick = (index: number) => {
@@ -17,31 +22,25 @@ export function Breadcrumb({ currentPath, onPathClick }: BreadcrumbProps) {
 
   return (
     <div className={styles.container}>
-      <button
-        onClick={() => onPathClick("")}
-        className={styles.button}
-      >
-        Root
+      <button onClick={() => onPathClick("")} className={styles.breadcrum}>
+        {bucketName}
       </button>
 
       {pathSegments.map((segment, index) => (
         <div key={index} className={styles.segment}>
           <span className={styles.separator}>/</span>
-          <button
-            onClick={() => handlePathClick(index)}
-            className={styles.button}
-          >
-            {segment}
-          </button>
+          {currentPath.split("/").pop()?.toString() === segment ? (
+            <span className={styles.breadcrum}>{segment}</span>
+          ) : (
+            <button
+              onClick={() => handlePathClick(index)}
+              className={styles.breadcrum}
+            >
+              {segment}
+            </button>
+          )}
         </div>
       ))}
-
-      {currentPath && (
-        <div className={styles.segment}>
-          <span className={styles.separator}>/</span>
-          <span className={styles.current}>Current</span>
-        </div>
-      )}
     </div>
   );
 }

@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { Item, FileItem, DirectoryItem } from '@/lib/utils';
 import { formatFileSize, formatDate, isImage, isVideo } from '@/lib/utils';
 import { 
-  Folder, 
-  File, 
   Download, 
   Trash2, 
   Edit3, 
-  Eye
+  Eye,
+  Folder
 } from 'lucide-react';
+import { FileIcon } from './FileIcon';
 import styles from './fileList.module.css';
 
 interface FileListProps {
@@ -21,6 +21,7 @@ interface FileListProps {
   onFileClick: (file: FileItem) => void;
   onFileDoubleClick: (file: FileItem) => void;
   onDownload: (file: FileItem) => void;
+  onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
 }
@@ -33,6 +34,7 @@ export function FileList({
   onFileClick,
   onFileDoubleClick,
   onDownload,
+  onDirectoryDownload,
   onDelete,
   onRename,
 }: FileListProps) {
@@ -147,11 +149,7 @@ export function FileList({
 
           <div className={styles.nameCell}>
             <div className={styles.iconCell}>
-              {item.isDirectory ? (
-                <Folder size={20} style={{ color: "#3b82f6" }} />
-              ) : (
-                <File size={20} style={{ color: "#6b7280" }} />
-              )}
+              <FileIcon filename={item.name} isDirectory={item.isDirectory} />
             </div>
             
             <div>
@@ -175,7 +173,10 @@ export function FileList({
           </div>
 
           <div className={styles.sizeCell}>
-            {item.isDirectory ? '—' : formatFileSize((item as FileItem).size)}
+            {item.isDirectory 
+              ? (item as DirectoryItem).formattedSize || 'Calculating...'
+              : formatFileSize((item as FileItem).size)
+            }
           </div>
 
           <div className={styles.modifiedCell}>
@@ -184,19 +185,23 @@ export function FileList({
 
           <div className={styles.actionsCell}>
             <div className={styles.actionsGroup}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (item.isDirectory) {
+                    onDirectoryDownload(item as DirectoryItem);
+                  } else {
+                    onDownload(item as FileItem);
+                  }
+                }}
+                className={styles.actionButton}
+                title="Download"
+              >
+                <Download size={16} />
+              </button>
+              
               {!item.isDirectory && (
                 <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDownload(item as FileItem);
-                    }}
-                    className={styles.actionButton}
-                    title="Download"
-                  >
-                    <Download size={16} />
-                  </button>
-                  
                   {(isImage(item.name) || isVideo(item.name)) && (
                     <button
                       onClick={(e) => {

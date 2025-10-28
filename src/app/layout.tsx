@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "S3 File Browser",
+  title: "Idit File Browser",
   description: "A modern file browser for Amazon S3 buckets",
 };
 

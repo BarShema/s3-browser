@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f9fafb;
+  background: var(--theme-bg-secondary);
 }
 
 .loadingContent {
@@ -14,7 +14,7 @@
   display: inline-block;
   width: 48px;
   height: 48px;
-  border: 2px solid #2563eb;
+  border: 2px solid var(--theme-accent-primary);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -28,6 +28,6 @@
 
 .loadingText {
   margin-top: 16px;
-  color: #4b5563;
+  color: var(--theme-text-quaternary);
 }
 

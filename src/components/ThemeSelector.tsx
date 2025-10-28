@@ -1,7 +1,7 @@
 "use client";
 
-import { Moon, Sun, Palette } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Moon, Palette, Sun } from "lucide-react";
 import styles from "./themeSelector.module.css";
 
 export function ThemeSelector() {
@@ -24,10 +24,9 @@ export function ThemeSelector() {
 
   return (
     <div className={styles.themeSelector}>
-      <div className={styles.themeIcon}>
-        {getThemeIcon(theme)}
-      </div>
+      <div className={styles.themeIcon}>{getThemeIcon(theme)}</div>
       <select
+        id="themeSelector"
         value={theme}
         onChange={handleThemeChange}
         className={styles.themeSelect}

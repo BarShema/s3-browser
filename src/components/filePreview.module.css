@@ -33,11 +33,11 @@
 }
 
 .item:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--theme-shadow-lg);
 }
 
 .item.selected {
-  box-shadow: 0 0 0 2px #2563eb;
+  box-shadow: 0 0 0 2px var(--theme-accent-primary);
 }
 
 .checkbox {
@@ -74,15 +74,17 @@
 .nameInput {
   width: 100%;
   padding: 4px 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--theme-border-secondary);
   border-radius: 4px;
   font-size: 14px;
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
 }
 
 .nameInput:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  border-color: var(--theme-accent-primary);
+  box-shadow: 0 0 0 2px var(--theme-focus-ring);
 }
 
 .nameText {
@@ -96,7 +98,7 @@
 
 .metadata {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -104,13 +106,13 @@
 
 .clickableSize {
   cursor: pointer;
-  color: #3b82f6;
+  color: var(--theme-accent-primary);
   text-decoration: underline;
   transition: color 0.2s;
 }
 
 .clickableSize:hover {
-  color: #1d4ed8;
+  color: var(--theme-accent-hover);
 }
 
 .directorySize {
@@ -118,12 +120,12 @@
 }
 
 .calculateIcon {
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   transition: color 0.2s;
 }
 
 .clickableSize:hover .calculateIcon {
-  color: #3b82f6;
+  color: var(--theme-accent-primary);
 }
 
 .actions {
@@ -146,40 +148,40 @@
 
 .actionButton {
   padding: 4px;
-  background: white;
+  background: var(--theme-bg-primary);
   border-radius: 50%;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(--theme-shadow-sm);
   border: none;
   cursor: pointer;
-  color: #9ca3af;
+  color: var(--theme-text-tertiary);
   transition: color 0.2s;
 }
 
 .actionButton:hover {
-  color: #2563eb;
+  color: var(--theme-accent-primary);
 }
 
 .actionButton.green:hover {
-  color: #16a34a;
+  color: var(--theme-success);
 }
 
 .actionButton.yellow:hover {
-  color: #ca8a04;
+  color: var(--theme-warning);
 }
 
 .actionButton.red:hover {
-  color: #dc2626;
+  color: var(--theme-error);
 }
 
 .emptyState {
   text-align: center;
   padding: 48px 0;
-  color: #6b7280;
+  color: var(--theme-text-secondary);
 }
 
 .emptyIcon {
   width: 48px;
   height: 48px;
   margin: 0 auto 16px;
-  color: #d1d5db;
+  color: var(--theme-border-secondary);
 }

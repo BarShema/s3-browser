@@ -19,13 +19,44 @@
   --theme-error: #dc2626;
   --theme-success: #16a34a;
   --theme-warning: #d97706;
+  
+  /* Additional default theme variables */
+  --theme-glass-bg: rgba(255, 255, 255, 0.8);
+  --theme-glass-border: rgba(255, 255, 255, 0.2);
+  --theme-overlay: rgba(0, 0, 0, 0.5);
+  --theme-focus-ring: rgba(37, 99, 235, 0.2);
+  --theme-hover-bg: #f3f4f6;
+  --theme-selected-bg: #dbeafe;
+  --theme-selected-text: #2563eb;
+  
+  /* Additional color variables */
+  --theme-text-quaternary: #4b5563;
+  --theme-text-quinary: #374151;
+  --theme-bg-quaternary: #eff6ff;
+  --theme-bg-quinary: #fef2f2;
+  --theme-bg-senary: #fee2e2;
+  --theme-bg-septenary: #e3f2fd;
+  --theme-border-tertiary: #bfdbfe;
+  --theme-border-quaternary: #fca5a5;
+  --theme-accent-tertiary: #1e40af;
+  --theme-accent-quaternary: #1e3a8a;
+  --theme-accent-quinary: #3b82f6;
+  --theme-accent-senary: #ef4444;
+  --theme-accent-septenary: #1976d2;
+  --theme-accent-octonary: #1565c0;
+  --theme-bg-octonary: #f8f9fa;
+  --theme-text-hexary: #1a1a1a;
+  --theme-text-septenary: #666;
+  --theme-text-octonary: #333;
+  --theme-text-nonary: #999;
+  --theme-border-quinary: #e0e0e0;
 }
 
 /* Night Theme */
 .theme-night {
-  --theme-bg-primary: rgb(15, 23, 42, 0.1);
+  --theme-bg-primary: rgb(15, 23, 42);
   --theme-bg-secondary: rgba(30, 58, 138, 0.1);
-  --theme-bg-tertiary: rgb(40 57 97);
+  --theme-bg-tertiary: rgba(59, 130, 246, 0.05);
   --theme-text-primary: #ffffff;
   --theme-text-secondary: rgb(209, 213, 219);
   --theme-text-tertiary: rgb(156, 163, 175);
@@ -41,6 +72,37 @@
   --theme-error: rgb(248, 113, 113);
   --theme-success: rgb(34, 197, 94);
   --theme-warning: rgb(251, 191, 36);
+  
+  /* Additional night theme variables */
+  --theme-glass-bg: rgba(255, 255, 255, 0.1);
+  --theme-glass-border: rgba(255, 255, 255, 0.2);
+  --theme-overlay: rgba(0, 0, 0, 0.75);
+  --theme-focus-ring: rgba(59, 130, 246, 0.2);
+  --theme-hover-bg: rgba(255, 255, 255, 0.05);
+  --theme-selected-bg: rgba(59, 130, 246, 0.2);
+  --theme-selected-text: #ffffff;
+  
+  /* Additional night theme color variables */
+  --theme-text-quaternary: rgb(156, 163, 175);
+  --theme-text-quinary: rgb(209, 213, 219);
+  --theme-bg-quaternary: rgba(59, 130, 246, 0.1);
+  --theme-bg-quinary: rgba(248, 113, 113, 0.1);
+  --theme-bg-senary: rgba(248, 113, 113, 0.2);
+  --theme-bg-septenary: rgba(59, 130, 246, 0.2);
+  --theme-border-tertiary: rgba(59, 130, 246, 0.3);
+  --theme-border-quaternary: rgba(248, 113, 113, 0.3);
+  --theme-accent-tertiary: rgb(79, 70, 229);
+  --theme-accent-quaternary: rgb(99, 102, 241);
+  --theme-accent-quinary: rgb(59, 130, 246);
+  --theme-accent-senary: rgb(248, 113, 113);
+  --theme-accent-septenary: rgb(59, 130, 246);
+  --theme-accent-octonary: rgb(29, 78, 216);
+  --theme-bg-octonary: rgba(15, 23, 42, 0.8);
+  --theme-text-hexary: #ffffff;
+  --theme-text-septenary: rgb(156, 163, 175);
+  --theme-text-octonary: rgb(209, 213, 219);
+  --theme-text-nonary: rgb(107, 114, 128);
+  --theme-border-quinary: rgba(255, 255, 255, 0.2);
 }
 
 /* Global Styles */
@@ -56,12 +118,12 @@ body {
   min-height: 100vh;
 }
 
-/* Glassmorphism effect for night theme */
-.theme-night .glass-effect {
-  background: rgba(255, 255, 255, 0.1);
+/* Glassmorphism effect */
+.glass-effect {
+  background: var(--theme-glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--theme-glass-border);
 }
 
 /* Button styles */
@@ -98,8 +160,8 @@ body {
 }
 
 .theme-night .input-primary {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--theme-glass-bg);
+  border: 1px solid var(--theme-glass-border);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -107,7 +169,7 @@ body {
 .input-primary:focus {
   outline: none;
   border-color: var(--theme-accent-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px var(--theme-focus-ring);
 }
 
 .input-primary::placeholder {
@@ -123,10 +185,10 @@ body {
 }
 
 .theme-night .card {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--theme-glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--theme-glass-border);
   box-shadow: var(--theme-shadow-xl);
 }
 

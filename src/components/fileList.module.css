@@ -9,8 +9,8 @@
   grid-template-columns: 48px 1fr 120px 180px 120px;
   gap: 16px;
   padding: 8px 16px;
-  background: var(--theme-border-primary);
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--theme-bg-secondary);
+  border-bottom: 1px solid var(--theme-border-primary);
   font-size: 14px;
   font-weight: 500;
   color: var(--theme-text-primary);
@@ -46,18 +46,18 @@
   grid-template-columns: 48px 1fr 120px 180px 120px;
   gap: 16px;
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--theme-border-primary);
   transition: background-color 0.2s;
   align-items: center;
   cursor: pointer;
 }
 
 .row:hover {
-  background: #deefff;
+  background: var(--theme-hover-bg);
 }
 
 .row.selected {
-  background: #eff6ff;
+  background: var(--theme-selected-bg);
 }
 
 .cell {
@@ -67,7 +67,7 @@
 
 .checkbox {
   border-radius: 4px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--theme-border-secondary);
 }
 
 .checkboxCell {
@@ -109,33 +109,35 @@
 .nameInput {
   width: 100%;
   padding: 4px 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--theme-border-secondary);
   border-radius: 4px;
   font-size: 14px;
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
 }
 
 .nameInput:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  border-color: var(--theme-accent-primary);
+  box-shadow: 0 0 0 2px var(--theme-focus-ring);
 }
 
 .sizeCell {
   grid-column: 3;
   font-size: 14px;
-  color: #4b5563;
+  color: var(--theme-text-secondary);
   text-align: center;
 }
 
 .clickableSize {
   cursor: pointer;
-  color: #3b82f6;
+  color: var(--theme-accent-primary);
   text-decoration: underline;
   transition: color 0.2s;
 }
 
 .clickableSize:hover {
-  color: #1d4ed8;
+  color: var(--theme-accent-hover);
 }
 
 .directorySize {
@@ -143,19 +145,19 @@
 }
 
 .calculateIcon {
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   transition: color 0.2s;
 }
 
 .clickableSize:hover .calculateIcon {
-  color: #3b82f6;
+  color: var(--theme-accent-primary);
 }
 
 .modifiedCell {
   grid-column: 4;
   font-size: 14px;
   text-align: center;
-  color: #4b5563;
+  color: var(--theme-text-secondary);
 }
 
 .actionsCell {
@@ -177,35 +179,35 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #9ca3af;
+  color: var(--theme-text-tertiary);
   transition: color 0.2s;
 }
 
 .actionButton:hover {
-  color: #2563eb;
+  color: var(--theme-accent-primary);
 }
 
 .actionButton.green:hover {
-  color: #16a34a;
+  color: var(--theme-success);
 }
 
 .actionButton.yellow:hover {
-  color: #ca8a04;
+  color: var(--theme-warning);
 }
 
 .actionButton.red:hover {
-  color: #dc2626;
+  color: var(--theme-error);
 }
 
 .emptyState {
   text-align: center;
   padding: 48px 0;
-  color: #6b7280;
+  color: var(--theme-text-secondary);
 }
 
 .emptyIcon {
   width: 48px;
   height: 48px;
   margin: 0 auto 16px;
-  color: #d1d5db;
+  color: var(--theme-border-secondary);
 }

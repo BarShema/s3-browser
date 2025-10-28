@@ -17,21 +17,21 @@
 }
 
 button.breadcrum {
-  color: #2563eb;
+  color: var(--theme-accent-primary);
   cursor: pointer;
 }
 
 button.breadcrum:hover {
-  color: #1d4ed8;
+  color: var(--theme-accent-hover);
 }
 
 button.breadcrum:disabled {
   cursor: default;
-  color: #333;
+  color: var(--theme-text-primary);
 }
 
 .separator {
-  color: #9ca3af;
+  color: var(--theme-text-tertiary);
 }
 
 .segment {
@@ -41,6 +41,6 @@ button.breadcrum:disabled {
 }
 
 .current {
-  color: #4b5563;
+  color: var(--theme-text-secondary);
   font-weight: 500;
 }

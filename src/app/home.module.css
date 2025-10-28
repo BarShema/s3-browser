@@ -144,7 +144,7 @@
 
 .loadingText {
   margin-top: 16px;
-  color: #4b5563;
+  color: var(--theme-text-quaternary);
 }
 
 .emptyState {
@@ -153,13 +153,13 @@
 }
 
 .emptyText {
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   margin-bottom: 8px;
 }
 
 .emptySubtext {
   font-size: 14px;
-  color: #9ca3af;
+  color: var(--theme-text-tertiary);
 }
 
 .driveGrid {
@@ -183,7 +183,7 @@
 .bucketCard {
   padding: 16px 24px;
   background: white;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--theme-border-secondary);
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
@@ -194,8 +194,8 @@
 }
 
 .bucketCard:hover {
-  background: #eff6ff;
-  border-color: #3b82f6;
+  background: var(--theme-bg-quaternary);
+  border-color: var(--theme-accent-quinary);
 }
 
 .bucketName {
@@ -205,5 +205,5 @@
 }
 
 .bucketArrow {
-  color: #2563eb;
+  color: var(--theme-accent-primary);
 }

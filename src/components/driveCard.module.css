@@ -1,6 +1,6 @@
 .driveCard {
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--theme-border-primary);
   border-radius: 12px;
   padding: 24px;
   text-align: left;
@@ -15,7 +15,7 @@
 }
 
 .bucketCard:hover {
-  border-color: #3b82f6;
+  border-color: var(--theme-accent-quinary);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   transform: translateY(-2px);
 }
@@ -28,14 +28,14 @@
 }
 
 .driveIcon {
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   flex-shrink: 0;
 }
 
 .driveName {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--theme-text-primary);
   flex: 1;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .loadingState {
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   margin-top: auto;
   margin-right: 10px;
 }
@@ -63,7 +63,7 @@
 }
 
 .errorText {
-  color: #ef4444;
+  color: var(--theme-accent-senary);
   font-size: 14px;
 }
 
@@ -74,41 +74,41 @@
 .sizeValue {
   font-size: 20px;
   font-weight: 700;
-  color: #111827;
+  color: var(--theme-text-primary);
   margin-bottom: 4px;
 }
 
 .objectsCount {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--theme-text-secondary);
 }
 
 .clickToCalculate {
   display: flex;
   gap: 8px;
   padding: 8px;
-  background: #f3f4f6;
+  background: var(--theme-bg-tertiary);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   margin-left: auto;
   justify-content: center;
 }
 
 .clickToCalculate:hover {
-  background: #e5e7eb;
-  border-color: #6b7280;
-  color: #374151;
+  background: var(--theme-border-primary);
+  border-color: var(--theme-text-secondary);
+  color: var(--theme-text-quinary);
 }
 
 .calculateIcon {
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   transition: color 0.2s;
 }
 
 .clickToCalculate:hover .calculateIcon {
-  color: #3b82f6;
+  color: var(--theme-accent-quinary);
 }
 
 .calculateText {
@@ -121,12 +121,12 @@
   top: 16px;
   right: 16px;
   font-size: 20px;
-  color: #9ca3af;
+  color: var(--theme-text-tertiary);
   transition: color 0.2s ease;
 }
 
 .bucketCard:hover .driveArrow {
-  color: #3b82f6;
+  color: var(--theme-accent-quinary);
 }
 
 @keyframes spin {

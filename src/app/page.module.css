@@ -1,6 +1,6 @@
 .main {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--theme-bg-octonary);
 }
 
 .container {
@@ -26,12 +26,12 @@
 .title {
   font-size: 28px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--theme-text-hexary);
   margin-bottom: 8px;
 }
 
 .subtitle {
-  color: #666;
+  color: var(--theme-text-septenary);
 }
 
 .bucketInfo {
@@ -43,17 +43,17 @@
 
 .bucketLabel {
   font-size: 14px;
-  color: #666;
+  color: var(--theme-text-septenary);
 }
 
 .bucketName {
   font-weight: 500;
-  color: #333;
+  color: var(--theme-text-octonary);
 }
 
 .changeBucket {
   font-size: 14px;
-  color: #1976d2;
+  color: var(--theme-accent-septenary);
   text-decoration: underline;
   background: none;
   border: none;
@@ -61,7 +61,7 @@
 }
 
 .changeBucket:hover {
-  color: #1565c0;
+  color: var(--theme-accent-octonary);
 }
 
 .userMenu {
@@ -74,7 +74,7 @@
   gap: 12px;
   background: white;
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--theme-border-quinary);
   padding: 8px 16px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
@@ -87,19 +87,19 @@
 .userName {
   font-size: 14px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--theme-text-hexary);
 }
 
 .userEmail {
   font-size: 12px;
-  color: #666;
+  color: var(--theme-text-septenary);
 }
 
 .logoutButton {
   margin-left: 16px;
   padding: 4px 12px;
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--theme-bg-quinary);
+  color: var(--theme-error);
   border-radius: 6px;
   border: none;
   cursor: pointer;
@@ -111,7 +111,7 @@
 }
 
 .logoutButton:hover {
-  background: #fee2e2;
+  background: var(--theme-bg-senary);
 }
 
 .bucketSelection {
@@ -127,8 +127,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid #e0e0e0;
-  border-top-color: #1976d2;
+  border: 2px solid var(--theme-border-quinary);
+  border-top-color: var(--theme-accent-septenary);
   margin: 0 auto;
 }
 
@@ -138,7 +138,7 @@
 
 .loadingText {
   margin-top: 16px;
-  color: #666;
+  color: var(--theme-text-septenary);
 }
 
 .emptyState {
@@ -147,19 +147,19 @@
 }
 
 .emptyText {
-  color: #666;
+  color: var(--theme-text-septenary);
   margin-bottom: 16px;
 }
 
 .emptyHint {
   font-size: 14px;
-  color: #999;
+  color: var(--theme-text-nonary);
 }
 
 .sectionTitle {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--theme-text-hexary);
   margin-bottom: 16px;
 }
 
@@ -172,7 +172,7 @@
 .bucketCard {
   padding: 24px;
   background: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--theme-border-quinary);
   border-radius: 8px;
   text-align: left;
   cursor: pointer;
@@ -180,8 +180,8 @@
 }
 
 .bucketCard:hover {
-  background: #e3f2fd;
-  border-color: #1976d2;
+  background: var(--theme-bg-septenary);
+  border-color: var(--theme-accent-septenary);
 }
 
 .bucketCardContent {
@@ -192,10 +192,10 @@
 
 .bucketCardName {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--theme-text-hexary);
 }
 
 .arrow {
-  color: #1976d2;
+  color: var(--theme-accent-septenary);
 }
 

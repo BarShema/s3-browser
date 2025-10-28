@@ -24,8 +24,8 @@
 
 .item {
   position: relative;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--theme-bg-primary);
+  border: 1px solid var(--theme-border-primary);
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.2s;
@@ -51,7 +51,7 @@
 
 .previewArea {
   aspect-ratio: 1;
-  background: #f9fafb;
+  background: var(--theme-bg-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,7 +88,7 @@
 .nameText {
   font-size: 14px;
   font-weight: 500;
-  color: #111827;
+  color: var(--theme-text-primary);
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -183,4 +183,3 @@
   margin: 0 auto 16px;
   color: #d1d5db;
 }
-

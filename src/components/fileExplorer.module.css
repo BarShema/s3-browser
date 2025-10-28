@@ -1,8 +1,8 @@
 .container {
-  background: white;
+  background: var(--theme-bg-primary);
   border-radius: 8px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--theme-shadow-sm);
+  border: 1px solid var(--theme-border-primary);
 }
 
 .content {
@@ -19,7 +19,7 @@
 .loader {
   width: 32px;
   height: 32px;
-  border: 2px solid #2563eb;
+  border: 2px solid var(--theme-accent-primary);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -42,7 +42,7 @@
 
 .loadingText {
   margin-left: 8px;
-  color: #4b5563;
+  color: var(--theme-text-secondary);
 }
 
 .previewOverlay {
@@ -56,12 +56,13 @@
 }
 
 .previewContent {
-  background: white;
+  background: var(--theme-bg-primary);
   border-radius: 8px;
   padding: 16px;
   max-width: 896px;
   max-height: 90vh;
   overflow: auto;
+  border: 1px solid var(--theme-border-primary);
 }
 
 .previewHeader {

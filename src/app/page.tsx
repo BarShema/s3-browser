@@ -2,6 +2,7 @@
 
 import { AuthGuard } from "@/components/AuthGuard";
 import { DriveCard } from "@/components/DriveCard";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, User } from "lucide-react";
@@ -50,6 +51,7 @@ export default function Home() {
                     <span className={styles.userEmail}>{user.email}</span>
                   )}
                 </div>
+                <ThemeSelector />
                 <button onClick={handleLogout} className={styles.logoutButton}>
                   <LogOut size={14} />
                   <span>Logout</span>

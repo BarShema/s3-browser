@@ -3,8 +3,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-bottom: 1px solid var(--theme-border-primary);
+  background: var(--theme-bg-secondary);
 }
 
 .buttonGroup {
@@ -19,17 +19,17 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #4b5563;
+  color: var(--theme-text-secondary);
   transition: all 0.2s;
 }
 
 .viewButton:hover {
-  background: #f3f4f6;
+  background: var(--theme-bg-tertiary);
 }
 
 .viewButton.active {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--theme-accent-primary);
+  color: white;
 }
 
 .actionsGroup {
@@ -43,7 +43,7 @@
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  color: #dc2626;
+  color: var(--theme-error);
   background: none;
   border: none;
   cursor: pointer;
@@ -53,7 +53,7 @@
 }
 
 .deleteButton:hover {
-  background: #fef2f2;
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .uploadButton {
@@ -61,7 +61,7 @@
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  background: #2563eb;
+  background: var(--theme-accent-primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -71,6 +71,6 @@
 }
 
 .uploadButton:hover {
-  background: #1d4ed8;
+  background: var(--theme-accent-hover);
 }
 

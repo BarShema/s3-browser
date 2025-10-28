@@ -3,8 +3,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--theme-bg-secondary);
+  border-bottom: 1px solid var(--theme-border-primary);
 }
 
 .filters {
@@ -22,7 +22,7 @@
 
 .filterGroup label {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--theme-text-secondary);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -30,11 +30,12 @@
 
 .input {
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--theme-border-secondary);
   border-radius: 6px;
   font-size: 14px;
-  background: white;
+  background: var(--theme-bg-primary);
   min-width: 132px;
+  color: var(--theme-text-primary);
 }
 
 .input:focus {
@@ -49,10 +50,8 @@
 
 .select {
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
-  background: white;
   min-width: 128px;
 }
 

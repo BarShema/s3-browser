@@ -9,11 +9,11 @@
   grid-template-columns: 48px 1fr 120px 180px 120px;
   gap: 16px;
   padding: 8px 16px;
-  background: #f9fafb;
+  background: var(--theme-border-primary);
   border-bottom: 1px solid #e5e7eb;
   font-size: 14px;
   font-weight: 500;
-  color: #4b5563;
+  color: var(--theme-text-primary);
   align-items: center;
 }
 
@@ -90,7 +90,7 @@
   min-width: 0;
 }
 
-.nameCell > div {
+.nameCell>div {
   min-width: 0;
 }
 
@@ -98,7 +98,7 @@
   text-align: left;
   font-size: 14px;
   font-weight: 500;
-  color: #111827;
+  color: var(--theme-text-primary);
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -209,4 +209,3 @@
   margin: 0 auto 16px;
   color: #d1d5db;
 }
-

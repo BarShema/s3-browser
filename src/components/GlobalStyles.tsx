@@ -1,7 +1,8 @@
 export function GlobalStyles() {
   return (
-    <style dangerouslySetInnerHTML={{
-      __html: `
+    <style
+      dangerouslySetInnerHTML={{
+        __html: `
         * {
           margin: 0;
           padding: 0;
@@ -74,6 +75,14 @@ export function GlobalStyles() {
         .btn:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+
+        select {
+          background: var(--theme-bg-tertiary);
+          color: var(--theme-text-primary);
+          border-radius: 6px;
+          font-size: 14px;
+          padding: 8px 12px;
         }
 
         .input {
@@ -179,8 +188,8 @@ export function GlobalStyles() {
             padding: 0 0.5rem;
           }
         }
-      `
-    }} />
+      `,
+      }}
+    />
   );
 }
-

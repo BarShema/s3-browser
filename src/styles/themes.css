@@ -1,0 +1,153 @@
+/* Theme Variables */
+:root {
+  /* Default Theme */
+  --theme-bg-primary: #ffffff;
+  --theme-bg-secondary: #f9fafb;
+  --theme-bg-tertiary: #f3f4f6;
+  --theme-text-primary: #111827;
+  --theme-text-secondary: #6b7280;
+  --theme-text-tertiary: #9ca3af;
+  --theme-border-primary: #e5e7eb;
+  --theme-border-secondary: #d1d5db;
+  --theme-accent-primary: #2563eb;
+  --theme-accent-secondary: #1d4ed8;
+  --theme-accent-hover: #1e40af;
+  --theme-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --theme-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --theme-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --theme-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --theme-error: #dc2626;
+  --theme-success: #16a34a;
+  --theme-warning: #d97706;
+}
+
+/* Night Theme */
+.theme-night {
+  --theme-bg-primary: rgb(15, 23, 42, 0.1);
+  --theme-bg-secondary: rgba(30, 58, 138, 0.1);
+  --theme-bg-tertiary: rgb(40 57 97);
+  --theme-text-primary: #ffffff;
+  --theme-text-secondary: rgb(209, 213, 219);
+  --theme-text-tertiary: rgb(156, 163, 175);
+  --theme-border-primary: rgba(255, 255, 255, 0.2);
+  --theme-border-secondary: rgba(255, 255, 255, 0.1);
+  --theme-accent-primary: rgb(59, 130, 246);
+  --theme-accent-secondary: rgb(79, 70, 229);
+  --theme-accent-hover: rgb(29, 78, 216);
+  --theme-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --theme-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --theme-shadow-lg: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+  --theme-shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --theme-error: rgb(248, 113, 113);
+  --theme-success: rgb(34, 197, 94);
+  --theme-warning: rgb(251, 191, 36);
+}
+
+/* Global Styles */
+body {
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Night theme background gradient */
+.theme-night body {
+  background: linear-gradient(to bottom right, rgb(15, 23, 42), rgb(30, 58, 138), rgb(15, 23, 42));
+  min-height: 100vh;
+}
+
+/* Glassmorphism effect for night theme */
+.theme-night .glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(to right, var(--theme-accent-primary), var(--theme-accent-secondary));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--theme-shadow-lg);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(to right, var(--theme-accent-hover), var(--theme-accent-secondary));
+  box-shadow: var(--theme-shadow-xl);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Input styles */
+.input-primary {
+  background: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border-primary);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--theme-text-primary);
+  transition: all 0.2s;
+}
+
+.theme-night .input-primary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.input-primary:focus {
+  outline: none;
+  border-color: var(--theme-accent-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.input-primary::placeholder {
+  color: var(--theme-text-tertiary);
+}
+
+/* Card styles */
+.card {
+  background: var(--theme-bg-primary);
+  border: 1px solid var(--theme-border-primary);
+  border-radius: 8px;
+  box-shadow: var(--theme-shadow-sm);
+}
+
+.theme-night .card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--theme-shadow-xl);
+}
+
+/* Text styles */
+.text-primary {
+  color: var(--theme-text-primary);
+}
+
+.text-secondary {
+  color: var(--theme-text-secondary);
+}
+
+.text-tertiary {
+  color: var(--theme-text-tertiary);
+}
+
+/* Border styles */
+.border-primary {
+  border-color: var(--theme-border-primary);
+}
+
+.border-secondary {
+  border-color: var(--theme-border-secondary);
+}

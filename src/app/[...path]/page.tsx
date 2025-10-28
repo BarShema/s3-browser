@@ -3,6 +3,7 @@
 import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
 import { FileExplorer } from "@/components/FileExplorer";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, User } from "lucide-react";
@@ -51,7 +52,7 @@ export default function Home() {
                 {bucketName && (
                   <div className={styles.bucketInfo}>
                     <span className={styles.bucketLabel}>
-                      Current Bucket:{" "}
+                      Current Drive:{" "}
                       <span className={styles.bucketName}>{bucketName}</span>
                       <Link href="/" className={styles.changeBucket}>
                         Change
@@ -69,6 +70,7 @@ export default function Home() {
                     <span className={styles.userEmail}>{user.email}</span>
                   )}
                 </div>
+                <ThemeSelector />
                 <button onClick={handleLogout} className={styles.logoutButton}>
                   <LogOut size={14} />
                   <span>Logout</span>

@@ -16,6 +16,7 @@ import {
   Download,
   Edit3,
   Eye,
+  EyeOff,
   Folder,
   Minus,
   Plus,
@@ -63,6 +64,13 @@ export function FilePreview({
 }: FilePreviewProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [showDetails, setShowDetails] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("s3-browser-preview-show-details");
+      return saved !== "false";
+    }
+    return true;
+  });
 
   const handleItemClick = (item: Item) => {
     if (item.isDirectory) {
@@ -115,6 +123,19 @@ export function FilePreview({
     }
   };
 
+  const handleToggleDetails = () => {
+    const newShowDetails = !showDetails;
+    setShowDetails(newShowDetails);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("s3-browser-preview-show-details", newShowDetails.toString());
+    }
+  };
+
+  // Check if there are any files with previews (images, videos, PDFs)
+  const hasPreviewFiles = items.some(item => 
+    !item.isDirectory && (isImage(item.name) || isVideo(item.name) || isPDF(item.name))
+  );
+
   if (items.length === 0) {
     return (
       <div className={styles.emptyState}>
@@ -153,6 +174,15 @@ export function FilePreview({
         >
           <Plus size={16} />
         </button>
+        {hasPreviewFiles && (
+          <button
+            className={`${styles.gridControlButton} ${showDetails ? styles.active : ''}`}
+            onClick={handleToggleDetails}
+            title={showDetails ? "Hide details" : "Show details"}
+          >
+            {showDetails ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        )}
       </div>
 
       {/* Grid */}
@@ -208,73 +238,75 @@ export function FilePreview({
             </div>
 
             {/* Content */}
-            <div className={styles.content}>
-              {/* Name */}
-              <div className={styles.name}>
-                {editingItem === item.id ? (
-                  <input
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={finishRename}
-                    onKeyDown={handleKeyPress}
-                    className={styles.nameInput}
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ) : (
-                  <div className={styles.nameText} title={item.name}>
-                    {item.name}
-                  </div>
-                )}
-              </div>
-
-              {/* Metadata */}
-              <div className={styles.metadata}>
-                <div>
-                  {item.isDirectory ? (
-                    <div
-                      className={`${styles.directorySize} ${
-                        (item as DirectoryItem).formattedSize ===
-                        "Click to calculate"
-                          ? styles.clickableSize
-                          : ""
-                      }`}
-                      onClick={(e) => {
-                        if (
-                          (item as DirectoryItem).formattedSize ===
-                            "Click to calculate" &&
-                          onDirectorySizeClick
-                        ) {
-                          e.stopPropagation();
-                          onDirectorySizeClick(item as DirectoryItem);
-                        }
-                      }}
-                      title={
-                        (item as DirectoryItem).formattedSize ===
-                        "Click to calculate"
-                          ? "Click to calculate size"
-                          : ""
-                      }
-                    >
-                      {(item as DirectoryItem).formattedSize ===
-                      "Click to calculate" ? (
-                        <Calculator
-                          size={12}
-                          className={styles.calculateIcon}
-                        />
-                      ) : (
-                        (item as DirectoryItem).formattedSize ||
-                        "Click to calculate"
-                      )}
-                    </div>
+            {showDetails && (
+              <div className={styles.content}>
+                {/* Name */}
+                <div className={styles.name}>
+                  {editingItem === item.id ? (
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={finishRename}
+                      onKeyDown={handleKeyPress}
+                      className={styles.nameInput}
+                      autoFocus
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   ) : (
-                    formatFileSize((item as FileItem).size)
+                    <div className={styles.nameText} title={item.name}>
+                      {item.name}
+                    </div>
                   )}
                 </div>
-                <div>{formatDate(item.lastModified)}</div>
+
+                {/* Metadata */}
+                <div className={styles.metadata}>
+                  <div>
+                    {item.isDirectory ? (
+                      <div
+                        className={`${styles.directorySize} ${
+                          (item as DirectoryItem).formattedSize ===
+                          "Click to calculate"
+                            ? styles.clickableSize
+                            : ""
+                        }`}
+                        onClick={(e) => {
+                          if (
+                            (item as DirectoryItem).formattedSize ===
+                              "Click to calculate" &&
+                            onDirectorySizeClick
+                          ) {
+                            e.stopPropagation();
+                            onDirectorySizeClick(item as DirectoryItem);
+                          }
+                        }}
+                        title={
+                          (item as DirectoryItem).formattedSize ===
+                          "Click to calculate"
+                            ? "Click to calculate size"
+                            : ""
+                        }
+                      >
+                        {(item as DirectoryItem).formattedSize ===
+                        "Click to calculate" ? (
+                          <Calculator
+                            size={12}
+                            className={styles.calculateIcon}
+                          />
+                        ) : (
+                          (item as DirectoryItem).formattedSize ||
+                          "Click to calculate"
+                        )}
+                      </div>
+                    ) : (
+                      formatFileSize((item as FileItem).size)
+                    )}
+                  </div>
+                  <div>{formatDate(item.lastModified)}</div>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Actions */}
             <div className={styles.actions}>

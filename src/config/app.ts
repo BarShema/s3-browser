@@ -5,7 +5,7 @@ export const appConfig = {
   // Grid View Configuration
   gridView: {
     defaultItemsPerRow: 6,
-    minItemsPerRow: 1,
+    minItemsPerRow: 3,
     maxItemsPerRow: 9,
   },
   

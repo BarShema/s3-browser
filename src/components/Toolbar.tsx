@@ -1,7 +1,7 @@
 'use client';
 
 import { ViewMode } from '@/lib/utils';
-import { Upload, Grid3X3, List, Trash2 } from 'lucide-react';
+import { Upload, Grid3X3, List, Trash2, FolderTree } from 'lucide-react';
 import styles from './toolbar.module.css';
 
 interface ToolbarProps {
@@ -10,12 +10,22 @@ interface ToolbarProps {
   onUpload: () => void;
   selectedCount: number;
   onDelete: () => void;
+  isTreeVisible: boolean;
+  onTreeToggle: () => void;
 }
 
-export function Toolbar({ viewMode, onViewModeChange, onUpload, selectedCount, onDelete }: ToolbarProps) {
+export function Toolbar({ viewMode, onViewModeChange, onUpload, selectedCount, onDelete, isTreeVisible, onTreeToggle }: ToolbarProps) {
   return (
     <div className={styles.container}>
       <div className={styles.buttonGroup}>
+        <button
+          onClick={onTreeToggle}
+          className={`${styles.viewButton} ${isTreeVisible ? styles.active : ''}`}
+          title={isTreeVisible ? "Hide Directory Tree" : "Show Directory Tree"}
+        >
+          <FolderTree size={20} />
+        </button>
+        
         <button
           onClick={() => onViewModeChange('list')}
           className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}

@@ -1,9 +1,10 @@
 .overlay {
-  /* position: fixed; */
+  position: sticky;
+  top: 3vh;
   border: 1px solid var(--theme-border-primary);
   border-radius: 8px;
   width: 50%;
-  height: 100vh;
+  height: 93vh;
   background: var(--theme-overlay);
   z-index: 1000;
   display: flex;
@@ -111,6 +112,7 @@
   flex: 1;
   overflow: hidden;
   display: flex;
+  padding: 30px;
   flex-direction: column;
 }
 

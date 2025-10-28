@@ -45,6 +45,12 @@
   cursor: not-allowed;
 }
 
+.gridControlButton.active {
+  background: var(--theme-accent-primary);
+  border-color: var(--theme-accent-primary);
+  color: var(--theme-accent-text);
+}
+
 .gridControlCount {
   min-width: 24px;
   text-align: center;

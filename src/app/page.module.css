@@ -72,11 +72,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
+  background: var(--theme-bg-primary);
   border-radius: 8px;
   border: 1px solid var(--theme-border-quinary);
   padding: 8px 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px var(--theme-shadow-rgba);
 }
 
 .userDetails {
@@ -171,7 +171,7 @@
 
 .bucketCard {
   padding: 24px;
-  background: white;
+  background: var(--theme-bg-primary);
   border: 1px solid var(--theme-border-quinary);
   border-radius: 8px;
   text-align: left;

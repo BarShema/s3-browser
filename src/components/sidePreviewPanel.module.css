@@ -4,7 +4,7 @@
   right: 0;
   width: 50%;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--theme-overlay);
   z-index: 1000;
   display: flex;
   justify-content: flex-end;
@@ -13,10 +13,10 @@
 .panel {
   width: 100%;
   height: 100%;
-  background: white;
+  background: var(--theme-bg-primary);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+  box-shadow: -4px 0 12px var(--theme-shadow-rgba-dark);
 }
 
 .header {
@@ -57,7 +57,7 @@
 .fileExtension {
   font-size: 12px;
   background: var(--theme-text-quinary);
-  color: white;
+  color: var(--theme-text-primary);
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 600;
@@ -76,7 +76,7 @@
   width: 32px;
   height: 32px;
   border: 1px solid var(--theme-border-secondary);
-  background: white;
+  background: var(--theme-bg-primary);
   border-radius: 6px;
   color: var(--theme-text-secondary);
   cursor: pointer;
@@ -97,7 +97,7 @@
 
 .closeButton {
   background: var(--theme-text-quinary);
-  color: white;
+  color: var(--theme-text-primary);
   border-color: var(--theme-text-quinary);
 }
 

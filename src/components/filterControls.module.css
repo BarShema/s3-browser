@@ -41,7 +41,7 @@
 .input:focus {
   outline: none;
   border-color: var(--theme-accent-quinary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--theme-shadow-rgba-accent-light);
 }
 
 .input::placeholder {
@@ -58,14 +58,14 @@
 .select:focus {
   outline: none;
   border-color: var(--theme-accent-quinary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--theme-shadow-rgba-accent-light);
 }
 
 .clearButton {
   padding: 8px 16px;
   border: 1px solid var(--theme-error);
   border-radius: 6px;
-  background: white;
+  background: var(--theme-bg-primary);
   color: var(--theme-error);
   font-size: 14px;
   font-weight: 500;
@@ -75,7 +75,7 @@
 
 .clearButton:hover {
   background: var(--theme-error);
-  color: white;
+  color: var(--theme-text-primary);
 }
 
 @media (max-width: 1024px) {

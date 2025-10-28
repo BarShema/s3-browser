@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--theme-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9,7 +9,7 @@
 }
 
 .modal {
-  background: white;
+  background: var(--theme-bg-primary);
   border-radius: 8px;
   width: 100%;
   max-width: 432px;
@@ -82,7 +82,7 @@
 
 .buttonCancel {
   color: var(--theme-text-quaternary);
-  background: white;
+  background: var(--theme-bg-primary);
 }
 
 .buttonCancel:hover {
@@ -91,7 +91,7 @@
 
 .buttonSave {
   background: var(--theme-accent-primary);
-  color: white;
+  color: var(--theme-text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -147,6 +147,6 @@
 .textarea:focus {
   outline: none;
   border-color: var(--theme-accent-primary);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 2px var(--theme-focus-ring);
 }
 

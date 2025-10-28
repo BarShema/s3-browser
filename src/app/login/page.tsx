@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { useAuth } from "@/contexts/AuthContext";
 import { AlertCircle, Lock, User } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -124,7 +125,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`${styles.loginButton} ${isLoading ? styles.loginButtonLoading : ''}`}
+              className={`${styles.loginButton} ${
+                isLoading ? styles.loginButtonLoading : ""
+              }`}
             >
               {isLoading ? (
                 <>
@@ -157,9 +160,13 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <div className={styles.loginFooter}>
-          <p>🔒 Secure access to your S3 file storage</p>
+        <div className={styles.themeSelectorContainer}>
+          <ThemeSelector />
         </div>
+
+        {/* <div className={styles.loginFooter}>
+          <p>🔒 Secure access to your S3 file storage</p>
+        </div> */}
       </div>
     </div>
   );

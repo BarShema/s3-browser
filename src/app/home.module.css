@@ -1,6 +1,6 @@
 .mainContainer {
   min-height: 100vh;
-  background: var(--theme-bg-secondary);
+  background: var(--theme-bg-gradient);
   padding: 32px 0;
 }
 
@@ -95,7 +95,7 @@
 .logoutButton {
   margin-left: 16px;
   padding: 4px 12px;
-  background: rgba(220, 38, 38, 0.1);
+  background: var(--theme-bg-error-light);
   color: var(--theme-error);
   border-radius: 6px;
   border: none;
@@ -108,7 +108,7 @@
 }
 
 .logoutButton:hover {
-  background: rgba(220, 38, 38, 0.15);
+  background: var(--theme-bg-error-medium);
 }
 
 .driveSelectContainer {
@@ -182,7 +182,7 @@
 
 .bucketCard {
   padding: 16px 24px;
-  background: white;
+  background: var(--theme-bg-primary);
   border: 1px solid var(--theme-border-secondary);
   border-radius: 8px;
   cursor: pointer;

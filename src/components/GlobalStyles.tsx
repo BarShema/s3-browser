@@ -10,7 +10,6 @@ export function GlobalStyles() {
         }
 
         :root {
-          --bg-gradient: linear-gradient(to bottom right, rgb(15, 23, 42), rgb(30, 58, 138), rgb(15, 23, 42));
           --white: #ffffff;
           --gray-50: #f9fafb;
           --gray-100: #f3f4f6;
@@ -35,7 +34,7 @@ export function GlobalStyles() {
         }
         
         body {
-          background: var(--bg-gradient);
+          background: var(--theme-bg-gradient);
           color: var(--gray-900);
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
           -webkit-font-smoothing: antialiased;
@@ -78,7 +77,7 @@ export function GlobalStyles() {
         }
 
         select {
-          background: var(--theme-bg-tertiary);
+          background: var(--theme-bg-primary);
           color: var(--theme-text-primary);
           border-radius: 6px;
           font-size: 14px;

@@ -1,6 +1,6 @@
 .loginPage {
   min-height: 100vh;
-  background: linear-gradient(to bottom right, rgb(15, 23, 42), rgb(30, 58, 138), rgb(15, 23, 42));
+  background: var(--theme-bg-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,38 +23,38 @@
   justify-content: center;
   width: 80px;
   height: 80px;
-  background: linear-gradient(to bottom right, rgb(59, 130, 246), rgb(79, 70, 229));
+  background: linear-gradient(to bottom right, var(--theme-accent-primary), var(--theme-accent-secondary));
   border-radius: 16px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 6px -1px var(--theme-shadow-rgba-accent-dark);
 }
 
 .iconLock {
   width: 36px;
   height: 36px;
-  color: white;
+  color: var(--theme-text-primary);
 }
 
 .loginTitle {
   font-size: 36px;
   font-weight: 700;
-  color: white;
+  color: var(--theme-text-primary);
   margin-bottom: 12px;
   letter-spacing: -0.025em;
 }
 
 .loginSubtitle {
-  color: rgb(209, 213, 219);
+  color: var(--theme-text-hexary);
   font-size: 16px;
 }
 
 .loginForm {
-  background: rgba(255, 255, 255, .1);
+  background: var(--theme-bg-glass-light);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-radius: 5px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .25);
-  border: 1px solid rgba(255, 255, 255, .2);
+  box-shadow: 0 25px 50px -12px var(--theme-shadow-rgba-darker);
+  border: 1px solid var(--theme-bg-glass-medium);
   padding: 20px;
 }
 
@@ -65,9 +65,9 @@
 }
 
 .errorMessage {
-  background: rgba(220, 38, 38, 0.1);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  color: rgb(254, 202, 202);
+  background: var(--theme-bg-error-light);
+  border: 1px solid var(--theme-border-error-light);
+  color: var(--theme-text-error-light);
   padding: 16px 20px;
   border-radius: 12px;
   display: flex;
@@ -87,7 +87,7 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: rgb(243, 244, 246);
+  color: var(--theme-text-septenary);
   margin-bottom: 8px;
 }
 
@@ -102,17 +102,17 @@
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  color: rgb(156, 163, 175);
+  color: var(--theme-text-light-dark);
   pointer-events: none;
 }
 
 .loginInput {
   width: 100%;
   padding: 10px 10px 10px 45px;
-  background: rgba(255, 255, 255, .05);
-  border: 1px solid rgba(255, 255, 255, .2);
+  background: var(--theme-bg-glass-dark);
+  border: 1px solid var(--theme-border-secondary);
   border-radius: .780px;
-  color: white;
+  color: var(--theme-text-primary);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   font-size: 16px;
@@ -121,12 +121,12 @@
 
 .loginInput:focus {
   outline: none;
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--theme-border-accent-light);
+  box-shadow: 0 0 0 3px var(--theme-focus-ring);
 }
 
 .loginInput::placeholder {
-  color: rgb(156, 163, 175);
+  color: var(--theme-text-light-dark);
 }
 
 .loginInput:disabled {
@@ -136,8 +136,8 @@
 
 .loginButton {
   width: 100%;
-  background: linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229));
-  color: white;
+  background: linear-gradient(to right, var(--theme-accent-primary), var(--theme-accent-secondary));
+  color: var(--theme-text-primary);
   padding: 16px 24px;
   border-radius: 12px;
   font-weight: 600;
@@ -146,13 +146,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 15px -3px var(--theme-shadow-rgba-accent-dark);
   transition: all 0.2s;
 }
 
 .loginButton:hover:not(:disabled) {
-  background: linear-gradient(to right, rgb(29, 78, 216), rgb(67, 56, 202));
-  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(to right, var(--theme-accent-hover), var(--theme-accent-secondary));
+  box-shadow: 0 10px 15px -3px var(--theme-shadow-rgba-accent-darker);
 }
 
 .loginButton:disabled {
@@ -162,11 +162,11 @@
 
 .loginButton:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 2px var(--theme-border-accent-light);
 }
 
 .loginButtonLoading {
-  background-color: rgba(37, 99, 235, 0.5);
+  background-color: var(--theme-bg-accent-light);
 }
 
 .spinnerIcon {
@@ -194,9 +194,16 @@
   }
 }
 
+.themeSelectorContainer {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+  padding: 16px 0;
+}
+
 .loginFooter {
   text-align: center;
   margin-top: 32px;
   font-size: 14px;
-  color: rgb(156, 163, 175);
+  color: var(--theme-text-light-dark);
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Image } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ImageThumbnailProps {
   src: string;
@@ -10,7 +10,12 @@ interface ImageThumbnailProps {
   maxHeight?: number;
 }
 
-export function ImageThumbnail({ src, alt, maxWidth = 400, maxHeight = 400 }: ImageThumbnailProps) {
+export function ImageThumbnail({
+  src,
+  alt,
+  maxWidth = 400,
+  maxHeight = 400,
+}: ImageThumbnailProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -24,11 +29,13 @@ export function ImageThumbnail({ src, alt, maxWidth = 400, maxHeight = 400 }: Im
     // Use the preview endpoint directly as image source
     const fetchThumbnailUrl = async () => {
       try {
-        const previewUrl = `/api/s3/preview?path=${encodeURIComponent(src)}&mw=${maxWidth}&mh=${maxHeight}`;
-        
+        const previewUrl = `/api/s3/preview?path=${encodeURIComponent(
+          src
+        )}&mw=${maxWidth}&mh=${maxHeight}`;
+
         // Test if the preview URL loads
-        const testImg = document.createElement('img');
-        
+        const testImg = document.createElement("img");
+
         const handleLoad = () => {
           setImageUrl(previewUrl);
           setIsLoading(false);
@@ -39,17 +46,17 @@ export function ImageThumbnail({ src, alt, maxWidth = 400, maxHeight = 400 }: Im
           setIsLoading(false);
         };
 
-        testImg.addEventListener('load', handleLoad);
-        testImg.addEventListener('error', handleError);
-        
+        testImg.addEventListener("load", handleLoad);
+        testImg.addEventListener("error", handleError);
+
         testImg.src = previewUrl;
 
         return () => {
-          testImg.removeEventListener('load', handleLoad);
-          testImg.removeEventListener('error', handleError);
+          testImg.removeEventListener("load", handleLoad);
+          testImg.removeEventListener("error", handleError);
         };
       } catch (error) {
-        console.error('Error loading thumbnail:', error);
+        console.error("Error loading thumbnail:", error);
         setHasError(true);
         setIsLoading(false);
       }
@@ -61,42 +68,50 @@ export function ImageThumbnail({ src, alt, maxWidth = 400, maxHeight = 400 }: Im
   return (
     <>
       {hasError ? (
-        <div style={{ 
-          width: "100%", 
-          height: "100%", 
-          background: "#f3f4f6", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center",
-          flexDirection: "column",
-          gap: "0.5rem"
-        }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            background: "#f3f4f6",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
+        >
           <Image size={24} color="#9ca3af" />
-          <div style={{ fontSize: "0.875rem", color: "#9ca3af" }}>Preview unavailable</div>
+          <div style={{ fontSize: "0.875rem", color: "#9ca3af" }}>
+            Preview unavailable
+          </div>
         </div>
       ) : isLoading ? (
-        <div style={{ 
-          width: "100%", 
-          height: "100%", 
-          background: "#f3f4f6", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center",
-          flexDirection: "column",
-          gap: "0.5rem"
-        }}>
-          <div style={{ fontSize: "0.875rem", color: "#9ca3af" }}>Loading preview...</div>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            background: "#f3f4f6",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
+        >
+          <div style={{ fontSize: "0.875rem", color: "#9ca3af" }}>
+            Loading preview...
+          </div>
         </div>
       ) : (
-        <img 
-          src={imageUrl || ''} 
-          alt={alt}
-          style={{ 
-            width: "100%", 
-            height: "100%", 
+        <img
+          src={imageUrl || ""}
+          alt={alt || "Image thumbnail"}
+          style={{
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
-            display: "block"
-          }} 
+            display: "block",
+          }}
         />
       )}
     </>

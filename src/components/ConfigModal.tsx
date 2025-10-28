@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import styles from './modal.module.css';
-import configStyles from './configModal.module.css';
+import React, { useState } from "react";
+import configStyles from "./configModal.module.css";
+import styles from "./modal.module.css";
 
 interface ConfigModalProps {
   isOpen: boolean;
@@ -11,7 +11,12 @@ interface ConfigModalProps {
   initialBucket?: string;
 }
 
-export function ConfigModal({ isOpen, onClose, onSave, initialBucket = '' }: ConfigModalProps) {
+export function ConfigModal({
+  isOpen,
+  onClose,
+  onSave,
+  initialBucket = "",
+}: ConfigModalProps) {
   const [bucket, setBucket] = useState(initialBucket);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,7 +33,7 @@ export function ConfigModal({ isOpen, onClose, onSave, initialBucket = '' }: Con
       <div className={styles.modal}>
         <div className={configStyles.modalContent}>
           <h2 className={configStyles.title}>Configure S3 Bucket</h2>
-          
+
           <form onSubmit={handleSubmit}>
             <div className={configStyles.formField}>
               <label htmlFor="bucket" className={configStyles.label}>
@@ -46,7 +51,9 @@ export function ConfigModal({ isOpen, onClose, onSave, initialBucket = '' }: Con
             </div>
 
             <div className={configStyles.infoBox}>
-              <h3 className={configStyles.infoTitle}>Environment Variables Required:</h3>
+              <h3 className={configStyles.infoTitle}>
+                Environment Variables Required:
+              </h3>
               <div className={configStyles.infoList}>
                 <div>AWS_ACCESS_KEY_ID</div>
                 <div>AWS_SECRET_ACCESS_KEY</div>
@@ -62,10 +69,7 @@ export function ConfigModal({ isOpen, onClose, onSave, initialBucket = '' }: Con
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                className={styles.buttonSave}
-              >
+              <button type="submit" className={styles.buttonSave}>
                 Save Configuration
               </button>
             </div>

@@ -1,5 +1,4 @@
 "use client";
-
 import {
   DirectoryItem,
   FileItem,
@@ -10,7 +9,7 @@ import {
   Item,
 } from "@/lib/utils";
 import { Download, Edit3, Eye, Folder, Trash2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
 import styles from "./fileGrid.module.css";
 
@@ -158,7 +157,7 @@ export function FileGrid({
           <div className={styles.metadata}>
             <div>
               {item.isDirectory
-                ? (item as DirectoryItem).formattedSize || 'Calculating...'
+                ? (item as DirectoryItem).formattedSize || "Calculating..."
                 : formatFileSize((item as FileItem).size)}
             </div>
             <div>{formatDate(item.lastModified)}</div>

@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import styles from "./authGuard.module.css";
 
 interface AuthGuardProps {

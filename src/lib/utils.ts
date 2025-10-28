@@ -154,6 +154,10 @@ export function isAudio(filename: string): boolean {
   return audioExtensions.includes(getFileExtension(filename));
 }
 
+export function isPDF(filename: string): boolean {
+  return getFileExtension(filename) === "pdf";
+}
+
 // Check if file is a text file that can be edited
 export function isEditableText(filename: string): boolean {
   const textExtensions = [

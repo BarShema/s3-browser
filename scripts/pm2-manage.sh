@@ -22,6 +22,8 @@ fi
 
 cd "$PROJECT_DIR"
 
+npm run build
+
 case $ACTION in
     start)
         echo "Starting $APP_NAME..."

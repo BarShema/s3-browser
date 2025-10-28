@@ -1,22 +1,22 @@
 "use client";
 
 import {
-  DirectoryItem, FileItem, formatDate, formatFileSize, isImage,
-  isVideo, isPDF, Item
+  DirectoryItem,
+  FileItem,
+  formatDate,
+  formatFileSize,
+  isImage,
+  isPDF,
+  isVideo,
+  Item,
 } from "@/lib/utils";
-import {
-  Download,
-  Edit3,
-  Eye,
-  Folder,
-  Trash2
-} from "lucide-react";
-import { useState } from "react";
-import styles from './filePreview.module.css';
-import { ImageThumbnail } from './ImageThumbnail';
-import { VideoPreview } from './VideoPreview';
-import { PDFPreview } from './PDFPreview';
-import { FileIcon } from './FileIcon';
+import { Download, Edit3, Eye, Folder, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { FileIcon } from "./FileIcon";
+import styles from "./filePreview.module.css";
+import { ImageThumbnail } from "./ImageThumbnail";
+import { PDFPreview } from "./PDFPreview";
+import { VideoPreview } from "./VideoPreview";
 
 interface FilePreviewProps {
   items: Item[];
@@ -113,7 +113,9 @@ export function FilePreview({
       {items.map((item) => (
         <div
           key={item.id}
-          className={`${styles.item} ${selectedItems.includes(item.id) ? styles.selected : ''}`}
+          className={`${styles.item} ${
+            selectedItems.includes(item.id) ? styles.selected : ""
+          }`}
           onClick={() => handleItemClick(item)}
           onDoubleClick={() => handleItemDoubleClick(item)}
         >
@@ -134,19 +136,19 @@ export function FilePreview({
             {item.isDirectory ? (
               <FileIcon filename={item.name} isDirectory={true} size={64} />
             ) : isImage(item.name) ? (
-              <ImageThumbnail 
+              <ImageThumbnail
                 src={`${bucketName}/${item.key}`}
                 alt={item.name}
                 maxWidth={400}
                 maxHeight={400}
               />
             ) : isVideo(item.name) ? (
-              <VideoPreview 
+              <VideoPreview
                 src={`${bucketName}/${item.key}`}
                 className={styles.previewThumbnail}
               />
             ) : isPDF(item.name) ? (
-              <PDFPreview 
+              <PDFPreview
                 src={`${bucketName}/${item.key}`}
                 className={styles.previewThumbnail}
               />
@@ -181,7 +183,7 @@ export function FilePreview({
             <div className={styles.metadata}>
               <div>
                 {item.isDirectory
-                  ? (item as DirectoryItem).formattedSize || 'Calculating...'
+                  ? (item as DirectoryItem).formattedSize || "Calculating..."
                   : formatFileSize((item as FileItem).size)}
               </div>
               <div>{formatDate(item.lastModified)}</div>

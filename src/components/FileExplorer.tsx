@@ -8,15 +8,27 @@ import { FilePreview } from "@/components/FilePreview";
 import { FilterControls } from "@/components/FilterControls";
 import { ImagePreview } from "@/components/ImagePreview";
 import { PaginationControls } from "@/components/PaginationControls";
+import { PDFPreview } from "@/components/PDFPreview";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
-import { PDFPreview } from "@/components/PDFPreview";
-import { DirectoryItem, FileItem, ViewMode, isImage as isImageFile, isVideo as isVideoFile, isAudio as isAudioFile, getFileExtension, isEditableText, isPDF } from "@/lib/utils";
-import { Download, Edit3, Trash2, FileText } from "lucide-react";
+import { appConfig } from "@/config/app";
+import {
+  DirectoryItem,
+  FileItem,
+  ViewMode,
+  getFileExtension,
+  isAudio as isAudioFile,
+  isEditableText,
+  isImage as isImageFile,
+  isPDF,
+  isVideo as isVideoFile,
+} from "@/lib/utils";
+import { Download, Edit3, FileText, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import styles from "./fileExplorer.module.css";
+import { VideoPreview } from "./VideoPreview";
 
 interface FileExplorerProps {
   bucketName: string;
@@ -47,11 +59,15 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingFile, setEditingFile] = useState<FileItem | null>(null);
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
-  const [directorySizes, setDirectorySizes] = useState<{ [key: string]: { size: number; objects: number; formattedSize: string } }>({});
+  const [directorySizes, setDirectorySizes] = useState<{
+    [key: string]: { size: number; objects: number; formattedSize: string };
+  }>({});
 
   // Pagination and filtering state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(
+    appConfig.defaultItemsPerPage
+  );
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [nameFilter, setNameFilter] = useState("");
@@ -79,12 +95,16 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   // Function to fetch directory sizes asynchronously
   const fetchDirectorySizes = useCallback(async () => {
     try {
-      const response = await fetch(`/api/s3/directory-sizes?bucket=${encodeURIComponent(bucketName)}&prefix=${encodeURIComponent(currentPath)}`);
-      
+      const response = await fetch(
+        `/api/s3/directory-sizes?bucket=${encodeURIComponent(
+          bucketName
+        )}&prefix=${encodeURIComponent(currentPath)}`
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch directory sizes");
       }
-      
+
       const data = await response.json();
       setDirectorySizes(data.directorySizes || {});
     } catch (error) {
@@ -136,15 +156,21 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
 
         if (typeFilter === "images") {
           // Show only image files
-          filteredFiles = fileItems.filter((f: FileItem) => isImageFile(f.name));
+          filteredFiles = fileItems.filter((f: FileItem) =>
+            isImageFile(f.name)
+          );
           filteredDirectories = [];
         } else if (typeFilter === "videos") {
           // Show only video files
-          filteredFiles = fileItems.filter((f: FileItem) => isVideoFile(f.name));
+          filteredFiles = fileItems.filter((f: FileItem) =>
+            isVideoFile(f.name)
+          );
           filteredDirectories = [];
         } else if (typeFilter === "sound") {
           // Show only audio files
-          filteredFiles = fileItems.filter((f: FileItem) => isAudioFile(f.name));
+          filteredFiles = fileItems.filter((f: FileItem) =>
+            isAudioFile(f.name)
+          );
           filteredDirectories = [];
         } else if (typeFilter === "docs") {
           // Show only document files (including text files)
@@ -188,7 +214,9 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
             "kt",
             "sql",
           ];
-          filteredFiles = fileItems.filter((f: FileItem) => docExts.includes(getFileExtension(f.name)));
+          filteredFiles = fileItems.filter((f: FileItem) =>
+            docExts.includes(getFileExtension(f.name))
+          );
           filteredDirectories = [];
         }
 
@@ -226,7 +254,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   }, [directories, fetchDirectorySizes]);
 
   // Merge directory sizes with directory information
-  const directoriesWithSizes = directories.map(dir => {
+  const directoriesWithSizes = directories.map((dir) => {
     const sizeInfo = directorySizes[dir.key];
     return {
       ...dir,
@@ -353,36 +381,42 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const handleDirectoryDownload = async (directory: DirectoryItem) => {
     try {
       toast.loading("Creating ZIP file...", { id: "zip-creation" });
-      
+
       const response = await fetch(
-        `/api/s3/download-directory?path=${encodeURIComponent(`${bucketName}/${directory.key}`)}`
+        `/api/s3/download-directory?path=${encodeURIComponent(
+          `${bucketName}/${directory.key}`
+        )}`
       );
-      
+
       if (!response.ok) {
         throw new Error("Failed to process directory");
       }
 
       // Check if response is JSON (large directory) or ZIP (small directory)
       const contentType = response.headers.get("content-type");
-      
+
       if (contentType?.includes("application/json")) {
         // Large directory - show detailed message
         const data = await response.json();
-        
-        const message = data.totalSizeMB 
-          ? `Directory too large: ${data.fileCount} files (${data.totalSizeMB} MB). ${data.suggestions?.[0] || 'Please download individual files.'}`
+
+        const message = data.totalSizeMB
+          ? `Directory too large: ${data.fileCount} files (${
+              data.totalSizeMB
+            } MB). ${
+              data.suggestions?.[0] || "Please download individual files."
+            }`
           : `Directory contains ${data.fileCount} files. Please download individual files or contact administrator for bulk download.`;
-          
-        toast.error(message, { 
+
+        toast.error(message, {
           id: "zip-creation",
-          duration: 10000 
+          duration: 10000,
         });
         return;
       }
 
       // Small directory - download ZIP
       const zipBlob = await response.blob();
-      
+
       // Create download link
       const url = window.URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
@@ -391,12 +425,13 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the URL object
       window.URL.revokeObjectURL(url);
 
-      toast.success(`${directory.name}.zip downloaded successfully`, { id: "zip-creation" });
-
+      toast.success(`${directory.name}.zip downloaded successfully`, {
+        id: "zip-creation",
+      });
     } catch (error) {
       console.error("Error downloading directory:", error);
       toast.error("Failed to download directory", { id: "zip-creation" });
@@ -514,51 +549,51 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
           </div>
         ) : (
           <>
-                   {viewMode === "list" && (
-                     <FileList
-                       items={allItems}
-                       selectedItems={selectedItems}
-                       onSelectionChange={setSelectedItems}
-                       onDirectoryClick={handleDirectoryClick}
-                       onFileClick={handleFileClick}
-                       onFileDoubleClick={handleFileDoubleClick}
-                       onDownload={handleDownload}
-                       onDirectoryDownload={handleDirectoryDownload}
-                       onDelete={handleDelete}
-                       onRename={handleRename}
-                     />
-                   )}
+            {viewMode === "list" && (
+              <FileList
+                items={allItems}
+                selectedItems={selectedItems}
+                onSelectionChange={setSelectedItems}
+                onDirectoryClick={handleDirectoryClick}
+                onFileClick={handleFileClick}
+                onFileDoubleClick={handleFileDoubleClick}
+                onDownload={handleDownload}
+                onDirectoryDownload={handleDirectoryDownload}
+                onDelete={handleDelete}
+                onRename={handleRename}
+              />
+            )}
 
-                   {viewMode === "grid" && (
-                     <FileGrid
-                       items={allItems}
-                       selectedItems={selectedItems}
-                       onSelectionChange={setSelectedItems}
-                       onDirectoryClick={handleDirectoryClick}
-                       onFileClick={handleFileClick}
-                       onFileDoubleClick={handleFileDoubleClick}
-                       onDownload={handleDownload}
-                       onDirectoryDownload={handleDirectoryDownload}
-                       onDelete={handleDelete}
-                       onRename={handleRename}
-                     />
-                   )}
+            {viewMode === "grid" && (
+              <FileGrid
+                items={allItems}
+                selectedItems={selectedItems}
+                onSelectionChange={setSelectedItems}
+                onDirectoryClick={handleDirectoryClick}
+                onFileClick={handleFileClick}
+                onFileDoubleClick={handleFileDoubleClick}
+                onDownload={handleDownload}
+                onDirectoryDownload={handleDirectoryDownload}
+                onDelete={handleDelete}
+                onRename={handleRename}
+              />
+            )}
 
-                   {viewMode === "preview" && (
-                     <FilePreview
-                       items={allItems}
-                       selectedItems={selectedItems}
-                       onSelectionChange={setSelectedItems}
-                       onDirectoryClick={handleDirectoryClick}
-                       onFileClick={handleFileClick}
-                       onFileDoubleClick={handleFileDoubleClick}
-                       onDownload={handleDownload}
-                       onDirectoryDownload={handleDirectoryDownload}
-                       onDelete={handleDelete}
-                       onRename={handleRename}
-                       bucketName={bucketName}
-                     />
-                   )}
+            {viewMode === "preview" && (
+              <FilePreview
+                items={allItems}
+                selectedItems={selectedItems}
+                onSelectionChange={setSelectedItems}
+                onDirectoryClick={handleDirectoryClick}
+                onFileClick={handleFileClick}
+                onFileDoubleClick={handleFileDoubleClick}
+                onDownload={handleDownload}
+                onDirectoryDownload={handleDirectoryDownload}
+                onDelete={handleDelete}
+                onRename={handleRename}
+                bucketName={bucketName}
+              />
+            )}
           </>
         )}
       </div>

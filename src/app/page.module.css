@@ -9,6 +9,84 @@
   padding: 32px 16px;
 }
 
+/* Mobile and Tablet Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px 8px;
+  }
+  
+  .header {
+    margin-bottom: 16px;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+  }
+  
+  .headerRight {
+    width: 100%;
+  }
+  
+  .driveCard {
+    padding: 16px;
+  }
+  
+  .driveTitle {
+    font-size: 18px;
+  }
+  
+  .driveDescription {
+    font-size: 13px;
+  }
+  
+  .driveStats {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px 6px;
+  }
+  
+  .header {
+    margin-bottom: 12px;
+  }
+  
+  .title {
+    font-size: 20px;
+  }
+  
+  .subtitle {
+    font-size: 13px;
+  }
+  
+  .driveCard {
+    padding: 12px;
+  }
+  
+  .driveTitle {
+    font-size: 16px;
+  }
+  
+  .driveDescription {
+    font-size: 12px;
+  }
+  
+  .driveStats {
+    font-size: 11px;
+  }
+}
+
 .header {
   margin-bottom: 32px;
 }

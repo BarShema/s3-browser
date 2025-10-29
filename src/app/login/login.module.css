@@ -12,6 +12,117 @@
   max-width: 320px;
 }
 
+/* Mobile and Tablet Responsive */
+@media (max-width: 768px) {
+  .loginPage {
+    padding: 12px;
+  }
+  
+  .loginContainer {
+    max-width: 100%;
+  }
+  
+  .loginHeader {
+    margin-bottom: 32px;
+  }
+  
+  .iconContainer {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+  }
+  
+  .loginTitle {
+    font-size: 24px;
+  }
+  
+  .loginSubtitle {
+    font-size: 14px;
+  }
+  
+  .formGroup {
+    margin-bottom: 16px;
+  }
+  
+  .formLabel {
+    font-size: 13px;
+  }
+  
+  .formInput {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .loginButton {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .themeSelectorContainer {
+    margin: 20px 0;
+    padding: 12px 0;
+  }
+  
+  .loginFooter {
+    margin-top: 24px;
+  }
+  
+  .loginFooter p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginPage {
+    padding: 8px;
+  }
+  
+  .loginHeader {
+    margin-bottom: 24px;
+  }
+  
+  .iconContainer {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 16px;
+  }
+  
+  .loginTitle {
+    font-size: 20px;
+  }
+  
+  .loginSubtitle {
+    font-size: 13px;
+  }
+  
+  .formGroup {
+    margin-bottom: 14px;
+  }
+  
+  .formInput {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .loginButton {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  .themeSelectorContainer {
+    margin: 16px 0;
+    padding: 8px 0;
+  }
+  
+  .loginFooter {
+    margin-top: 20px;
+  }
+  
+  .loginFooter p {
+    font-size: 11px;
+  }
+}
+
 .loginHeader {
   text-align: center;
   margin-bottom: 40px;

@@ -2,6 +2,43 @@
   box-shadow: var(--theme-shadow-sm);
   display: flex;
   gap: 10px;
+  height: 100%;
+}
+
+/* Mobile and Tablet Responsive */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .treeSidebar {
+    width: 100%;
+    min-width: unset;
+    max-height: 300px;
+    order: 2;
+  }
+  
+  .mainContent {
+    order: 1;
+    min-height: 0;
+  }
+  
+  .content {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    gap: 6px;
+    padding: 6px;
+  }
+  
+  .content {
+    padding: 8px;
+  }
 }
 
 .treeSidebar {

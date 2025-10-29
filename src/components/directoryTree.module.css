@@ -5,6 +5,90 @@
     flex-direction: column;
 }
 
+/* Mobile and Tablet Responsive */
+@media (max-width: 768px) {
+    .container {
+        max-height: 300px;
+    }
+    
+    .header {
+        padding: 8px 12px;
+    }
+    
+    .title {
+        font-size: 13px;
+    }
+    
+    .refreshButton {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    
+    .tree {
+        padding: 6px 0;
+    }
+    
+    .nodeContent {
+        min-height: 24px;
+    }
+    
+    .expandButton {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .folderButton {
+        padding: 2px 6px;
+        gap: 4px;
+    }
+    
+    .folderIcon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .folderName {
+        font-size: 12px;
+    }
+    
+    .emptyDirectory {
+        padding: 6px 0 4px 20px;
+        margin-left: 12px;
+    }
+    
+    .emptyText {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 6px 8px;
+    }
+    
+    .title {
+        font-size: 12px;
+    }
+    
+    .tree {
+        padding: 4px 0;
+    }
+    
+    .nodeContent {
+        min-height: 20px;
+    }
+    
+    .folderButton {
+        padding: 1px 4px;
+        gap: 3px;
+    }
+    
+    .folderName {
+        font-size: 11px;
+    }
+}
+
 .header {
     display: flex;
     align-items: center;

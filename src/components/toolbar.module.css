@@ -7,6 +7,58 @@
   background: var(--theme-bg-secondary);
 }
 
+/* Mobile and Tablet Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .buttonGroup {
+    gap: 6px;
+  }
+  
+  .viewButton {
+    padding: 6px;
+  }
+  
+  .actionsGroup {
+    gap: 6px;
+  }
+  
+  .actionButton {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .buttonGroup {
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .viewButton {
+    padding: 4px;
+  }
+  
+  .actionsGroup {
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .actionButton {
+    padding: 4px;
+  }
+}
+
 .buttonGroup {
   display: flex;
   align-items: center;

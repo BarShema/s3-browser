@@ -1,0 +1,350 @@
+.videoContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--theme-bg-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.playPauseAnimation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 100;
+  color: rgba(255, 255, 255, 0.9);
+  animation: playPulse 0.6s ease-out forwards;
+}
+
+@keyframes playPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    transparent 100%
+  );
+  padding: 12px 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.controls.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.progressBar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: visible;
+}
+
+.progressTrack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.progressFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--theme-accent-primary);
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.progressHandle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  background: var(--theme-accent-primary);
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.progressBar:hover .progressHandle {
+  opacity: 1;
+}
+
+.previewThumbnail {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  transform: translateX(-50%);
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.95);
+  border-radius: 8px;
+  padding: 6px;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 140px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.previewThumbnail img {
+  width: 140px;
+  height: 78px;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+  background: #000;
+}
+
+.previewTime {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+/* Preview thumbnail arrow */
+.previewThumbnail::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(0, 0, 0, 0.9);
+}
+
+.controlsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.controlsLeft,
+.controlsRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controlButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.controlButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.controlButton:active {
+  transform: scale(0.95);
+}
+
+.volumeControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.volumeSlider {
+  position: relative;
+  width: 80px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.volumeControl:hover .volumeSlider {
+  opacity: 1;
+}
+
+.volumeTrack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.volumeFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.timeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: monospace;
+  margin-left: 8px;
+}
+
+.timeSeparator {
+  opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .controls {
+    padding: 10px 12px;
+  }
+
+  .controlButton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .timeDisplay {
+    font-size: 12px;
+    margin-left: 4px;
+  }
+
+  .volumeSlider {
+    width: 60px;
+  }
+
+  .controlsLeft,
+  .controlsRight {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    padding: 8px 10px;
+  }
+
+  .controlButton {
+    width: 28px;
+    height: 28px;
+  }
+
+  .timeDisplay {
+    font-size: 11px;
+    margin-left: 2px;
+  }
+
+  .volumeSlider {
+    width: 50px;
+  }
+
+  .progressBar {
+    margin-bottom: 8px;
+  }
+}
+
+/* Fullscreen styles */
+.videoContainer:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+}
+
+.videoContainer:fullscreen .video {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Theme-aware adjustments */
+.theme-night .videoContainer {
+  background: var(--theme-bg-primary);
+}
+
+.theme-night .controls {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.7) 50%,
+    transparent 100%
+  );
+}
+

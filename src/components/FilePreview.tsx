@@ -226,6 +226,7 @@ export function FilePreview({
                 <VideoPreview
                   src={`${bucketName}/${item.key}`}
                   className={styles.previewThumbnail}
+                  isThumbnail={true}
                 />
               ) : isPDF(item.name) ? (
                 <PDFPreview

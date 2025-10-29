@@ -12,19 +12,19 @@
     gap: 8px;
     padding: 8px;
   }
-  
+
   .treeSidebar {
     width: 100%;
     min-width: unset;
     max-height: 300px;
     order: 2;
   }
-  
+
   .mainContent {
     order: 1;
     min-height: 0;
   }
-  
+
   .content {
     padding: 12px;
   }
@@ -35,7 +35,7 @@
     gap: 6px;
     padding: 6px;
   }
-  
+
   .content {
     padding: 8px;
   }

@@ -1,17 +1,17 @@
 "use client";
 
-import { 
-  File, 
-  Folder, 
-  FileText, 
-  FileSpreadsheet, 
-  Archive, 
+import {
+  File,
+  Folder,
+  FileText,
+  FileSpreadsheet,
+  Archive,
   Cpu,
   FileImage,
   FileVideo,
   FileAudio,
   FileCode,
-  Presentation
+  Presentation,
 } from "lucide-react";
 import { getFileIcon, getFileExtension } from "@/lib/utils";
 import styles from "./fileIcon.module.css";
@@ -24,22 +24,22 @@ interface FileIconProps {
   showExtension?: boolean;
 }
 
-export function FileIcon({ 
-  filename, 
-  isDirectory = false, 
-  size = 20, 
-  className, 
-  showExtension = true 
+export function FileIcon({
+  filename,
+  isDirectory = false,
+  size = 20,
+  className,
+  showExtension = true,
 }: FileIconProps) {
   const extension = getFileExtension(filename);
-  
+
   if (isDirectory) {
     return (
-      <div 
-        className={`${styles.iconContainer} ${className || ''}`}
-        data-size={size <= 24 ? 'small' : size >= 48 ? 'large' : 'medium'}
+      <div
+        className={`${styles.iconContainer} ${className || ""}`}
+        data-size={size <= 24 ? "small" : size >= 48 ? "large" : "medium"}
       >
-        <Folder size={size} style={{ color: "#3b82f6" }} />
+        <Folder size={size} style={{ color: "var(--theme-accent-primary)" }} />
       </div>
     );
   }
@@ -72,14 +72,16 @@ export function FileIcon({
   };
 
   return (
-    <div 
-      className={`${styles.iconContainer} ${className || ''}`}
-      data-size={size <= 24 ? 'small' : size >= 48 ? 'large' : 'medium'}
+    <div
+      className={`${styles.iconContainer} ${className || ""}`}
+      data-size={size <= 24 ? "small" : size >= 48 ? "large" : "medium"}
     >
       {renderIcon()}
       {showExtension && extension && (
         <div className={styles.extensionBox}>
-          <span className={styles.extensionText}>{extension.toUpperCase()}</span>
+          <span className={styles.extensionText}>
+            {extension.toUpperCase()}
+          </span>
         </div>
       )}
     </div>

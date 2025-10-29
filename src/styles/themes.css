@@ -10,7 +10,7 @@
   --theme-text-tertiary: #9ca3af;
   --theme-border-primary: #e5e7eb;
   --theme-border-secondary: #d1d5db;
-  --theme-accent-primary: #2563eb;
+  --theme-accent-primary: #ffbe67eb;
   --theme-accent-secondary: #1d4ed8;
   --theme-accent-hover: #1e40af;
   --theme-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -184,6 +184,25 @@ body {
 .btn-primary:hover:not(:disabled) {
   background: linear-gradient(to right, var(--theme-accent-hover), var(--theme-accent-secondary));
   box-shadow: var(--theme-shadow-xl);
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--theme-border-primary);
+  border-radius: 4px;
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 12px;
+}
+
+.btn-refresh:hover {
+  color: var(--theme-accent-primary);
 }
 
 .btn-primary:disabled {

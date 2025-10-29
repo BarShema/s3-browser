@@ -1,8 +1,16 @@
 "use client";
 
+import { clz } from "@/lib/clz";
+import {
+  FileItem,
+  getFileExtension,
+  isEditableText,
+  isImage,
+  isPDF,
+  isVideo,
+} from "@/lib/utils";
+import { Download, Edit3, FileText, Trash2, X, Maximize2, Minimize2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { X, Download, Edit3, Trash2, FileText } from "lucide-react";
-import { FileItem, isImage, isVideo, isPDF, isEditableText, getFileExtension } from "@/lib/utils";
 import { ImagePreview } from "./ImagePreview";
 import { VideoPreview } from "./VideoPreview";
 import styles from "./sidePreviewPanel.module.css";
@@ -31,30 +39,42 @@ export function SidePreviewPanel({
   const [textContent, setTextContent] = useState<string>("");
   const [isLoadingText, setIsLoadingText] = useState(false);
   const [textError, setTextError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (file && isEditableText(file.name)) {
       setIsLoadingText(true);
       setTextError(null);
-      
-      fetch(`/api/s3/content?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`)
-        .then(response => {
+
+      fetch(
+        `/api/s3/content?path=${encodeURIComponent(
+          `${bucketName}/${file.key}`
+        )}`
+      )
+        .then((response) => {
           if (!response.ok) {
-            throw new Error('Failed to fetch file content');
+            throw new Error("Failed to fetch file content");
           }
           return response.text();
         })
-        .then(content => {
+        .then((content) => {
           setTextContent(content);
           setIsLoadingText(false);
         })
-        .catch(error => {
-          console.error('Error loading text content:', error);
+        .catch((error) => {
+          console.error("Error loading text content:", error);
           setTextError(error.message);
           setIsLoadingText(false);
         });
     }
   }, [file, bucketName]);
+
+  // Reset expanded state when panel closes or file changes
+  useEffect(() => {
+    if (!isOpen || !file) {
+      setIsExpanded(false);
+    }
+  }, [isOpen, file]);
 
   if (!isOpen || !file) {
     return null;
@@ -63,15 +83,19 @@ export function SidePreviewPanel({
   const extension = getFileExtension(file.name);
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={`${styles.overlay} ${isExpanded ? styles.expanded : ""}`} onClick={onClose}>
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.fileInfo}>
             <h3 className={styles.fileName}>{file.name}</h3>
             <div className={styles.fileMeta}>
-              <span className={styles.fileSize}>{(file.size / 1024).toFixed(1)} KB</span>
-              <span className={styles.fileExtension}>{extension.toUpperCase()}</span>
+              <span className={styles.fileSize}>
+                {(file.size / 1024).toFixed(1)} KB
+              </span>
+              <span className={styles.fileExtension}>
+                {extension.toUpperCase()}
+              </span>
             </div>
           </div>
           <div className={styles.actions}>
@@ -106,8 +130,18 @@ export function SidePreviewPanel({
               <Trash2 size={16} />
             </button>
             <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+              className={styles.actionButton}
+              title={isExpanded ? "Minimize" : "Expand"}
+            >
+              {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+            <button
               onClick={onClose}
-              className={styles.closeButton}
+              className={clz(styles.closeButton, styles.actionButton)}
               title="Close"
             >
               <X size={16} />
@@ -129,11 +163,14 @@ export function SidePreviewPanel({
             <VideoPreview
               src={`${bucketName}/${file.key}`}
               className={styles.previewContent}
+              autoPlay={true}
             />
           ) : isPDF(file.name) ? (
             <div className={styles.pdfContainer}>
               <iframe
-                src={`/api/s3/download?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`}
+                src={`/api/s3/download?path=${encodeURIComponent(
+                  `${bucketName}/${file.key}`
+                )}`}
                 className={styles.pdfViewer}
                 title={file.name}
               />
@@ -143,7 +180,9 @@ export function SidePreviewPanel({
               {isLoadingText ? (
                 <div className={styles.loading}>Loading content...</div>
               ) : textError ? (
-                <div className={styles.error}>Error loading content: {textError}</div>
+                <div className={styles.error}>
+                  Error loading content: {textError}
+                </div>
               ) : (
                 <pre className={styles.textContent}>{textContent}</pre>
               )}

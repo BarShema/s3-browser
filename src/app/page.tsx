@@ -3,10 +3,12 @@
 import { AuthGuard } from "@/components/AuthGuard";
 import { DriveCard } from "@/components/DriveCard";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { SettingsModal } from "@/components/SettingsModal";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import styles from "./home.module.css";
 
@@ -14,6 +16,7 @@ export default function Home() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const drives = driveConfig.drives;
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleDriveSelect = (drive: string) => {
     router.push(`/${drive}`);
@@ -52,6 +55,13 @@ export default function Home() {
                   )}
                 </div>
                 <ThemeSelector />
+                <button
+                  onClick={() => setIsSettingsOpen(true)}
+                  className={styles.settingsButton}
+                  title="Settings"
+                >
+                  <Settings size={16} />
+                </button>
                 <button onClick={handleLogout} className={styles.logoutButton}>
                   <LogOut size={14} />
                   <span>Logout</span>
@@ -74,6 +84,10 @@ export default function Home() {
           </div>
 
           <Toaster position="top-right" />
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+          />
         </div>
       </main>
     </AuthGuard>

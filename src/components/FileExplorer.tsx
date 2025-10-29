@@ -22,6 +22,8 @@ import {
   isVideo as isVideoFile,
 } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
+import { DeleteProtectionModal } from "./DeleteProtectionModal";
+import { isDeleteProtectionEnabled } from "@/lib/preferences";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -29,6 +31,7 @@ import styles from "./fileExplorer.module.css";
 
 interface FileExplorerProps {
   bucketName: string;
+  onOpenSettings?: () => void;
 }
 
 interface S3File {
@@ -44,7 +47,10 @@ interface S3Directory {
   lastModified: string;
 }
 
-export function FileExplorer({ bucketName }: FileExplorerProps) {
+export function FileExplorer({
+  bucketName,
+  onOpenSettings,
+}: FileExplorerProps) {
   const params = useParams();
   const router = useRouter();
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -63,6 +69,8 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const [editingFile, setEditingFile] = useState<FileItem | null>(null);
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isDeleteProtectionModalOpen, setIsDeleteProtectionModalOpen] =
+    useState(false);
   const [directorySizes, setDirectorySizes] = useState<{
     [key: string]: {
       size: number;
@@ -610,11 +618,8 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     }
   };
 
-  const handleDelete = async (file: FileItem) => {
-    if (!confirm(`Are you sure you want to delete "${file.name}"?`)) {
-      return;
-    }
-
+  // Internal delete function without confirmation
+  const deleteFile = async (file: FileItem): Promise<boolean> => {
     try {
       const response = await fetch(
         `/api/s3?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`,
@@ -627,10 +632,34 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
         throw new Error("Failed to delete file");
       }
 
-      toast.success("File deleted successfully");
-      loadFiles(currentPath);
+      return true;
     } catch (error) {
       console.error("Error deleting file:", error);
+      return false;
+    }
+  };
+
+  const handleDelete = async (file: FileItem) => {
+    // Check delete protection
+    if (isDeleteProtectionEnabled()) {
+      setIsDeleteProtectionModalOpen(true);
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete "${file.name}"?`)) {
+      return;
+    }
+
+    const success = await deleteFile(file);
+    if (success) {
+      toast.success("File deleted successfully");
+      // Close preview panel if the deleted file was being previewed
+      if (previewFile && previewFile.key === file.key) {
+        setIsPreviewOpen(false);
+        setPreviewFile(null);
+      }
+      loadFiles(currentPath);
+    } else {
       toast.error("Failed to delete file");
     }
   };
@@ -781,14 +810,43 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
             onViewModeChange={handleViewModeChange}
             onUpload={() => setIsUploadModalOpen(true)}
             selectedCount={selectedItems.length}
-            onDelete={() => {
+            onDelete={async () => {
+              // Check delete protection
+              if (isDeleteProtectionEnabled()) {
+                setIsDeleteProtectionModalOpen(true);
+                return;
+              }
+
               const selectedFiles = files.filter((f) =>
                 selectedItems.includes(f.id)
               );
-              selectedFiles.forEach(handleDelete);
+
+              // Confirm deletion for multiple files
+              if (
+                !confirm(
+                  `Are you sure you want to delete ${selectedFiles.length} file(s)?`
+                )
+              ) {
+                return;
+              }
+
+              // Delete all files and then refresh once
+              const deletePromises = selectedFiles.map((file) =>
+                deleteFile(file)
+              );
+              const results = await Promise.all(deletePromises);
+
+              const successCount = results.filter((r) => r === true).length;
+              if (successCount > 0) {
+                toast.success(`${successCount} file(s) deleted successfully`);
+                loadFiles(currentPath);
+              } else {
+                toast.error("Failed to delete files");
+              }
             }}
             isTreeVisible={isTreeVisible}
             onTreeToggle={handleTreeToggle}
+            onRefresh={() => loadFiles(currentPath)}
           />
 
           <FilterControls
@@ -910,6 +968,16 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
         onRename={handleRename}
         onDelete={handleDelete}
         onEdit={handleEdit}
+      />
+      <DeleteProtectionModal
+        isOpen={isDeleteProtectionModalOpen}
+        onClose={() => setIsDeleteProtectionModalOpen(false)}
+        onGoToSettings={() => {
+          setIsDeleteProtectionModalOpen(false);
+          if (onOpenSettings) {
+            onOpenSettings();
+          }
+        }}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { Upload, X, File, Folder } from 'lucide-react';
 import toast from 'react-hot-toast';
 import styles from './modal.module.css';
 import uploadStyles from './uploadModal.module.css';
+import { clz } from '@/lib/clz';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -117,7 +118,7 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
           <button
             onClick={handleClose}
             disabled={isUploading}
-            className={styles.closeButton}
+            className={clz(styles.closeButton, styles.actionButton)}
           >
             <X size={24} />
           </button>

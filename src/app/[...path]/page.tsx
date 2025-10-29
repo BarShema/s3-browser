@@ -4,17 +4,20 @@ import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
 import { FileExplorer } from "@/components/FileExplorer";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { SettingsModal } from "@/components/SettingsModal";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function Home() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const params = useParams();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Get bucket name from URL path
   const bucketName = Array.isArray(params.path)
@@ -71,6 +74,13 @@ export default function Home() {
                   )}
                 </div>
                 <ThemeSelector />
+                <button
+                  onClick={() => setIsSettingsOpen(true)}
+                  className={styles.settingsButton}
+                  title="Settings"
+                >
+                  <Settings size={16} />
+                </button>
                 <button onClick={handleLogout} className={styles.logoutButton}>
                   <LogOut size={14} />
                   <span>Logout</span>
@@ -80,7 +90,10 @@ export default function Home() {
           </div>
 
           {bucketName ? (
-            <FileExplorer bucketName={bucketName} />
+            <FileExplorer
+              bucketName={bucketName}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+            />
           ) : (
             <div className={styles.bucketSelectContainer}>
               <h2 className={styles.bucketSelectTitle}>Select an S3 Bucket</h2>
@@ -100,6 +113,10 @@ export default function Home() {
           )}
 
           <Toaster position="top-right" />
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+          />
         </div>
       </main>
     </AuthGuard>

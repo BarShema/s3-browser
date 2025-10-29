@@ -92,6 +92,27 @@
   color: var(--theme-text-secondary);
 }
 
+.settingsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-secondary);
+  border: 1px solid var(--theme-border-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settingsButton:hover {
+  background: var(--theme-bg-tertiary);
+  color: var(--theme-text-primary);
+  border-color: var(--theme-border-primary);
+}
+
 .logoutButton {
   margin-left: 16px;
   padding: 4px 12px;

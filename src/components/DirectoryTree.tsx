@@ -363,12 +363,12 @@ export function DirectoryTree({
       <div className={styles.header}>
         <h3 className={styles.title}>Directory Tree</h3>
         <button
-          className={styles.refreshButton}
+          className={styles.viewButton}
           onClick={fetchDirectoryStructure}
           disabled={isLoading}
           title="Refresh directory structure"
         >
-          {isLoading ? "⟳" : "↻"}
+          ↻
         </button>
       </div>
 

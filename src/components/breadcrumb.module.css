@@ -5,6 +5,8 @@
   padding: 16px;
   border-bottom: 1px solid var(--theme-border-primary);
   background: var(--theme-border-primary);
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .breadcrum {
@@ -14,6 +16,39 @@
   padding: 0;
   font-size: 14px;
   cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* Responsive when tree + preview panel are open (approx < 1400px) */
+@media (max-width: 1400px) {
+  .container {
+    padding: 12px;
+    gap: 6px;
+  }
+
+  .breadcrum {
+    font-size: 12px;
+    max-width: 120px;
+  }
+
+  .separator {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+    gap: 4px;
+  }
+
+  .breadcrum {
+    font-size: 11px;
+    max-width: 80px;
+  }
 }
 
 button.breadcrum {

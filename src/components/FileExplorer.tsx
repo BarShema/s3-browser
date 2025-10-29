@@ -26,7 +26,8 @@ import { Loader2, X } from "lucide-react";
 import { DeleteProtectionModal } from "./DeleteProtectionModal";
 import { isDeleteProtectionEnabled } from "@/lib/preferences";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useResize } from "@/lib/useResize";
 import toast from "react-hot-toast";
 import styles from "./fileExplorer.module.css";
 
@@ -128,6 +129,14 @@ export function FileExplorer({
       return saved === "true";
     }
     return false;
+  });
+
+  // Resizable tree sidebar
+  const treeResize = useResize({
+    initialWidth: 280,
+    minWidth: 200,
+    maxWidth: 600,
+    storageKey: "idits-drive-tree-width",
   });
 
   // Extract bucket and path from URL
@@ -801,14 +810,23 @@ export function FileExplorer({
     <div className={styles.container}>
       {/* Directory Tree Sidebar */}
       {isTreeVisible && (
-        <div className={styles.treeSidebar}>
-          <DirectoryTree
-            bucketName={bucketName}
-            currentPath={currentPath}
-            onPathClick={handleBreadcrumbClick}
-            isVisible={isTreeVisible}
+        <>
+          <div 
+            className={styles.treeSidebar}
+            style={{ width: `${treeResize.width}px`, minWidth: `${treeResize.width}px` }}
+          >
+            <DirectoryTree
+              bucketName={bucketName}
+              currentPath={currentPath}
+              onPathClick={handleBreadcrumbClick}
+              isVisible={isTreeVisible}
+            />
+          </div>
+          <div
+            className={styles.treeResizer}
+            onMouseDown={treeResize.handleMouseDown}
           />
-        </div>
+        </>
       )}
 
       <div

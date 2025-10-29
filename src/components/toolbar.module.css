@@ -5,6 +5,39 @@
   padding: 16px;
   border-bottom: 1px solid var(--theme-border-primary);
   background: var(--theme-bg-secondary);
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Responsive when tree + preview panel are open (approx < 1400px) */
+@media (max-width: 1400px) {
+  .container {
+    padding: 12px;
+  }
+
+  .buttonGroup {
+    gap: 4px;
+  }
+
+  .viewButton {
+    padding: 6px;
+  }
+
+  .actionsGroup {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .deleteButton span,
+  .uploadButton span {
+    display: none;
+  }
+
+  .deleteButton,
+  .uploadButton {
+    padding: 6px 8px;
+  }
 }
 
 /* Mobile and Tablet Responsive */

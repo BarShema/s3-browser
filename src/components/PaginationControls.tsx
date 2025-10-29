@@ -25,7 +25,7 @@ export function PaginationControls({
   const handlePageJump = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const page = parseInt(formData.get('page') as string);
+    const page = parseInt(formData.get("page") as string);
     if (page >= 1 && page <= totalPages) {
       onPageChange(page);
     }
@@ -36,58 +36,47 @@ export function PaginationControls({
       <div className={styles.info}>
         Showing {startItem}-{endItem} of {totalItems} items
       </div>
-      
-      <div className={styles.controls}>
-        <div className={styles.itemsPerPage}>
-          <label htmlFor="itemsPerPage">Items per page:</label>
-          <select
-            id="itemsPerPage"
-            value={itemsPerPage}
-            onChange={(e) => onItemsPerPageChange(parseInt(e.target.value))}
-            className={styles.select}
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
-        </div>
 
+      <div className={styles.controls}>
         <div className={styles.pagination}>
-          <button
-            onClick={() => onPageChange(1)}
-            disabled={currentPage === 1}
-            className={styles.button}
-          >
-            First
-          </button>
-          
-          <button
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={styles.button}
-          >
-            Previous
-          </button>
+          <div>
+            <button
+              onClick={() => onPageChange(1)}
+              disabled={currentPage === 1}
+              className={styles.button}
+            >
+              First
+            </button>
+
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={styles.button}
+            >
+              Previous
+            </button>
+          </div>
 
           <span className={styles.pageInfo}>
             Page {currentPage} of {totalPages}
           </span>
+          <div>
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={styles.button}
+            >
+              Next
+            </button>
 
-          <button
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={styles.button}
-          >
-            Next
-          </button>
-          
-          <button
-            onClick={() => onPageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            className={styles.button}
-          >
-            Last
-          </button>
+            <button
+              onClick={() => onPageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={styles.button}
+            >
+              Last
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handlePageJump} className={styles.jumpTo}>
@@ -105,6 +94,20 @@ export function PaginationControls({
             Go
           </button>
         </form>
+
+        <div className={styles.itemsPerPage}>
+          <label htmlFor="itemsPerPage">Items per page:</label>
+          <select
+            id="itemsPerPage"
+            value={itemsPerPage}
+            onChange={(e) => onItemsPerPageChange(parseInt(e.target.value))}
+            className={styles.select}
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
       </div>
     </div>
   );

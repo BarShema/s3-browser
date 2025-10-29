@@ -57,6 +57,80 @@ export function SidePreviewPanel({
   const [previousFile, setPreviousFile] = useState<FileItem | null>(null);
   const previousFileRef = useRef<FileItem | null>(null);
 
+  // Resizable preview panel (default 50% of viewport, stored as percentage)
+  const [previewWidthPercent, setPreviewWidthPercent] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("idits-drive-preview-width");
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed >= 20 && parsed <= 80) {
+          return parsed;
+        }
+      }
+    }
+    return 50;
+  });
+
+  const [isResizing, setIsResizing] = useState(false);
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
+  const justFinishedResizingRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("idits-drive-preview-width", previewWidthPercent.toString());
+    }
+  }, [previewWidthPercent]);
+
+  useEffect(() => {
+    if (!isResizing || !isOpen) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const viewportWidth = window.innerWidth;
+      const deltaX = startXRef.current - e.clientX; // Inverted because preview is on the right
+      const deltaPercent = (deltaX / viewportWidth) * 100;
+      let newWidth = startWidthRef.current + deltaPercent;
+
+      if (newWidth < 20) newWidth = 20;
+      if (newWidth > 80) newWidth = 80;
+
+      setPreviewWidthPercent(newWidth);
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsResizing(false);
+      // Mark that we just finished resizing to prevent click event
+      justFinishedResizingRef.current = true;
+      // Reset the flag after a short delay to allow click event to be ignored
+      setTimeout(() => {
+        justFinishedResizingRef.current = false;
+      }, 100);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, isOpen]);
+
+  const handlePreviewResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    justFinishedResizingRef.current = false; // Reset flag when starting new resize
+    startXRef.current = e.clientX;
+    startWidthRef.current = previewWidthPercent;
+  };
+
   useEffect(() => {
     if (file && isEditableText(file.name)) {
       setIsLoadingText(true);
@@ -91,18 +165,6 @@ export function SidePreviewPanel({
       setIsExpanded(false);
     }
   }, [isOpen, file]);
-
-  // Disable body scroll when preview panel is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
 
   // Handle preview loading state when switching between images/videos
   useEffect(() => {
@@ -149,11 +211,36 @@ export function SidePreviewPanel({
 
   const extension = getFileExtension(file.name);
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // Don't close if we just finished resizing
+    if (isResizing || justFinishedResizingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    // Don't close if clicking on the resizer
+    if ((e.target as HTMLElement).closest(`.${styles.previewResizer}`)) {
+      return;
+    }
+    onClose();
+  };
+
   return (
     <div
       className={`${styles.overlay} ${isExpanded ? styles.expanded : ""}`}
-      onClick={onClose}
+      onClick={handleOverlayClick}
+      style={isExpanded ? {} : { width: `${previewWidthPercent}%` }}
     >
+      {!isExpanded && (
+        <div
+          className={styles.previewResizer}
+          onMouseDown={handlePreviewResizeStart}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        />
+      )}
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.header}>

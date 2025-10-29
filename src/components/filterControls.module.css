@@ -5,6 +5,9 @@
   padding: 16px;
   background: var(--theme-bg-secondary);
   border-bottom: 1px solid var(--theme-border-primary);
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .filters {
@@ -12,6 +15,7 @@
   align-items: center;
   gap: 24px;
   flex: 1;
+  min-width: 0;
 }
 
 .filterGroup {
@@ -76,6 +80,48 @@
 .clearButton:hover {
   background: var(--theme-error);
   color: var(--theme-text-primary);
+}
+
+/* Responsive when tree + preview panel are open (approx < 1400px) */
+@media (max-width: 1400px) {
+  .container {
+    padding: 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .filterGroup {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .filterGroup label {
+    min-width: 100px;
+    text-align: right;
+    font-size: 11px;
+  }
+
+  .input,
+  .select {
+    min-width: 0;
+    flex: 1;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .clearButton {
+    align-self: flex-end;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 1024px) {

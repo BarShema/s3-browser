@@ -11,6 +11,7 @@ import { PaginationControls } from "@/components/PaginationControls";
 import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
+import { FileDetailsModal } from "@/components/FileDetailsModal";
 import { appConfig } from "@/config/app";
 import {
   DirectoryItem,
@@ -69,6 +70,8 @@ export function FileExplorer({
   const [editingFile, setEditingFile] = useState<FileItem | null>(null);
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [detailsFile, setDetailsFile] = useState<FileItem | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteProtectionModalOpen, setIsDeleteProtectionModalOpen] =
     useState(false);
   const [directorySizes, setDirectorySizes] = useState<{
@@ -327,9 +330,13 @@ export function FileExplorer({
         const data = await response.json();
 
         // Convert S3 objects to our item types
-        const fileItems = data.files.map((file: S3File) => ({
+        const fileItems = data.files.map((file: any) => ({
           ...file,
           id: Math.random().toString(36).substr(2, 9),
+          isDirectory: false,
+          lastModified: file.lastModified instanceof Date 
+            ? file.lastModified 
+            : new Date(file.lastModified),
         }));
 
         const directoryItems = data.directories.map((dir: S3Directory) => ({
@@ -525,6 +532,11 @@ export function FileExplorer({
       setEditingFile(file);
       setIsEditModalOpen(true);
     }
+  };
+
+  const handleDetailsClick = (file: FileItem) => {
+    setDetailsFile(file);
+    setIsDetailsModalOpen(true);
   };
 
   const handleFileClick = (file: FileItem) => {
@@ -886,10 +898,12 @@ export function FileExplorer({
                   onDirectoryDownload={handleDirectoryDownload}
                   onDelete={handleDelete}
                   onRename={handleRename}
+                  onDetailsClick={handleDetailsClick}
                   onDirectorySizeClick={calculateDirectorySize}
                   sortColumn={sortColumn}
                   sortDirection={sortDirection}
                   onSort={handleSort}
+                  bucketName={bucketName}
                 />
               )}
 
@@ -923,6 +937,7 @@ export function FileExplorer({
                   onDirectoryDownload={handleDirectoryDownload}
                   onDelete={handleDelete}
                   onRename={handleRename}
+                  onDetailsClick={handleDetailsClick}
                   bucketName={bucketName}
                   onDirectorySizeClick={calculateDirectorySize}
                   itemsPerRow={previewItemsPerRow}
@@ -968,6 +983,7 @@ export function FileExplorer({
         onRename={handleRename}
         onDelete={handleDelete}
         onEdit={handleEdit}
+        onDetailsClick={handleDetailsClick}
       />
       <DeleteProtectionModal
         isOpen={isDeleteProtectionModalOpen}
@@ -978,6 +994,12 @@ export function FileExplorer({
             onOpenSettings();
           }
         }}
+      />
+      <FileDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        file={detailsFile}
+        bucketName={bucketName}
       />
     </div>
   );

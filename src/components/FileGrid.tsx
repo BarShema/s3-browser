@@ -17,6 +17,9 @@ import {
   Minus,
   Plus,
   Trash2,
+  Ruler,
+  Clock,
+  Info,
 } from "lucide-react";
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
@@ -34,6 +37,7 @@ interface FileGridProps {
   onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
+  onDetailsClick?: (file: FileItem) => void;
   onDirectorySizeClick?: (directory: DirectoryItem) => void;
   itemsPerRow: number;
   onItemsPerRowChange: (count: number) => void;
@@ -50,6 +54,7 @@ export function FileGrid({
   onDirectoryDownload,
   onDelete,
   onRename,
+  onDetailsClick,
   onDirectorySizeClick,
   itemsPerRow,
   onItemsPerRowChange,
@@ -236,6 +241,17 @@ export function FileGrid({
                 )}
               </div>
               <div>{formatDate(item.lastModified)}</div>
+              {!item.isDirectory && (
+                <div>
+                  {isImage(item.name) ? (
+                    <Ruler size={14} className={styles.metadataIcon} />
+                  ) : isVideo(item.name) ? (
+                    <Clock size={14} className={styles.metadataIcon} />
+                  ) : (
+                    "-"
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Actions */}
@@ -271,6 +287,19 @@ export function FileGrid({
                       </button>
                     )}
                   </>
+                )}
+
+                {!item.isDirectory && onDetailsClick && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDetailsClick(item as FileItem);
+                    }}
+                    className={`${styles.actionButton} blue`}
+                    title="Details"
+                  >
+                    <Info size={14} />
+                  </button>
                 )}
 
                 <button

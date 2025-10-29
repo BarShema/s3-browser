@@ -10,6 +10,7 @@ interface VideoPreviewProps {
   className?: string;
   isThumbnail?: boolean; // If true, show thumbnail image; if false, show video player
   autoPlay?: boolean;
+  onLoad?: () => void;
 }
 
 export function VideoPreview({
@@ -17,6 +18,7 @@ export function VideoPreview({
   className,
   isThumbnail = false,
   autoPlay = false,
+  onLoad,
 }: VideoPreviewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -77,6 +79,7 @@ export function VideoPreview({
         } else {
           // For video player, just set loading to false
           setIsLoading(false);
+          onLoad?.();
         }
       } catch (error) {
         console.error("Error loading video:", error);
@@ -190,6 +193,7 @@ export function VideoPreview({
           src={videoUrl}
           className={className}
           autoPlay={autoPlay}
+          onLoad={onLoad}
         />
       ) : (
         <div className={className}>

@@ -1,9 +1,6 @@
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: var(--theme-overlay);
   z-index: 2500;
   display: flex;
@@ -65,6 +62,9 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cancelButton:hover {
@@ -73,9 +73,6 @@
 }
 
 .settingsButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   padding: 10px 20px;
   background: var(--theme-accent-primary);
   color: var(--theme-text-primary);
@@ -85,10 +82,18 @@
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.settingsButton:hover {
+.settingsButton:hover:not(:disabled) {
   background: var(--theme-accent-hover);
+}
+
+.settingsButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Responsive */

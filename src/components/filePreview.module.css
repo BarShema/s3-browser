@@ -247,6 +247,11 @@
   gap: 4px;
 }
 
+.metadataIcon {
+  color: var(--theme-text-tertiary);
+  vertical-align: middle;
+}
+
 .clickableSize {
   cursor: pointer;
   color: var(--theme-accent-primary);
@@ -298,6 +303,9 @@
   cursor: pointer;
   color: var(--theme-text-tertiary);
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .actionButton:hover {
@@ -314,6 +322,10 @@
 
 .actionButton.red:hover {
   color: var(--theme-error);
+}
+
+.actionButton.blue:hover {
+  color: var(--theme-info, #3b82f6);
 }
 
 .emptyState {

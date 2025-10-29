@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Item, FileItem, DirectoryItem } from '@/lib/utils';
-import { formatFileSize, formatDate, isImage, isVideo } from '@/lib/utils';
+import { formatFileSize, formatDate, isImage, isVideo, formatDuration, formatDimensions } from '@/lib/utils';
 import { 
   Download, 
   Trash2, 
@@ -12,9 +12,11 @@ import {
   Calculator,
   ChevronUp,
   ChevronDown,
-  ChevronsUpDown
+  ChevronsUpDown,
+  Info
 } from 'lucide-react';
 import { FileIcon } from './FileIcon';
+import { FileDetailsCell } from './FileDetailsCell';
 import styles from './fileList.module.css';
 
 interface FileListProps {
@@ -28,10 +30,12 @@ interface FileListProps {
   onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
+  onDetailsClick?: (file: FileItem) => void;
   onDirectorySizeClick?: (directory: DirectoryItem) => void;
   sortColumn?: string | null;
   sortDirection?: 'asc' | 'desc' | null;
   onSort?: (column: string) => void;
+  bucketName?: string;
 }
 
 export function FileList({
@@ -45,13 +49,17 @@ export function FileList({
   onDirectoryDownload,
   onDelete,
   onRename,
+  onDetailsClick,
   onDirectorySizeClick,
   sortColumn,
   sortDirection,
   onSort,
+  bucketName,
 }: FileListProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [loadingMetadata, setLoadingMetadata] = useState<Set<string>>(new Set());
+  const [metadataCache, setMetadataCache] = useState<Map<string, string>>(new Map());
 
   const handleItemClick = (item: Item) => {
     if (item.isDirectory) {
@@ -173,6 +181,15 @@ export function FileList({
             {getSortIcon('modified')}
           </button>
         </div>
+        <div className={styles.headerDetails}>
+          <button 
+            className={styles.headerButton}
+            onClick={() => onSort?.('details')}
+          >
+            Details
+            {getSortIcon('details')}
+          </button>
+        </div>
         <div className={styles.headerActions}>Actions</div>
       </div>
 
@@ -250,6 +267,44 @@ export function FileList({
             {formatDate(item.lastModified)}
           </div>
 
+          <div className={styles.detailsCell}>
+            {!item.isDirectory ? (
+              <FileDetailsCell
+                file={item as FileItem}
+                loadingMetadata={loadingMetadata}
+                metadataCache={metadataCache}
+                onLoadMetadata={(fileId: string) => {
+                  if (loadingMetadata.has(fileId)) return;
+                  
+                  setLoadingMetadata(prev => new Set(prev).add(fileId));
+                  
+                  const file = item as FileItem;
+                  const fullPath = bucketName ? `${bucketName}/${file.key}` : file.key;
+                  fetch(`/api/s3/metadata?path=${encodeURIComponent(fullPath)}`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(metadata => {
+                      if (metadata) {
+                        const details = isVideo(file.name) && metadata.duration
+                          ? formatDuration(metadata.duration)
+                          : (isImage(file.name) && metadata.width && metadata.height)
+                          ? formatDimensions(metadata.width, metadata.height)
+                          : '';
+                        setMetadataCache(prev => new Map(prev).set(fileId, details));
+                      }
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                      setLoadingMetadata(prev => {
+                        const next = new Set(prev);
+                        next.delete(fileId);
+                        return next;
+                      });
+                    });
+                }}
+              />
+            ) : "-"}
+          </div>
+
           <div className={styles.actionsCell}>
             <div className={styles.actionsGroup}>
               <button
@@ -284,6 +339,19 @@ export function FileList({
                 </>
               )}
               
+              {!item.isDirectory && onDetailsClick && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDetailsClick(item as FileItem);
+                  }}
+                  className={`${styles.actionButton} blue`}
+                  title="Details"
+                >
+                  <Info size={16} />
+                </button>
+              )}
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();

@@ -17,12 +17,14 @@ interface CustomVideoPlayerProps {
   src: string;
   className?: string;
   autoPlay?: boolean;
+  onLoad?: () => void;
 }
 
 export function CustomVideoPlayer({
   src,
   className,
   autoPlay = false,
+  onLoad,
 }: CustomVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,6 +60,7 @@ export function CustomVideoPlayer({
     const handlePause = () => setIsPlaying(false);
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
+      onLoad?.();
       if (autoPlay) {
         video.play().catch(() => setIsPlaying(false));
       }

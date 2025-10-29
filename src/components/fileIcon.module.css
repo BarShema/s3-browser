@@ -7,8 +7,8 @@
 
 .extensionBox {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
+  bottom: 5px;
+  right: 5px;
   background: var(--theme-bg-octonary);
   color: var(--theme-text-primary);
   border-radius: 3px;

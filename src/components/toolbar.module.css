@@ -26,10 +26,6 @@
   .actionsGroup {
     gap: 6px;
   }
-  
-  .actionButton {
-    padding: 6px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -52,10 +48,6 @@
   .actionsGroup {
     justify-content: center;
     gap: 4px;
-  }
-  
-  .actionButton {
-    padding: 4px;
   }
 }
 

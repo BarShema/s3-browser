@@ -9,8 +9,18 @@ import {
   isPDF,
   isVideo,
 } from "@/lib/utils";
-import { Download, Edit3, FileText, Trash2, X, Maximize2, Minimize2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Download,
+  Edit3,
+  FileText,
+  Info,
+  Loader2,
+  Maximize2,
+  Minimize2,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { ImagePreview } from "./ImagePreview";
 import { VideoPreview } from "./VideoPreview";
 import styles from "./sidePreviewPanel.module.css";
@@ -24,6 +34,7 @@ interface SidePreviewPanelProps {
   onRename: (file: FileItem, newName: string) => void;
   onDelete: (file: FileItem) => void;
   onEdit: (file: FileItem) => void;
+  onDetailsClick?: (file: FileItem) => void;
 }
 
 export function SidePreviewPanel({
@@ -35,11 +46,16 @@ export function SidePreviewPanel({
   onRename,
   onDelete,
   onEdit,
+  onDetailsClick,
 }: SidePreviewPanelProps) {
   const [textContent, setTextContent] = useState<string>("");
   const [isLoadingText, setIsLoadingText] = useState(false);
   const [textError, setTextError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [currentPreviewKey, setCurrentPreviewKey] = useState<string>("");
+  const [previousFile, setPreviousFile] = useState<FileItem | null>(null);
+  const previousFileRef = useRef<FileItem | null>(null);
 
   useEffect(() => {
     if (file && isEditableText(file.name)) {
@@ -76,6 +92,45 @@ export function SidePreviewPanel({
     }
   }, [isOpen, file]);
 
+  // Handle preview loading state when switching between images/videos
+  useEffect(() => {
+    if (!file) {
+      setIsLoadingPreview(false);
+      setCurrentPreviewKey("");
+      setPreviousFile(null);
+      previousFileRef.current = null;
+      return;
+    }
+
+    // Check if this is an image or video that needs preview
+    if (isImage(file.name) || isVideo(file.name)) {
+      const newKey = `${file.id}-${file.key}`;
+      
+      // If it's a different file, show loader and hide current content
+      if (newKey !== currentPreviewKey && currentPreviewKey !== "") {
+        // Store the current file as previous before switching
+        if (previousFileRef.current) {
+          setPreviousFile(previousFileRef.current);
+        }
+        setIsLoadingPreview(true);
+      }
+      
+      // Update the ref to track the current file for next switch
+      previousFileRef.current = file;
+      setCurrentPreviewKey(newKey);
+    } else {
+      setIsLoadingPreview(false);
+      setCurrentPreviewKey("");
+      setPreviousFile(null);
+      previousFileRef.current = null;
+    }
+  }, [file, currentPreviewKey]);
+
+  // Callback to handle when preview finishes loading
+  const handlePreviewLoaded = () => {
+    setIsLoadingPreview(false);
+  };
+
   if (!isOpen || !file) {
     return null;
   }
@@ -83,7 +138,10 @@ export function SidePreviewPanel({
   const extension = getFileExtension(file.name);
 
   return (
-    <div className={`${styles.overlay} ${isExpanded ? styles.expanded : ""}`} onClick={onClose}>
+    <div
+      className={`${styles.overlay} ${isExpanded ? styles.expanded : ""}`}
+      onClick={onClose}
+    >
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.header}>
@@ -106,6 +164,15 @@ export function SidePreviewPanel({
             >
               <Download size={16} />
             </button>
+            {onDetailsClick && (
+              <button
+                onClick={() => onDetailsClick(file)}
+                className={styles.actionButton}
+                title="Details"
+              >
+                <Info size={16} />
+              </button>
+            )}
             <button
               onClick={() => onRename(file, file.name)}
               className={styles.actionButton}
@@ -151,20 +218,63 @@ export function SidePreviewPanel({
 
         {/* Content */}
         <div className={styles.content}>
-          {isImage(file.name) ? (
-            <ImagePreview
-              src={`${bucketName}/${file.key}`}
-              alt={file.name}
-              className={styles.previewContent}
-              maxWidth={800}
-              maxHeight={600}
-            />
-          ) : isVideo(file.name) ? (
-            <VideoPreview
-              src={`${bucketName}/${file.key}`}
-              className={styles.previewContent}
-              autoPlay={true}
-            />
+          {isImage(file.name) || isVideo(file.name) ? (
+            <>
+              {isLoadingPreview && (
+                <div className={styles.previewLoader}>
+                  {previousFile && (isImage(previousFile.name) || isVideo(previousFile.name)) && (
+                    <div className={styles.previousPreview}>
+                      {isImage(previousFile.name) ? (
+                        <img
+                          src={`/api/s3/preview?path=${encodeURIComponent(
+                            `${bucketName}/${previousFile.key}`
+                          )}&mw=400&mh=400`}
+                          alt={previousFile.name}
+                          className={styles.previousPreviewImage}
+                        />
+                      ) : (
+                        <img
+                          src={`/api/s3/preview?path=${encodeURIComponent(
+                            `${bucketName}/${previousFile.key}`
+                          )}&mw=400&mh=400`}
+                          alt={previousFile.name}
+                          className={styles.previousPreviewImage}
+                        />
+                      )}
+                    </div>
+                  )}
+                  <div className={styles.loaderOverlay}>
+                    <Loader2 size={48} className={styles.loaderIcon} />
+                    <p className={styles.loaderText}>Loading preview...</p>
+                  </div>
+                </div>
+              )}
+              <div
+                style={{
+                  display: isLoadingPreview ? "none" : "block",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                {isImage(file.name) ? (
+                  <ImagePreview
+                    src={`${bucketName}/${file.key}`}
+                    alt={file.name}
+                    className={styles.previewContent}
+                    maxWidth={800}
+                    maxHeight={600}
+                    onLoad={handlePreviewLoaded}
+                  />
+                ) : (
+                  <VideoPreview
+                    src={`${bucketName}/${file.key}`}
+                    className={styles.previewContent}
+                    autoPlay={true}
+                    onLoad={handlePreviewLoaded}
+                  />
+                )}
+              </div>
+            </>
           ) : isPDF(file.name) ? (
             <div className={styles.pdfContainer}>
               <iframe

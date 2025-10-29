@@ -4,6 +4,11 @@ export type ViewMode = "list" | "grid" | "preview";
 
 export interface FileItem extends S3File {
   id: string;
+  metadata?: {
+    width?: number;
+    height?: number;
+    duration?: number; // Duration in seconds for videos
+  };
 }
 
 export interface DirectoryItem extends S3Directory {
@@ -215,6 +220,40 @@ export function formatDate(date: Date): string {
   } catch {
     return new Date().toLocaleDateString();
   }
+}
+
+// Format video duration (seconds to MM:SS or HH:MM:SS)
+export function formatDuration(seconds: number | null | undefined): string {
+  if (!seconds || isNaN(seconds)) return "";
+  
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+}
+
+// Format image/video dimensions
+export function formatDimensions(
+  width: number | null | undefined,
+  height: number | null | undefined
+): string {
+  if (!width || !height || isNaN(width) || isNaN(height)) return "";
+  return `${width} × ${height}`;
+}
+
+// Get file details (duration for videos, dimensions for images)
+export function getFileDetails(file: FileItem): string {
+  if (isVideo(file.name) && file.metadata?.duration) {
+    return formatDuration(file.metadata.duration);
+  }
+  if (isImage(file.name) && file.metadata?.width && file.metadata?.height) {
+    return formatDimensions(file.metadata.width, file.metadata.height);
+  }
+  return "";
 }
 
 // Generate unique ID for items

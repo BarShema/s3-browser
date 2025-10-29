@@ -14,59 +14,59 @@
   .grid {
     gap: 12px;
   }
-  
+
   .container {
     gap: 12px;
   }
-  
+
   .gridControlsButtons {
     gap: 6px;
   }
-  
+
   .gridControlButton {
     width: 28px;
     height: 28px;
   }
-  
+
   .gridControlCount {
     min-width: 20px;
     font-size: 13px;
   }
-  
+
   .item {
     padding: 8px;
   }
-  
+
   .icon {
     width: 48px;
     height: 48px;
   }
-  
+
   .content {
     padding: 6px 0;
   }
-  
+
   .name {
     margin-bottom: 4px;
   }
-  
+
   .nameText {
     font-size: 12px;
   }
-  
+
   .metadata {
     font-size: 10px;
     gap: 4px;
   }
-  
+
   .actions {
     padding: 4px 0;
   }
-  
+
   .actionsGroup {
     gap: 4px;
   }
-  
+
   .actionButton {
     width: 24px;
     height: 24px;
@@ -77,41 +77,41 @@
   .grid {
     gap: 8px;
   }
-  
+
   .container {
     gap: 8px;
   }
-  
+
   .gridControlsButtons {
     gap: 4px;
   }
-  
+
   .gridControlButton {
     width: 24px;
     height: 24px;
   }
-  
+
   .item {
     padding: 6px;
   }
-  
+
   .icon {
     width: 40px;
     height: 40px;
   }
-  
+
   .content {
     padding: 4px 0;
   }
-  
+
   .nameText {
     font-size: 11px;
   }
-  
+
   .metadata {
     font-size: 9px;
   }
-  
+
   .actionButton {
     width: 20px;
     height: 20px;
@@ -232,6 +232,11 @@
   margin-top: 4px;
 }
 
+.metadataIcon {
+  color: var(--theme-text-tertiary);
+  vertical-align: middle;
+}
+
 .clickableSize {
   cursor: pointer;
   color: var(--theme-accent-primary);
@@ -284,6 +289,9 @@
   cursor: pointer;
   color: var(--theme-text-tertiary);
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .actionButton:hover {
@@ -300,6 +308,10 @@
 
 .actionButton.red:hover {
   color: var(--theme-error);
+}
+
+.actionButton.blue:hover {
+  color: var(--theme-info, #3b82f6);
 }
 
 .emptyState {

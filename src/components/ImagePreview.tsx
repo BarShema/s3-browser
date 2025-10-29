@@ -8,9 +8,10 @@ interface ImagePreviewProps {
   className?: string;
   maxWidth?: number;
   maxHeight?: number;
+  onLoad?: () => void;
 }
 
-export function ImagePreview({ src, alt, className, maxWidth = 800, maxHeight = 600 }: ImagePreviewProps) {
+export function ImagePreview({ src, alt, className, maxWidth = 800, maxHeight = 600, onLoad }: ImagePreviewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export function ImagePreview({ src, alt, className, maxWidth = 800, maxHeight = 
           if (effectRef.current === src) {
             setImageUrl(previewUrl);
             setIsLoading(false);
+            onLoad?.();
           }
         };
 
@@ -98,6 +100,7 @@ export function ImagePreview({ src, alt, className, maxWidth = 800, maxHeight = 
       src={imageUrl || ''} 
       alt={alt}
       className={className}
+      onLoad={() => onLoad?.()}
     />
   );
 }

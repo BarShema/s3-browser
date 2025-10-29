@@ -21,6 +21,9 @@ import {
   Minus,
   Plus,
   Trash2,
+  Ruler,
+  Clock,
+  Info,
 } from "lucide-react";
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
@@ -40,6 +43,7 @@ interface FilePreviewProps {
   onDirectoryDownload: (directory: DirectoryItem) => void;
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
+  onDetailsClick?: (file: FileItem) => void;
   bucketName: string;
   onDirectorySizeClick?: (directory: DirectoryItem) => void;
   itemsPerRow: number;
@@ -57,6 +61,7 @@ export function FilePreview({
   onDirectoryDownload,
   onDelete,
   onRename,
+  onDetailsClick,
   bucketName,
   onDirectorySizeClick,
   itemsPerRow,
@@ -64,7 +69,7 @@ export function FilePreview({
 }: FilePreviewProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [showDetails, setShowDetails] = useState(() => {
+  const [showDetailsPref, setShowDetailsPref] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("idits-drive-preview-show-details");
       return saved !== "false";
@@ -124,8 +129,8 @@ export function FilePreview({
   };
 
   const handleToggleDetails = () => {
-    const newShowDetails = !showDetails;
-    setShowDetails(newShowDetails);
+    const newShowDetails = !showDetailsPref;
+    setShowDetailsPref(newShowDetails);
     if (typeof window !== "undefined") {
       localStorage.setItem("idits-drive-preview-show-details", newShowDetails.toString());
     }
@@ -135,6 +140,9 @@ export function FilePreview({
   const hasPreviewFiles = items.some(item => 
     !item.isDirectory && (isImage(item.name) || isVideo(item.name) || isPDF(item.name))
   );
+
+  // When there are no preview files, always show details; otherwise use preference
+  const showDetails = !hasPreviewFiles ? true : showDetailsPref;
 
   if (items.length === 0) {
     return (
@@ -305,6 +313,17 @@ export function FilePreview({
                     )}
                   </div>
                   <div>{formatDate(item.lastModified)}</div>
+                  {!item.isDirectory && (
+                    <div>
+                      {isImage(item.name) ? (
+                        <Ruler size={14} className={styles.metadataIcon} />
+                      ) : isVideo(item.name) ? (
+                        <Clock size={14} className={styles.metadataIcon} />
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -327,7 +346,7 @@ export function FilePreview({
                   <Download size={14} />
                 </button>
 
-                {!item.isDirectory && (
+                {/* {!item.isDirectory && (
                   <>
                     {(isImage(item.name) || isVideo(item.name)) && (
                       <button
@@ -342,6 +361,19 @@ export function FilePreview({
                       </button>
                     )}
                   </>
+                )} */}
+
+                {!item.isDirectory && onDetailsClick && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDetailsClick(item as FileItem);
+                    }}
+                    className={`${styles.actionButton} blue`}
+                    title="Details"
+                  >
+                    <Info size={14} />
+                  </button>
                 )}
 
                 <button

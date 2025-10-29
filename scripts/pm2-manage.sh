@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PM2 Management Script for S3 Browser
+# PM2 Management Script for Idits Drive
 # Usage: ./scripts/pm2-manage.sh <action> <env>
 # Actions: start, stop, restart, delete, logs, status
 # Environments: dev, prd, lcl
@@ -12,7 +12,7 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ACTION=${1:-status}
 ENV=${2:-dev}
 
-APP_NAME="s3-browser-$ENV"
+APP_NAME="idits-drive-$ENV"
 CONFIG_FILE="app.config.$ENV.json"
 
 if [ ! -f "$PROJECT_DIR/$CONFIG_FILE" ]; then

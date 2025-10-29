@@ -1,11 +1,11 @@
 {
-  "name": "s3-browser-dev",
+  "name": "idits-drive-dev",
   "script": "node_modules/next/dist/bin/next",
   "args": "start --port 3010",
   "instances": 1,
   "exec_mode": "fork",
-  "error_file": "./logs/s3-browser-dev-error.log",
-  "out_file": "./logs/s3-browser-dev-out.log",
+  "error_file": "./logs/idits-drive-dev-error.log",
+  "out_file": "./logs/idits-drive-dev-out.log",
   "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
   "merge_logs": true,
   "env": {

@@ -1,4 +1,4 @@
-# S3 File Browser
+# Idits Drive
 
 A modern, full-featured file browser for Amazon S3 buckets built with Next.js, TypeScript, and Tailwind CSS.
 
@@ -28,7 +28,7 @@ A modern, full-featured file browser for Amazon S3 buckets built with Next.js, T
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd s3-file-browser
+cd idits-drive
 ```
 
 2. Install dependencies:

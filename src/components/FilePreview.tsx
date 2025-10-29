@@ -66,7 +66,7 @@ export function FilePreview({
   const [editValue, setEditValue] = useState("");
   const [showDetails, setShowDetails] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("s3-browser-preview-show-details");
+      const saved = localStorage.getItem("idits-drive-preview-show-details");
       return saved !== "false";
     }
     return true;
@@ -127,7 +127,7 @@ export function FilePreview({
     const newShowDetails = !showDetails;
     setShowDetails(newShowDetails);
     if (typeof window !== "undefined") {
-      localStorage.setItem("s3-browser-preview-show-details", newShowDetails.toString());
+      localStorage.setItem("idits-drive-preview-show-details", newShowDetails.toString());
     }
   };
 

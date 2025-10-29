@@ -51,7 +51,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const [directories, setDirectories] = useState<DirectoryItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("s3-browser-view-mode");
+      const saved = localStorage.getItem("idits-drive-view-mode");
       return (saved as ViewMode) || "list";
     }
     return "list";
@@ -93,7 +93,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   // Grid/Preview items per row state
   const [gridItemsPerRow, setGridItemsPerRow] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("s3-browser-grid-items-per-row");
+      const saved = localStorage.getItem("idits-drive-grid-items-per-row");
       return saved
         ? parseInt(saved, 10)
         : appConfig.gridView.defaultItemsPerRow;
@@ -102,7 +102,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   });
   const [previewItemsPerRow, setPreviewItemsPerRow] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("s3-browser-preview-items-per-row");
+      const saved = localStorage.getItem("idits-drive-preview-items-per-row");
       return saved
         ? parseInt(saved, 10)
         : appConfig.previewView.defaultItemsPerRow;
@@ -113,7 +113,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   // Directory tree visibility state
   const [isTreeVisible, setIsTreeVisible] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("s3-browser-tree-visible");
+      const saved = localStorage.getItem("idits-drive-tree-visible");
       return saved === "true";
     }
     return false;
@@ -141,7 +141,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
   const handleViewModeChange = useCallback((mode: ViewMode) => {
     setViewMode(mode);
     if (typeof window !== "undefined") {
-      localStorage.setItem("s3-browser-view-mode", mode);
+      localStorage.setItem("idits-drive-view-mode", mode);
     }
   }, []);
 
@@ -150,7 +150,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     setGridItemsPerRow(newCount);
     if (typeof window !== "undefined") {
       localStorage.setItem(
-        "s3-browser-grid-items-per-row",
+        "idits-drive-grid-items-per-row",
         newCount.toString()
       );
     }
@@ -161,7 +161,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     setPreviewItemsPerRow(newCount);
     if (typeof window !== "undefined") {
       localStorage.setItem(
-        "s3-browser-preview-items-per-row",
+        "idits-drive-preview-items-per-row",
         newCount.toString()
       );
     }
@@ -172,7 +172,7 @@ export function FileExplorer({ bucketName }: FileExplorerProps) {
     const newVisibility = !isTreeVisible;
     setIsTreeVisible(newVisibility);
     if (typeof window !== "undefined") {
-      localStorage.setItem("s3-browser-tree-visible", newVisibility.toString());
+      localStorage.setItem("idits-drive-tree-visible", newVisibility.toString());
     }
   }, [isTreeVisible]);
 

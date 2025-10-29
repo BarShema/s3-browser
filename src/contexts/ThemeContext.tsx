@@ -18,7 +18,7 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('s3-browser-theme');
+      const saved = localStorage.getItem('idits-drive-theme');
       return (saved as Theme) || 'default';
     }
     return 'default';
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('s3-browser-theme', theme);
+      localStorage.setItem('idits-drive-theme', theme);
       // Apply theme class to document body
       document.body.className = `theme-${theme}`;
     }

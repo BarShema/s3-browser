@@ -1,7 +1,7 @@
 {
   "name": "s3-browser-prd",
   "script": "node_modules/next/dist/bin/next",
-  "args": "start --port 3002",
+  "args": "start --port 3011",
   "instances": 1,
   "exec_mode": "fork",
   "error_file": "./logs/s3-browser-prd-error.log",
@@ -10,11 +10,10 @@
   "merge_logs": true,
   "env": {
     "NODE_ENV": "production",
-    "PORT": "3002",
+    "PORT": "3011",
     "NEXT_PUBLIC_ENV": "production"
   },
   "env_production": {
     "NODE_ENV": "production"
   }
 }
-

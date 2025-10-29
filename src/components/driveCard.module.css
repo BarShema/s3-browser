@@ -42,7 +42,7 @@
 .driveInfo {
   flex: 1;
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
   min-height: 32px;
 }
 

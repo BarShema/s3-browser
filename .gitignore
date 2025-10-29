@@ -63,6 +63,7 @@ Thumbs.db
 app.config.lcl.json
 app.config.*.json
 .env.credentials
+.env.dev
 app.config.lcl.json
 app.config.dev.json
 app.config.prd.json

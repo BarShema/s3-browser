@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { getFileExtension } from "@/lib/utils";
+import { useEffect, useState } from "react";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
 import styles from "./fileIcon.module.css";
 
@@ -175,18 +175,17 @@ export function VideoPreview({
         >
           Video unavailable
         </div>
-      ) : isLoading ? (
+      ) : !isLoading ? (
         <div
           className={className}
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#f3f4f6",
             color: "#9ca3af",
           }}
         >
-          Loading video...
+          Loading...
         </div>
       ) : videoUrl ? (
         <CustomVideoPlayer

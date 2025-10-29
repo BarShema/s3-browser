@@ -3,11 +3,11 @@
 import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
 import { FileExplorer } from "@/components/FileExplorer";
-import { ThemeSelector } from "@/components/ThemeSelector";
 import { SettingsModal } from "@/components/SettingsModal";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User, Settings } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -47,31 +47,45 @@ export default function Home() {
         <div className={styles.container}>
           <div className={styles.header}>
             <div className={styles.headerContent}>
-              <div>
-                <h1 className={styles.title}>Idit File Browser</h1>
-                <p className={styles.subtitle}>
-                  Browse, manage, and organize your S3 files with ease
-                </p>
-                {bucketName && (
-                  <div className={styles.bucketInfo}>
-                    <span className={styles.bucketLabel}>
-                      Current Drive:{" "}
-                      <span className={styles.bucketName}>{bucketName}</span>
-                      <Link href="/" className={styles.changeBucket}>
-                        Change
-                      </Link>
-                    </span>
-                  </div>
-                )}
+              <div className={styles.headerLeft}>
+                <div>
+                  <h1 className={styles.title}>
+                    {/* <img
+                      src="/logo.svg"
+                      alt="Idit File Browser Logo"
+                      className={styles.logo}
+                    /> */}
+                    Idit File Browser
+                  </h1>
+
+                  <p className={styles.subtitle}>
+                    Browse, manage, and organize your files with ease
+                  </p>
+                  {bucketName && (
+                    <div className={styles.bucketInfo}>
+                      <span className={styles.bucketLabel}>
+                        Current Drive:{" "}
+                        <span className={styles.bucketName}>{bucketName}</span>
+                        <Link href="/" className={styles.changeBucket}>
+                          Change
+                        </Link>
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className={styles.userMenu}>
-                <User size={18} style={{ color: "#6b7280" }} />
                 <div className={styles.userInfo}>
-                  <span className={styles.userName}>{user?.username}</span>
-                  {user?.email && (
-                    <span className={styles.userEmail}>{user.email}</span>
-                  )}
+                  <div className={styles.userDetails}>
+                    <User size={18} style={{ color: "#6b7280" }} />
+                    <div className={styles.userInfoDetails}>
+                      <span className={styles.userName}>{user?.username}</span>
+                      {user?.email && (
+                        <span className={styles.userEmail}>{user.email}</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <ThemeSelector />
                 <button
@@ -83,7 +97,6 @@ export default function Home() {
                 </button>
                 <button onClick={handleLogout} className={styles.logoutButton}>
                   <LogOut size={14} />
-                  <span>Logout</span>
                 </button>
               </div>
             </div>

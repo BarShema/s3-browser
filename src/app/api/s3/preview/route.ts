@@ -1,5 +1,5 @@
 import { appConfig } from "@/config/app";
-import { s3Client } from "@/lib/s3";
+import { getS3ClientForBucket, s3Client } from "@/lib/s3";
 import {
   GetObjectCommand,
   PutObjectCommand,
@@ -13,9 +13,6 @@ import path from "path";
 import os from "os";
 
 const execAsync = promisify(exec);
-
-// Use the same S3 client configuration as the main one
-// The tempS3Client will be created dynamically based on the bucket's actual region
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,12 +64,14 @@ export async function GET(request: NextRequest) {
     // Check if thumbnail already exists in temp bucket
     const tempBucket = appConfig.tempBucketName;
     try {
+      // Get S3 client with correct region for temp bucket
+      const tempS3Client = await getS3ClientForBucket(tempBucket);
       const getThumbnailCommand = new GetObjectCommand({
         Bucket: tempBucket,
         Key: thumbnailKey,
       });
 
-      const thumbnailResponse = await s3Client.send(getThumbnailCommand);
+      const thumbnailResponse = await tempS3Client.send(getThumbnailCommand);
 
       if (thumbnailResponse.Body) {
         // Convert stream to buffer and return directly
@@ -133,21 +132,25 @@ export async function GET(request: NextRequest) {
     }
 
     // Upload thumbnail to temp bucket
-    const putThumbnailCommand = new PutObjectCommand({
-      Bucket: tempBucket,
-      Key: thumbnailKey,
-      Body: thumbnailBuffer,
-      ContentType: "image/webp",
-      CacheControl: "max-age=31536000", // Cache for 1 year
-    });
+    if (tempBucket) {
+      try {
+        // Get S3 client with correct region for temp bucket
+        const tempS3Client = await getS3ClientForBucket(tempBucket);
+        const putThumbnailCommand = new PutObjectCommand({
+          Bucket: tempBucket,
+          Key: thumbnailKey,
+          Body: thumbnailBuffer,
+          ContentType: "image/webp",
+          CacheControl: "max-age=31536000", // Cache for 1 year
+        });
 
-    try {
-      await s3Client.send(putThumbnailCommand);
-      console.log(`Thumbnail saved to temp bucket: ${tempBucket}/${thumbnailKey}`);
-    } catch (error: unknown) {
-      console.error("Error saving thumbnail to temp bucket:", error instanceof Error ? error.message : 'Unknown error');
-      // If temp bucket fails, just return the thumbnail without caching
-      console.log("Returning thumbnail without caching due to temp bucket error");
+        await tempS3Client.send(putThumbnailCommand);
+        console.log(`Thumbnail saved to temp bucket: ${tempBucket}/${thumbnailKey}`);
+      } catch (error: unknown) {
+        console.error("Error saving thumbnail to temp bucket:", error instanceof Error ? error.message : 'Unknown error');
+        // If temp bucket fails, just return the thumbnail without caching
+        console.log("Returning thumbnail without caching due to temp bucket error");
+      }
     }
 
     // Return the thumbnail buffer directly

@@ -3,6 +3,7 @@
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { DirectoryTree } from "@/components/DirectoryTree";
 import { EditModal } from "@/components/EditModal";
+import { FileDetailsModal } from "@/components/FileDetailsModal";
 import { FileGrid } from "@/components/FileGrid";
 import { FileList } from "@/components/FileList";
 import { FilePreview } from "@/components/FilePreview";
@@ -11,8 +12,9 @@ import { PaginationControls } from "@/components/PaginationControls";
 import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
-import { FileDetailsModal } from "@/components/FileDetailsModal";
 import { appConfig } from "@/config/app";
+import { isDeleteProtectionEnabled } from "@/lib/preferences";
+import { useResize } from "@/lib/useResize";
 import {
   DirectoryItem,
   FileItem,
@@ -23,12 +25,10 @@ import {
   isVideo as isVideoFile,
 } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
-import { DeleteProtectionModal } from "./DeleteProtectionModal";
-import { isDeleteProtectionEnabled } from "@/lib/preferences";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useResize } from "@/lib/useResize";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { DeleteProtectionModal } from "./DeleteProtectionModal";
 import styles from "./fileExplorer.module.css";
 
 interface FileExplorerProps {
@@ -192,7 +192,10 @@ export function FileExplorer({
     const newVisibility = !isTreeVisible;
     setIsTreeVisible(newVisibility);
     if (typeof window !== "undefined") {
-      localStorage.setItem("idits-drive-tree-visible", newVisibility.toString());
+      localStorage.setItem(
+        "idits-drive-tree-visible",
+        newVisibility.toString()
+      );
     }
   }, [isTreeVisible]);
 
@@ -339,13 +342,11 @@ export function FileExplorer({
         const data = await response.json();
 
         // Convert S3 objects to our item types
-        const fileItems = data.files.map((file: any) => ({
+        const fileItems = data.files.map((file: S3File) => ({
           ...file,
           id: Math.random().toString(36).substr(2, 9),
           isDirectory: false,
-          lastModified: file.lastModified instanceof Date 
-            ? file.lastModified 
-            : new Date(file.lastModified),
+          lastModified: new Date(file.lastModified),
         }));
 
         const directoryItems = data.directories.map((dir: S3Directory) => ({
@@ -483,8 +484,12 @@ export function FileExplorer({
     // Encode each path segment for the URL (including bucket name)
     const encodedPath = [bucketName, cleanPath]
       .filter(Boolean)
-      .map((segment) => encodeURIComponent(segment))
+      .map((segment) =>
+        segment.split("/").map((segment) => encodeURIComponent(segment))
+      )
+      .flat()
       .join("/");
+
     router.push(`/${encodedPath}`);
   };
 
@@ -494,7 +499,10 @@ export function FileExplorer({
     // Encode each path segment for the URL (including bucket name)
     const encodedPath = [bucketName, cleanPath]
       .filter(Boolean)
-      .map((segment) => encodeURIComponent(segment))
+      .map((segment) =>
+        segment.split("/").map((segment) => encodeURIComponent(segment))
+      )
+      .flat()
       .join("/");
     router.push(`/${encodedPath}`);
   };
@@ -811,9 +819,12 @@ export function FileExplorer({
       {/* Directory Tree Sidebar */}
       {isTreeVisible && (
         <>
-          <div 
+          <div
             className={styles.treeSidebar}
-            style={{ width: `${treeResize.width}px`, minWidth: `${treeResize.width}px` }}
+            style={{
+              width: `${treeResize.width}px`,
+              minWidth: `${treeResize.width}px`,
+            }}
           >
             <DirectoryTree
               bucketName={bucketName}

@@ -39,15 +39,49 @@
   }
 }
 
+/* Tablet Responsive */
+@media (max-width: 1024px) {
+  .container {
+    padding: 12px;
+    gap: 6px;
+  }
+
+  .breadcrum {
+    font-size: 12px;
+    max-width: 100px;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 10px;
     gap: 4px;
+    flex-wrap: wrap;
   }
 
   .breadcrum {
     font-size: 11px;
+    max-width: 100px;
+  }
+
+  .separator {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+    gap: 3px;
+  }
+
+  .breadcrum {
+    font-size: 10px;
     max-width: 80px;
+  }
+
+  .separator {
+    font-size: 9px;
   }
 }
 

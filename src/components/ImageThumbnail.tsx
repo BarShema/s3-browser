@@ -96,7 +96,6 @@ export function ImageThumbnail({
           style={{
             width: "100%",
             height: "100%",
-            background: "#f3f4f6",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -105,7 +104,7 @@ export function ImageThumbnail({
           }}
         >
           <div style={{ fontSize: "0.875rem", color: "#9ca3af" }}>
-            Loading preview...
+            Loading...
           </div>
         </div>
       ) : (

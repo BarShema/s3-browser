@@ -1,6 +1,7 @@
 import {
   CopyObjectCommand,
   DeleteObjectCommand,
+  GetBucketLocationCommand,
   GetObjectCommand,
   HeadObjectCommand,
   HeadObjectCommandOutput,
@@ -295,6 +296,39 @@ export async function getUploadUrl(
     console.error("Error generating upload URL:", error);
     throw new Error("Failed to generate upload URL");
   }
+}
+
+// Get bucket region
+export async function getBucketRegion(bucket: string): Promise<string> {
+  try {
+    const command = new GetBucketLocationCommand({
+      Bucket: bucket,
+    });
+    const response = await s3Client.send(command);
+    // GetBucketLocation returns null for us-east-1, which is the default
+    return response.LocationConstraint || "us-east-1";
+  } catch (error) {
+    console.error("Error getting bucket region:", error);
+    // Fallback to default region
+    return process.env.AWS_REGION || "eu-west-1";
+  }
+}
+
+// Get S3 client for a specific bucket (with correct region)
+export async function getS3ClientForBucket(bucket: string): Promise<S3Client> {
+  const region = await getBucketRegion(bucket);
+  const config = getS3Config();
+  
+  // If region matches, return existing client
+  if (config.region === region) {
+    return s3Client;
+  }
+  
+  // Create new client with bucket's region
+  return new S3Client({
+    ...config,
+    region,
+  });
 }
 
 export { s3Client };

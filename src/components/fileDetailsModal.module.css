@@ -130,3 +130,100 @@
         transform: rotate(360deg);
     }
 }
+
+/* Mobile and Tablet Responsive */
+@media (max-width: 768px) {
+    .modal {
+        max-width: 100%;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .content {
+        height: calc(100vh - 120px);
+        flex-direction: column;
+    }
+
+    .contentFullHeight {
+        height: calc(100vh - 80px);
+    }
+
+    .previewContainer {
+        padding: 16px;
+        border-radius: 0;
+    }
+
+    .previewContainerFull {
+        border-radius: 0;
+    }
+
+    .previewImage {
+        max-width: 100%;
+        max-height: calc(50vh - 80px);
+    }
+
+    .properties {
+        padding: 16px;
+        max-height: calc(50vh - 40px);
+    }
+
+    .propertyRow {
+        padding-bottom: 12px;
+    }
+
+    .propertyLabel {
+        font-size: 11px;
+    }
+
+    .propertyValue {
+        font-size: 13px;
+    }
+
+    .closePropertiesButton {
+        width: 36px;
+        height: 36px;
+        top: 4px;
+        right: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .content {
+        height: calc(100vh - 100px);
+    }
+
+    .contentFullHeight {
+        height: calc(100vh - 60px);
+    }
+
+    .previewContainer {
+        padding: 12px;
+    }
+
+    .previewImage {
+        max-height: calc(45vh - 80px);
+    }
+
+    .properties {
+        padding: 12px;
+        max-height: calc(45vh - 40px);
+    }
+
+    .propertyRow {
+        padding-bottom: 10px;
+    }
+
+    .propertyLabel {
+        font-size: 10px;
+    }
+
+    .propertyValue {
+        font-size: 12px;
+    }
+
+    .closePropertiesButton {
+        width: 32px;
+        height: 32px;
+    }
+}

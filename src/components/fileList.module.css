@@ -4,37 +4,60 @@
   gap: 4px;
 }
 
+/* Tablet Responsive */
+@media (max-width: 1024px) {
+  .header {
+    grid-template-columns: 40px 1fr 100px 140px 100px 80px;
+    gap: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .row {
+    grid-template-columns: 40px 1fr 100px 140px 100px 80px;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+}
+
 /* Mobile and Tablet Responsive */
 @media (max-width: 768px) {
   .header {
-    grid-template-columns: 40px 1fr 80px 100px;
+    grid-template-columns: 36px 1fr auto;
     gap: 8px;
-    padding: 6px 12px;
+    padding: 6px 10px;
     font-size: 12px;
   }
   
+  .headerSize,
+  .headerModified,
   .headerDetails {
     display: none;
   }
   
   .headerActions {
-    display: none;
+    display: flex;
+    gap: 4px;
   }
   
   .row {
-    grid-template-columns: 40px 1fr 80px 100px;
+    grid-template-columns: 36px 1fr auto;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 10px;
+    position: relative;
   }
   
+  .sizeCell,
+  .modifiedCell,
   .detailsCell {
     display: none;
   }
   
   .actionsCell {
-    display: none;
+    display: flex !important;
+    gap: 4px;
   }
-  
+
   .icon {
     width: 32px;
     height: 32px;
@@ -42,62 +65,53 @@
   
   .name {
     font-size: 12px;
+    min-width: 0;
+  }
+
+  .nameButton {
+    font-size: 12px;
   }
   
-  .size {
-    font-size: 11px;
-  }
-  
-  .modified {
-    font-size: 11px;
+  .row:hover {
+    background: var(--theme-hover-bg);
   }
 }
 
 @media (max-width: 480px) {
   .header {
-    grid-template-columns: 32px 1fr 60px;
+    grid-template-columns: 32px 1fr auto;
     gap: 6px;
     padding: 4px 8px;
     font-size: 11px;
   }
   
-  .headerSize {
-    display: none;
-  }
-  
-  .headerModified {
-    display: none;
-  }
-  
-  .headerDetails {
-    display: none;
-  }
-  
   .row {
-    grid-template-columns: 32px 1fr 60px;
+    grid-template-columns: 32px 1fr auto;
     gap: 6px;
-    padding: 6px 8px;
-  }
-  
-  .sizeCell {
-    display: none;
-  }
-  
-  .modifiedCell {
-    display: none;
-  }
-  
-  .detailsCell {
-    display: none;
+    padding: 8px;
   }
   
   .icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
   }
   
   .name {
     font-size: 11px;
+  }
+
+  .nameButton {
+    font-size: 11px;
+  }
+
+  .actionButton {
+    padding: 6px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .actionsCell {
+    gap: 2px;
   }
 }
 

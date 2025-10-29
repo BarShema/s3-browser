@@ -1,0 +1,39 @@
+<svg width="180" height="60" viewBox="0 0 180 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon Container -->
+  <g>
+    <!-- Drive/Hard Disk Icon -->
+    <rect x="5" y="15" width="36" height="30" rx="4" stroke="url(#iconBorder)" stroke-width="1.5"/>
+    
+    <!-- Inner Circle (Disk) -->
+    <circle cx="23" cy="30" r="8" fill="url(#iconGradient)"/>
+    <circle cx="23" cy="30" r="5" fill="url(#iconGradient)"/>
+    <circle cx="23" cy="30" r="2" fill="url(#iconGradient)"/>
+    
+    <!-- Drive Lines -->
+    <!-- <line x1="12" y1="20" x2="30" y2="20" stroke="rgba(0, 0, 0)" stroke-width="1"/> -->
+    <!-- <line x1="12" y1="26" x2="28" y2="26" stroke="rgba(0, 0, 0)" stroke-width="1"/> -->
+    <line x1="12" y1="34" x2="28" y2="34" stroke="#333" stroke-width="1"/>
+    <line x1="12" y1="40" x2="30" y2="40" stroke="#333" stroke-width="1"/>
+      </g>
+  
+  <!-- Text: "idits" -->
+  <text x="50" y="38" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="600" fill="#333" letter-spacing="-0.5px" stroke="rgba(81,190, 151, 0.5)" stroke-width="1">
+    idits
+  </text>
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#51be97;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3fa580;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6bc9a8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#51be97;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

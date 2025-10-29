@@ -169,24 +169,32 @@
   box-shadow: 0 0 0 3px var(--theme-focus-ring);
 }
 
+/* Tablet Responsive */
+@media (max-width: 1024px) {
+  .container {
+    padding: 12px;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: stretch;
-    padding: 12px;
+    padding: 10px;
   }
 
   .info {
     font-size: 12px;
     order: 1;
     align-self: center;
+    text-align: center;
   }
 
   .controls {
     flex-direction: column;
     gap: 12px;
-    align-items: center;
+    align-items: stretch;
     width: 100%;
   }
 
@@ -195,18 +203,83 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 4px;
+    width: 100%;
   }
 
   .button {
-    padding: 5px 8px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .pageInfo {
+    font-size: 13px;
+    margin: 0 4px;
   }
 
   .itemsPerPage {
     order: 2;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .itemsPerPage label {
+    font-size: 13px;
+  }
+
+  .select {
+    flex: 1;
+    min-height: 40px;
+    font-size: 13px;
   }
 
   .jumpTo {
     order: 3;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .jumpTo label {
+    font-size: 13px;
+  }
+
+  .input {
+    flex: 1;
+    min-height: 40px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .info {
+    font-size: 11px;
+  }
+
+  .button {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .pageInfo {
+    font-size: 12px;
+  }
+
+  .itemsPerPage label,
+  .jumpTo label {
+    font-size: 12px;
+  }
+
+  .select,
+  .input {
+    font-size: 12px;
+    min-height: 36px;
   }
 }

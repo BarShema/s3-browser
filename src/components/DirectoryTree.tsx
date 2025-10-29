@@ -60,30 +60,7 @@ export function DirectoryTree({
         console.log({ tree });
         setTreeData(tree);
 
-        // Only auto-expand to current path on first load
-        if (currentPathRef.current && !hasInitializedRef.current) {
-          setTimeout(async () => {
-            // We'll call expandToPath directly here to avoid circular dependency
-            const path = currentPathRef.current;
-            if (path && bucketName) {
-              const pathParts = path.split("/").filter(Boolean);
-              const expandedSet = new Set<string>();
-
-              // Add all parent paths to expanded set
-              for (let i = 1; i <= pathParts.length; i++) {
-                const parentPath = pathParts.slice(0, i).join("/");
-                expandedSet.add(parentPath);
-              }
-
-              setExpandedNodes(expandedSet);
-
-              // Load subdirectories for each parent directory if not already loaded
-              // Note: We can't use loadSubdirectories here due to circular dependency
-              // This will be handled by the expandToPath function when it's called
-            }
-            setHasInitialized(true);
-          }, 100);
-        }
+        // Note: Auto-expansion to current path is handled in useEffect below
       } else {
         console.log("No directories found in response:", data);
         setTreeData([]);
@@ -254,11 +231,14 @@ export function DirectoryTree({
 
       setExpandedNodes(expandedSet);
 
-      // Load subdirectories for each parent directory if not already loaded
+      // Load subdirectories for each parent directory sequentially
+      // This ensures that nested directories are available before we try to expand them
       for (let i = 1; i < pathParts.length; i++) {
         const parentPath = pathParts.slice(0, i).join("/");
         if (!loadedNodes.has(parentPath)) {
           await loadSubdirectories(parentPath);
+          // Small delay to ensure tree structure is updated
+          await new Promise((resolve) => setTimeout(resolve, 50));
         }
       }
     },
@@ -351,7 +331,13 @@ export function DirectoryTree({
   // Expand to current path when it changes (only on first load)
   useEffect(() => {
     if (currentPath && treeData.length > 0 && !hasInitialized) {
-      expandToPath(currentPath);
+      const expandPath = async () => {
+        await expandToPath(currentPath);
+        setHasInitialized(true);
+      };
+      expandPath();
+    } else if (!currentPath && treeData.length > 0 && !hasInitialized) {
+      // If no current path, just mark as initialized
       setHasInitialized(true);
     }
   }, [currentPath, treeData, expandToPath, hasInitialized]);

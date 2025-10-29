@@ -57,9 +57,19 @@ export function SidePreviewPanel({
   const [previousFile, setPreviousFile] = useState<FileItem | null>(null);
   const previousFileRef = useRef<FileItem | null>(null);
 
+  // Helper function to check if mobile
+  const checkIsMobile = () => {
+    return typeof window !== "undefined" && window.innerWidth <= 768;
+  };
+
   // Resizable preview panel (default 50% of viewport, stored as percentage)
+  // On mobile, always use 100% width (fullscreen)
   const [previewWidthPercent, setPreviewWidthPercent] = useState(() => {
     if (typeof window !== "undefined") {
+      // Check if mobile - don't use stored width on mobile
+      if (checkIsMobile()) {
+        return 100;
+      }
       const saved = localStorage.getItem("idits-drive-preview-width");
       if (saved) {
         const parsed = parseFloat(saved);
@@ -76,9 +86,41 @@ export function SidePreviewPanel({
   const startWidthRef = useRef(0);
   const justFinishedResizingRef = useRef(false);
 
+  // Handle window resize - update width for mobile/desktop
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("idits-drive-preview-width", previewWidthPercent.toString());
+    if (typeof window === "undefined") return;
+
+    const handleResize = () => {
+      if (checkIsMobile()) {
+        // On mobile, always use 100% width
+        setPreviewWidthPercent(100);
+      } else {
+        // On desktop, restore saved width or use default
+        const saved = localStorage.getItem("idits-drive-preview-width");
+        if (saved) {
+          const parsed = parseFloat(saved);
+          if (!isNaN(parsed) && parsed >= 20 && parsed <= 80) {
+            setPreviewWidthPercent(parsed);
+          } else {
+            setPreviewWidthPercent(50);
+          }
+        } else {
+          setPreviewWidthPercent(50);
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    // Only save width to localStorage on desktop (not mobile)
+    if (typeof window !== "undefined" && !checkIsMobile()) {
+      localStorage.setItem(
+        "idits-drive-preview-width",
+        previewWidthPercent.toString()
+      );
     }
   }, [previewWidthPercent]);
 
@@ -109,16 +151,16 @@ export function SidePreviewPanel({
       }, 100);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     };
   }, [isResizing, isOpen]);
 
@@ -179,7 +221,7 @@ export function SidePreviewPanel({
     // Check if this is an image or video that needs preview
     if (isImage(file.name) || isVideo(file.name)) {
       const newKey = `${file.id}-${file.key}`;
-      
+
       // If it's a different file, show loader and hide current content
       if (newKey !== currentPreviewKey && currentPreviewKey !== "") {
         // Store the current file as previous before switching
@@ -188,7 +230,7 @@ export function SidePreviewPanel({
         }
         setIsLoadingPreview(true);
       }
-      
+
       // Update the ref to track the current file for next switch
       previousFileRef.current = file;
       setCurrentPreviewKey(newKey);
@@ -225,11 +267,14 @@ export function SidePreviewPanel({
     onClose();
   };
 
+  // On mobile, always use 100% width regardless of state
+  const effectiveWidth = checkIsMobile() ? 100 : previewWidthPercent;
+
   return (
     <div
       className={`${styles.overlay} ${isExpanded ? styles.expanded : ""}`}
       onClick={handleOverlayClick}
-      style={isExpanded ? {} : { width: `${previewWidthPercent}%` }}
+      style={isExpanded ? {} : { width: `${effectiveWidth}%` }}
     >
       {!isExpanded && (
         <div
@@ -321,30 +366,22 @@ export function SidePreviewPanel({
             <>
               {isLoadingPreview && (
                 <div className={styles.previewLoader}>
-                  {previousFile && (isImage(previousFile.name) || isVideo(previousFile.name)) && (
-                    <div className={styles.previousPreview}>
-                      {isImage(previousFile.name) ? (
+                  {previousFile &&
+                    (isImage(previousFile.name) ||
+                      isVideo(previousFile.name)) && (
+                      <div className={styles.previousPreview}>
                         <img
                           src={`/api/s3/preview?path=${encodeURIComponent(
-                            `${bucketName}/${previousFile.key}`
+                            `${bucketName}/${file.key}`
                           )}&mw=400&mh=400`}
-                          alt={previousFile.name}
+                          alt={file.name}
                           className={styles.previousPreviewImage}
                         />
-                      ) : (
-                        <img
-                          src={`/api/s3/preview?path=${encodeURIComponent(
-                            `${bucketName}/${previousFile.key}`
-                          )}&mw=400&mh=400`}
-                          alt={previousFile.name}
-                          className={styles.previousPreviewImage}
-                        />
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
                   <div className={styles.loaderOverlay}>
                     <Loader2 size={48} className={styles.loaderIcon} />
-                    <p className={styles.loaderText}>Loading preview...</p>
+                    <p className={styles.loaderText}>Loading...</p>
                   </div>
                 </div>
               )}

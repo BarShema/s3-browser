@@ -14,40 +14,40 @@
   .container {
     padding: 16px 8px;
   }
-  
+
   .header {
     margin-bottom: 16px;
   }
-  
+
   .headerContent {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .title {
     font-size: 24px;
   }
-  
+
   .subtitle {
     font-size: 14px;
   }
-  
+
   .headerRight {
     width: 100%;
   }
-  
+
   .driveCard {
     padding: 16px;
   }
-  
+
   .driveTitle {
     font-size: 18px;
   }
-  
+
   .driveDescription {
     font-size: 13px;
   }
-  
+
   .driveStats {
     font-size: 12px;
   }
@@ -57,31 +57,31 @@
   .container {
     padding: 12px 6px;
   }
-  
+
   .header {
     margin-bottom: 12px;
   }
-  
+
   .title {
     font-size: 20px;
   }
-  
+
   .subtitle {
     font-size: 13px;
   }
-  
+
   .driveCard {
     padding: 12px;
   }
-  
+
   .driveTitle {
     font-size: 16px;
   }
-  
+
   .driveDescription {
     font-size: 12px;
   }
-  
+
   .driveStats {
     font-size: 11px;
   }
@@ -159,6 +159,12 @@
 
 .userDetails {
   display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.userInfoDetails {
+  display: flex;
   flex-direction: column;
 }
 
@@ -211,7 +217,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loadingText {
@@ -276,4 +284,3 @@
 .arrow {
   color: var(--theme-accent-septenary);
 }
-

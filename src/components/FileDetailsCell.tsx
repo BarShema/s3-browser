@@ -1,8 +1,7 @@
 "use client";
 
-import { FileItem } from "@/lib/utils";
-import { isImage, isVideo } from "@/lib/utils";
-import { Ruler, Clock, Loader2 } from "lucide-react";
+import { FileItem, isImage, isVideo } from "@/lib/utils";
+import { Clock, Loader2, Ruler } from "lucide-react";
 import styles from "./fileList.module.css";
 
 interface FileDetailsCellProps {
@@ -42,7 +41,6 @@ export function FileDetailsCell({
           e.stopPropagation();
           onLoadMetadata(fileId);
         }}
-        title="Click to load image dimensions"
       />
     );
   }
@@ -56,11 +54,9 @@ export function FileDetailsCell({
           e.stopPropagation();
           onLoadMetadata(fileId);
         }}
-        title="Click to load video duration"
       />
     );
   }
 
   return <span>-</span>;
 }
-

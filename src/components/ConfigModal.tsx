@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import configStyles from "./configModal.module.css";
 import styles from "./modal.module.css";
 
@@ -18,6 +18,18 @@ export function ConfigModal({
   initialBucket = "",
 }: ConfigModalProps) {
   const [bucket, setBucket] = useState(initialBucket);
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

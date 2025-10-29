@@ -28,6 +28,18 @@ export function FileDetailsModal({
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [showProperties, setShowProperties] = useState(true);
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen || !file) {
       setMetadata(null);

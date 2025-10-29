@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Folder } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -27,6 +27,18 @@ interface UploadFile {
 export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPath }: UploadModalProps) {
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: UploadFile[] = acceptedFiles.map(file => ({

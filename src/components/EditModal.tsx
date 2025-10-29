@@ -26,6 +26,18 @@ export function EditModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen && file) {
       loadFileContent();

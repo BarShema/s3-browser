@@ -1,6 +1,7 @@
 "use client";
 
 import { Settings } from "lucide-react";
+import { useEffect } from "react";
 import styles from "./deleteProtectionModal.module.css";
 
 interface DeleteProtectionModalProps {
@@ -14,6 +15,18 @@ export function DeleteProtectionModal({
   onClose,
   onGoToSettings,
 }: DeleteProtectionModalProps) {
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (

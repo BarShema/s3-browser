@@ -92,6 +92,18 @@ export function SidePreviewPanel({
     }
   }, [isOpen, file]);
 
+  // Disable body scroll when preview panel is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   // Handle preview loading state when switching between images/videos
   useEffect(() => {
     if (!file) {

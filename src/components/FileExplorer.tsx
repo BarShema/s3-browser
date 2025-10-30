@@ -23,9 +23,10 @@ import {
   isAudio as isAudioFile,
   isImage as isImageFile,
   isVideo as isVideoFile,
+  generateStableIdFromString,
 } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { DeleteProtectionModal } from "./DeleteProtectionModal";
@@ -55,6 +56,7 @@ export function FileExplorer({
 }: FileExplorerProps) {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [directories, setDirectories] = useState<DirectoryItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -341,17 +343,19 @@ export function FileExplorer({
 
         const data = await response.json();
 
-        // Convert S3 objects to our item types
+        // Convert S3 objects to our item types (deterministic IDs based on key)
         const fileItems = data.files.map((file: S3File) => ({
           ...file,
-          id: Math.random().toString(36).substr(2, 9),
+          id: generateStableIdFromString(file.key),
           isDirectory: false,
           lastModified: new Date(file.lastModified),
         }));
 
         const directoryItems = data.directories.map((dir: S3Directory) => ({
           ...dir,
-          id: Math.random().toString(36).substr(2, 9),
+          id: generateStableIdFromString(dir.key),
+          isDirectory: true,
+          lastModified: new Date(dir.lastModified),
         }));
 
         // Apply client-side type filters for images/videos/docs/sound
@@ -449,6 +453,17 @@ export function FileExplorer({
   useEffect(() => {
     loadFiles(currentPath);
   }, [currentPath, loadFiles]);
+
+  useEffect(() => {
+    const previewKey = searchParams?.get("preview");
+    if (previewKey && files.length > 0) {
+      const found = files.find((f) => f.key === previewKey);
+      if (found) {
+        setPreviewFile(found);
+        setIsPreviewOpen(true);
+      }
+    }
+  }, [searchParams, files]);
 
   // Merge directory sizes with directory information
   const directoriesWithSizes = directories.map((dir) => {
@@ -559,6 +574,11 @@ export function FileExplorer({
   const handleFileClick = (file: FileItem) => {
     setPreviewFile(file);
     setIsPreviewOpen(true);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("preview", file.key);
+      router.push(url.pathname + "?" + url.searchParams.toString(), { scroll: false });
+    } catch {}
   };
 
   const handleDownload = async (file: FileItem) => {
@@ -1007,12 +1027,56 @@ export function FileExplorer({
         file={previewFile}
         bucketName={bucketName}
         isOpen={isPreviewOpen}
-        onClose={handleClosePreview}
+        onClose={() => {
+          handleClosePreview();
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("preview");
+            const qs = url.searchParams.toString();
+            router.replace(url.pathname + (qs ? "?" + qs : ""), { scroll: false });
+          } catch {}
+        }}
         onDownload={handleDownload}
         onRename={handleRename}
         onDelete={handleDelete}
         onEdit={handleEdit}
         onDetailsClick={handleDetailsClick}
+        onPrev={() => {
+          if (!previewFile) return;
+          const idx = files.findIndex((f) => f.key === previewFile.key);
+          if (idx > 0) {
+            const nextFile = files[idx - 1];
+            setPreviewFile(nextFile);
+            try {
+              const url = new URL(window.location.href);
+              url.searchParams.set("preview", nextFile.key);
+              router.replace(url.pathname + "?" + url.searchParams.toString(), { scroll: false });
+            } catch {}
+          }
+        }}
+        onNext={() => {
+          if (!previewFile) return;
+          const idx = files.findIndex((f) => f.key === previewFile.key);
+          if (idx >= 0 && idx < files.length - 1) {
+            const nextFile = files[idx + 1];
+            setPreviewFile(nextFile);
+            try {
+              const url = new URL(window.location.href);
+              url.searchParams.set("preview", nextFile.key);
+              router.replace(url.pathname + "?" + url.searchParams.toString(), { scroll: false });
+            } catch {}
+          }
+        }}
+        canPrev={(() => {
+          if (!previewFile) return false;
+          const idx = files.findIndex((f) => f.key === previewFile.key);
+          return idx > 0;
+        })()}
+        canNext={(() => {
+          if (!previewFile) return false;
+          const idx = files.findIndex((f) => f.key === previewFile.key);
+          return idx >= 0 && idx < files.length - 1;
+        })()}
       />
       <DeleteProtectionModal
         isOpen={isDeleteProtectionModalOpen}

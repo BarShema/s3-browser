@@ -24,52 +24,37 @@ export function ImagePreview({
   const effectRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Track this effect instance
     effectRef.current = src;
-
-    // Use the preview endpoint directly as image source
+    let canceled = false;
     const fetchThumbnailUrl = async () => {
       try {
         const previewUrl = `/api/s3/preview?path=${encodeURIComponent(
           src
         )}&mw=${maxWidth}&mh=${maxHeight}`;
-
-        // Test if the preview URL loads
-        const testImg = document.createElement("img");
-
-        const handleLoad = () => {
-          // Only update if this is still the current effect
-          if (effectRef.current === src) {
+        const testImg = new window.Image();
+        testImg.onload = () => {
+          if (!canceled && effectRef.current === src) {
+            setHasError(false);
             setImageUrl(previewUrl);
-            onLoad?.();
           }
         };
-
-        const handleError = () => {
-          // Only update if this is still the current effect
-          if (effectRef.current === src) {
+        testImg.onerror = () => {
+          if (!canceled && effectRef.current === src) {
             setHasError(true);
           }
         };
-
-        testImg.addEventListener("load", handleLoad);
-        testImg.addEventListener("error", handleError);
-
         testImg.src = previewUrl;
-
-        return () => {
-          testImg.removeEventListener("load", handleLoad);
-          testImg.removeEventListener("error", handleError);
-        };
       } catch (error) {
         console.error("Error loading thumbnail:", error);
-        if (effectRef.current === src) {
+        if (!canceled && effectRef.current === src) {
           setHasError(true);
         }
       }
     };
-
     fetchThumbnailUrl();
+    return () => {
+      canceled = true;
+    };
   }, [src, maxWidth, maxHeight]);
 
   if (hasError) {
@@ -88,13 +73,18 @@ export function ImagePreview({
       </div>
     );
   }
-
+  if (!imageUrl) {
+    return null;
+  }
   return (
     <img
-      src={imageUrl || ""}
+      key={imageUrl}
+      src={imageUrl}
       alt={alt}
       className={className}
-      onLoad={() => onLoad?.()}
+      onLoad={() => {
+        onLoad?.();
+      }}
     />
   );
 }

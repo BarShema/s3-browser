@@ -53,17 +53,13 @@ export function DirectoryTree({
       const response = await fetch(`/api/s3?path=${bucketName}&limit=1000`);
       const data = await response.json();
 
-      console.log("DirectoryTree API Response:", data);
-
       if (data.directories) {
         const tree = buildTreeStructure(data.directories);
-        console.log({ tree });
-        setTreeData(tree);
+                setTreeData(tree);
 
         // Note: Auto-expansion to current path is handled in useEffect below
       } else {
-        console.log("No directories found in response:", data);
-        setTreeData([]);
+                setTreeData([]);
       }
     } catch (error) {
       console.error("Error fetching directory structure:", error);
@@ -90,8 +86,6 @@ export function DirectoryTree({
           `/api/s3?path=${bucketName}/${directoryKey}&limit=1000`
         );
         const data = await response.json();
-
-        console.log(`Loading subdirectories for ${directoryKey}:`, data);
 
         // Filter out the origin directory and any parent directories from the results
         const filteredDirectories =

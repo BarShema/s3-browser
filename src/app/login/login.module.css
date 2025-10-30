@@ -128,7 +128,7 @@
   margin-bottom: 40px;
 }
 
-.iconContainer {
+/* .iconContainer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -138,7 +138,7 @@
   border-radius: 16px;
   margin-bottom: 24px;
   box-shadow: 0 4px 6px -1px var(--theme-shadow-rgba-accent-dark);
-}
+} */
 
 .iconLock {
   width: 36px;
@@ -178,7 +178,7 @@
 .errorMessage {
   background: var(--theme-bg-error-light);
   border: 1px solid var(--theme-border-error-light);
-  color: var(--theme-text-error-light);
+  color: var(--theme-text-octonary);
   padding: 16px 20px;
   border-radius: 12px;
   display: flex;
@@ -247,7 +247,7 @@
 
 .loginButton {
   width: 100%;
-  background: linear-gradient(to right, var(--theme-accent-primary), var(--theme-accent-secondary));
+  background: linear-gradient(to right, var(--theme-text-secondary), var(--theme-accent-secondary));
   color: var(--theme-text-primary);
   padding: 16px 24px;
   border-radius: 12px;
@@ -259,11 +259,12 @@
   justify-content: center;
   box-shadow: 0 10px 15px -3px var(--theme-shadow-rgba-accent-dark);
   transition: all 0.2s;
+  opacity: 0.8;
 }
 
 .loginButton:hover:not(:disabled) {
-  background: linear-gradient(to right, var(--theme-accent-hover), var(--theme-accent-secondary));
   box-shadow: 0 10px 15px -3px var(--theme-shadow-rgba-accent-darker);
+  opacity: 1;
 }
 
 .loginButton:disabled {

@@ -34,6 +34,16 @@ export function ThemeSelector() {
       >
         <option value="default">Default</option>
         <option value="night">Night</option>
+        <option value="forest">Forest</option>
+        <option value="ocean">Ocean</option>
+        <option value="rose">Rose</option>
+        <option value="desert">Desert</option>
+        <option value="sunset">Sunset</option>
+        <option value="lavender">Lavender</option>
+        <option value="charcoal">Charcoal</option>
+        <option value="emerald">Emerald</option>
+        <option value="aws">AWS</option>
+        <option value="vscode">VSCode</option>
       </select>
     </div>
   );

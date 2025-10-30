@@ -69,7 +69,10 @@ export default function LoginPage() {
       <div className={styles.loginContainer}>
         <div className={styles.loginHeader}>
           <div className={styles.iconContainer}>
-            <Lock className={styles.iconLock} />
+            <img
+              src="/logo.svg"
+              alt="Idit File Browser"
+            />
           </div>
           <h1 className={styles.loginTitle}>Idit File Browser</h1>
           <p className={styles.loginSubtitle}>Sign in to access your files</p>

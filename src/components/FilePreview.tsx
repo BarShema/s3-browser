@@ -18,12 +18,12 @@ import {
   Eye,
   EyeOff,
   Folder,
-  Minus,
-  Plus,
   Trash2,
   Ruler,
   Clock,
   Info,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
@@ -165,11 +165,10 @@ export function FilePreview({
             )
           }
           disabled={itemsPerRow <= appConfig.previewView.minItemsPerRow}
-          title="Decrease items per row"
+          title="Zoom in"
         >
-          <Minus size={16} />
+          <ZoomIn size={16} />
         </button>
-        <span className={styles.gridControlCount}>{itemsPerRow}</span>
         <button
           className={styles.gridControlButton}
           onClick={() =>
@@ -178,9 +177,9 @@ export function FilePreview({
             )
           }
           disabled={itemsPerRow >= appConfig.previewView.maxItemsPerRow}
-          title="Increase items per row"
+          title="Zoom out"
         >
-          <Plus size={16} />
+          <ZoomOut size={16} />
         </button>
         {hasPreviewFiles && (
           <button

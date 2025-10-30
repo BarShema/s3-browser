@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
       Key: key,
     });
 
-    console.log({ bucket, key });
+    
     const response = await s3Client.send(getObjectCommand);
 
     if (!response.Body) {

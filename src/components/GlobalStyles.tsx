@@ -82,6 +82,7 @@ export function GlobalStyles() {
           border-radius: 6px;
           font-size: 14px;
           padding: 8px 12px;
+          border: 1px solid var(--gray-300);
         }
 
         .input {

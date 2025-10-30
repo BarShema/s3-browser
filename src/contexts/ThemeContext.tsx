@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type Theme = "default" | "night";
+export type Theme = "default" | "night" | "forest" | "ocean" | "rose" | "desert" | "sunset" | "lavender" | "charcoal" | "emerald" | "aws" | "vscode";
 
 interface ThemeContextType {
   theme: Theme;

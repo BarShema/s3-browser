@@ -75,11 +75,11 @@ export async function GET(request: NextRequest) {
     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
     const totalSizeMB = totalSize / (1024 * 1024);
 
-    console.log(`Directory: ${directoryName}, Files: ${files.length}, Size: ${totalSizeMB.toFixed(2)} MB`);
+    
 
     // For small directories (≤100 files AND ≤50MB), create ZIP
     if (files.length <= 100 && totalSizeMB <= 50) {
-      console.log(`Creating ZIP for ${files.length} files (${totalSizeMB.toFixed(2)} MB)`);
+      
 
       // Create ZIP file in memory
       const archive = archiver("zip", {
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
       // Combine all chunks into a single buffer
       const zipBuffer = Buffer.concat(chunks);
 
-      console.log(`ZIP created successfully: ${zipBuffer.length} bytes`);
+      
 
       // Return the ZIP file directly
       return new NextResponse(zipBuffer, {

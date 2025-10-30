@@ -256,6 +256,19 @@ export function getFileDetails(file: FileItem): string {
   return "";
 }
 
+// Generate a stable hash-based id from a string (djb2)
+export function generateStableIdFromString(input: string): string {
+  let hash = 5381;
+  for (let i = 0; i < input.length; i++) {
+    // hash * 33 + charCode
+    hash = ((hash << 5) + hash) + input.charCodeAt(i);
+    // Convert to 32-bit int
+    hash = hash | 0;
+  }
+  // Ensure unsigned and encode compactly
+  return `id_${(hash >>> 0).toString(36)}`;
+}
+
 // Generate unique ID for items
 export function generateId(): string {
   return Math.random().toString(36).substr(2, 9);
@@ -263,9 +276,10 @@ export function generateId(): string {
 
 // Convert S3File to FileItem
 export function s3FileToFileItem(file: S3File): FileItem {
+  const fullPath = file.key; // key is unique and stable within bucket
   return {
     ...file,
-    id: generateId(),
+    id: generateStableIdFromString(fullPath),
   };
 }
 
@@ -273,8 +287,9 @@ export function s3FileToFileItem(file: S3File): FileItem {
 export function s3DirectoryToDirectoryItem(
   directory: S3Directory
 ): DirectoryItem {
+  const fullPath = directory.key;
   return {
     ...directory,
-    id: generateId(),
+    id: generateStableIdFromString(fullPath),
   };
 }

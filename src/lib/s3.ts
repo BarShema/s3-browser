@@ -121,13 +121,6 @@ export async function listS3Objects(
           const pathParts = fullPath.split("/").filter(Boolean);
           const dirName = pathParts[pathParts.length - 1] || "Unnamed Folder";
 
-          console.log("Prefix:", prefix);
-          console.log("Directory:", {
-            key: prefixObj.Prefix,
-            name: dirName,
-            lastModified: new Date(),
-            isDirectory: true,
-          });
           directories.push({
             key: prefixObj.Prefix,
             name: dirName,
@@ -151,11 +144,11 @@ export async function listS3Objects(
         // Extract all parent directories
         for (let i = 1; i < pathParts.length; i++) {
           const dirPath = pathParts.slice(0, i).join("/") + "/";
-          
+
           if (directorySet.has(dirPath)) continue;
 
           const dirName = pathParts[i - 1];
-          
+
           // Skip if this directory is part of the prefix path
           if (prefixParts.includes(dirName)) continue;
 
@@ -165,7 +158,7 @@ export async function listS3Objects(
             lastModified: new Date(),
             isDirectory: true,
           });
-          
+
           directorySet.add(dirPath);
         }
       }
@@ -318,12 +311,12 @@ export async function getBucketRegion(bucket: string): Promise<string> {
 export async function getS3ClientForBucket(bucket: string): Promise<S3Client> {
   const region = await getBucketRegion(bucket);
   const config = getS3Config();
-  
+
   // If region matches, return existing client
   if (config.region === region) {
     return s3Client;
   }
-  
+
   // Create new client with bucket's region
   return new S3Client({
     ...config,

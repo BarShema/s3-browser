@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
       // Thumbnail doesn't exist or temp bucket is not accessible
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.log("Thumbnail not found in temp bucket or temp bucket not accessible:", errorMessage);
+      
     }
 
     // Get original file from S3
@@ -145,11 +145,11 @@ export async function GET(request: NextRequest) {
         });
 
         await tempS3Client.send(putThumbnailCommand);
-        console.log(`Thumbnail saved to temp bucket: ${tempBucket}/${thumbnailKey}`);
+        
       } catch (error: unknown) {
         console.error("Error saving thumbnail to temp bucket:", error instanceof Error ? error.message : 'Unknown error');
         // If temp bucket fails, just return the thumbnail without caching
-        console.log("Returning thumbnail without caching due to temp bucket error");
+        
       }
     }
 

@@ -10,6 +10,8 @@ import {
   isVideo,
 } from "@/lib/utils";
 import {
+  ChevronLeft,
+  ChevronRight,
   Download,
   Edit3,
   FileText,
@@ -35,6 +37,10 @@ interface SidePreviewPanelProps {
   onDelete: (file: FileItem) => void;
   onEdit: (file: FileItem) => void;
   onDetailsClick?: (file: FileItem) => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  canPrev?: boolean;
+  canNext?: boolean;
 }
 
 export function SidePreviewPanel({
@@ -47,6 +53,10 @@ export function SidePreviewPanel({
   onDelete,
   onEdit,
   onDetailsClick,
+  onPrev,
+  onNext,
+  canPrev,
+  canNext,
 }: SidePreviewPanelProps) {
   const [textContent, setTextContent] = useState<string>("");
   const [isLoadingText, setIsLoadingText] = useState(false);
@@ -211,6 +221,7 @@ export function SidePreviewPanel({
   // Handle preview loading state when switching between images/videos
   useEffect(() => {
     if (!file) {
+      console.log("loading preview false 1");
       setIsLoadingPreview(false);
       setCurrentPreviewKey("");
       setPreviousFile(null);
@@ -222,12 +233,15 @@ export function SidePreviewPanel({
     if (isImage(file.name) || isVideo(file.name)) {
       const newKey = `${file.id}-${file.key}`;
 
+      console.log("keys", { newKey, currentPreviewKey });
+
       // If it's a different file, show loader and hide current content
-      if (newKey !== currentPreviewKey && currentPreviewKey !== "") {
+      if (newKey !== currentPreviewKey) {
         // Store the current file as previous before switching
         if (previousFileRef.current) {
           setPreviousFile(previousFileRef.current);
         }
+        console.log("loading preview true 1");
         setIsLoadingPreview(true);
       }
 
@@ -235,6 +249,7 @@ export function SidePreviewPanel({
       previousFileRef.current = file;
       setCurrentPreviewKey(newKey);
     } else {
+      console.log("loading preview false 2");
       setIsLoadingPreview(false);
       setCurrentPreviewKey("");
       setPreviousFile(null);
@@ -244,6 +259,7 @@ export function SidePreviewPanel({
 
   // Callback to handle when preview finishes loading
   const handlePreviewLoaded = () => {
+    console.log("loading preview false 3");
     setIsLoadingPreview(false);
   };
 
@@ -358,6 +374,30 @@ export function SidePreviewPanel({
               <X size={16} />
             </button>
           </div>
+          <div className={styles.headerCenter}>
+            <button
+              className={styles.actionButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrev && onPrev();
+              }}
+              title="Previous"
+              disabled={onPrev ? !canPrev : true}
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              className={styles.actionButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                onNext && onNext();
+              }}
+              title="Next"
+              disabled={onNext ? !canNext : true}
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -397,8 +437,8 @@ export function SidePreviewPanel({
                     src={`${bucketName}/${file.key}`}
                     alt={file.name}
                     className={styles.previewContent}
-                    maxWidth={800}
-                    maxHeight={600}
+                    maxWidth={1000}
+                    maxHeight={1000}
                     onLoad={handlePreviewLoaded}
                   />
                 ) : (

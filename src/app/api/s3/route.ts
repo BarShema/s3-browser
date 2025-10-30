@@ -41,16 +41,8 @@ export async function GET(request: NextRequest) {
 
     // Add trailing slash to prefix for S3 listing
     const s3Prefix = prefix ? `${prefix}/` : "";
-
-    console.log(`S3 API: Listing bucket=${bucket}, prefix="${s3Prefix}"`);
-
     const result = await listS3Objects(bucket, s3Prefix);
-    console.log("Result:", result);
-    console.log(
-      `S3 API: Found ${result.files.length} files, ${result.directories.length} directories`
-    );
-    console.log("Directories:", result.directories);
-
+    
     // Apply client-side filtering and pagination
     let filteredFiles = result.files;
     let filteredDirectories = result.directories;

@@ -2,8 +2,8 @@
 
 import { AuthGuard } from "@/components/AuthGuard";
 import { DriveCard } from "@/components/DriveCard";
+import { PageHeader } from "@/components/pageHeader";
 import { SettingsModal } from "@/components/SettingsModal";
-import { UserMenu } from "@/components/UserMenu";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -36,31 +36,12 @@ export default function Home() {
     <AuthGuard>
       <main className={styles.mainContainer}>
         <div className={styles.container}>
-          <div className={styles.header}>
-            <div className={styles.headerContent}>
-              <div className={styles.headerLeft}>
-                <div>
-                  <h1 className={styles.title}>
-                    {/* <img
-                      src="/logo.svg"
-                      alt="Idit File Browser Logo"
-                      className={styles.logo}
-                    /> */}
-                    Idit File Browser
-                  </h1>
-                  <p className={styles.subtitle}>
-                    Browse, manage, and organize your files with ease
-                  </p>
-                </div>
-              </div>
-
-              <UserMenu
-                user={user}
-                onLogout={handleLogout}
-                onOpenSettings={() => setIsSettingsOpen(true)}
-              />
-            </div>
-          </div>
+          <PageHeader
+            bucketName={""}
+            user={user}
+            handleLogout={handleLogout}
+            setIsSettingsOpen={setIsSettingsOpen}
+          />
 
           <div className={styles.driveSelectContainer}>
             <h2 className={styles.driveSelectTitle}>Select a Drive</h2>

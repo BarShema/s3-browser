@@ -80,16 +80,16 @@ export async function GET(request: NextRequest) {
       
       if (directoryData) {
         // Check if directory is too large (more than 10,000 objects or 1GB)
-        const isTooLarge = directoryData.objects > 10000 || directoryData.size > 1024 * 1024 * 1024;
+        // const isTooLarge = directoryData.objects > 10000 || directoryData.size > 1024 * 1024 * 10240;
         
-        if (isTooLarge) {
-          return NextResponse.json({
-            error: "Directory too large to calculate",
-            totalSize: 0,
-            totalObjects: 0,
-            formattedSize: "Too large",
-          });
-        }
+        // if (isTooLarge) {
+        //   return NextResponse.json({
+        //     error: "Directory too large to calculate",
+        //     totalSize: 0,
+        //     totalObjects: 0,
+        //     formattedSize: "Too large",
+        //   });
+        // }
         
         return NextResponse.json({
           totalSize: directoryData.size,

@@ -3,11 +3,10 @@
 import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
 import { FileExplorer } from "@/components/FileExplorer";
+import { PageHeader } from "@/components/pageHeader";
 import { SettingsModal } from "@/components/SettingsModal";
-import { UserMenu } from "@/components/UserMenu";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
@@ -44,43 +43,12 @@ export default function Home() {
     <AuthGuard>
       <main className={styles.mainContainer}>
         <div className={styles.container}>
-          <div className={styles.header}>
-            <div className={styles.headerContent}>
-              <div className={styles.headerLeft}>
-                <div>
-                  <h1 className={styles.title}>
-                    {/* <img
-                      src="/logo.svg"
-                      alt="Idit File Browser Logo"
-                      className={styles.logo}
-                    /> */}
-                    Idit File Browser
-                  </h1>
-
-                  <p className={styles.subtitle}>
-                    Browse, manage, and organize your files with ease
-                  </p>
-                  {bucketName && (
-                    <div className={styles.bucketInfo}>
-                      <span className={styles.bucketLabel}>
-                        Current Drive:{" "}
-                        <span className={styles.bucketName}>{bucketName}</span>
-                        <Link href="/" className={styles.changeBucket}>
-                          Change
-                        </Link>
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <UserMenu
-                user={user}
-                onLogout={handleLogout}
-                onOpenSettings={() => setIsSettingsOpen(true)}
-              />
-            </div>
-          </div>
+          <PageHeader
+            bucketName={bucketName}
+            user={user}
+            handleLogout={handleLogout}
+            setIsSettingsOpen={setIsSettingsOpen}
+          />
 
           {bucketName ? (
             <FileExplorer

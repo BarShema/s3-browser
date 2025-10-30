@@ -32,10 +32,6 @@
     font-size: 14px;
   }
 
-  .headerRight {
-    width: 100%;
-  }
-
   .driveCard {
     padding: 16px;
   }
@@ -85,38 +81,6 @@
   .driveStats {
     font-size: 11px;
   }
-}
-
-.header {
-  margin-bottom: 32px;
-}
-
-.headerContent {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.headerLeft {
-  flex: 1;
-}
-
-.title {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--theme-text-hexary);
-  margin-bottom: 8px;
-}
-
-.subtitle {
-  color: var(--theme-text-septenary);
-}
-
-.bucketInfo {
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
 }
 
 .bucketLabel {

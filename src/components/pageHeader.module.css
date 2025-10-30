@@ -1,0 +1,99 @@
+.header {
+  margin-bottom: 32px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.headerLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.headerRight {
+  width: 100%;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--theme-text-hexary);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--theme-text-septenary);
+}
+
+.bucketInfo {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bucketLabel {
+  font-size: 14px;
+  color: var(--theme-text-secondary);
+}
+
+.bucketName {
+  font-weight: 500;
+  color: var(--theme-text-primary);
+  margin: 0 5px;
+}
+
+.changeBucket {
+  font-size: 14px;
+  color: var(--theme-accent-primary);
+  background: none;
+  font-size: 12px;
+  border: none;
+  margin: 5px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.changeBucket:hover {
+  color: var(--theme-accent-hover);
+}
+
+@media (max-width: 768px) {
+  .header {
+    margin-bottom: 16px;
+  }
+  .headerContent {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .title {
+    font-size: 24px;
+  }
+  .subtitle {
+    font-size: 14px;
+  }
+  .headerRight {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    margin-bottom: 12px;
+  }
+  .title {
+    font-size: 20px;
+  }
+  .subtitle {
+    font-size: 13px;
+  }
+  .headerLeft {
+    gap: 10px;
+  }
+}

@@ -36,7 +36,7 @@
     min-width: unset !important;
     max-width: none !important;
     max-height: 300px;
-    order: 2;
+    order: 1; /* Show above explorer */
     position: relative;
   }
 
@@ -45,7 +45,7 @@
   }
 
   .mainContent {
-    order: 1;
+    order: 2; /* Show below directory tree */
     min-height: 0;
     width: 100%;
   }

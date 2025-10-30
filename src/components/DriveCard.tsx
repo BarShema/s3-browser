@@ -85,8 +85,6 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
           </div>
         )}
       </div>
-
-      <span className={styles.driveArrow}>→</span>
     </button>
   );
 }

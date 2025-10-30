@@ -8,7 +8,7 @@
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 5px;
   min-height: 120px;
   position: relative;
   overflow: hidden;
@@ -23,6 +23,7 @@
 
 .driveHeader {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 12px;
 }
@@ -48,8 +49,7 @@
 
 .loadingState {
   color: var(--theme-text-secondary);
-  margin-top: auto;
-  margin-right: 10px;
+  margin: auto;
 }
 
 .spinner {
@@ -69,12 +69,13 @@
 
 .sizeInfo {
   text-align: center;
+  margin: auto;
 }
 
 .sizeValue {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--theme-text-primary);
+  color: var(--theme-text-secondary);
   margin-bottom: 4px;
 }
 
@@ -92,7 +93,7 @@
   cursor: pointer;
   transition: all 0.2s;
   color: var(--theme-text-secondary);
-  margin-left: auto;
+  margin: auto;
   justify-content: center;
 }
 
@@ -114,19 +115,6 @@
 .calculateText {
   font-size: 14px;
   font-weight: 500;
-}
-
-.driveArrow {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  font-size: 20px;
-  color: var(--theme-text-tertiary);
-  transition: color 0.2s ease;
-}
-
-.bucketCard:hover .driveArrow {
-  color: var(--theme-accent-quinary);
 }
 
 @keyframes spin {

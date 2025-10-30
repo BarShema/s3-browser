@@ -4,10 +4,9 @@ import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
 import { FileExplorer } from "@/components/FileExplorer";
 import { SettingsModal } from "@/components/SettingsModal";
-import { ThemeSelector } from "@/components/ThemeSelector";
+import { UserMenu } from "@/components/UserMenu";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -75,30 +74,11 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className={styles.userMenu}>
-                <div className={styles.userInfo}>
-                  <div className={styles.userDetails}>
-                    <User size={18} style={{ color: "#6b7280" }} />
-                    <div className={styles.userInfoDetails}>
-                      <span className={styles.userName}>{user?.username}</span>
-                      {user?.email && (
-                        <span className={styles.userEmail}>{user.email}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <ThemeSelector />
-                <button
-                  onClick={() => setIsSettingsOpen(true)}
-                  className={styles.settingsButton}
-                  title="Settings"
-                >
-                  <Settings size={16} />
-                </button>
-                <button onClick={handleLogout} className={styles.logoutButton}>
-                  <LogOut size={14} />
-                </button>
-              </div>
+              <UserMenu
+                user={user}
+                onLogout={handleLogout}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+              />
             </div>
           </div>
 

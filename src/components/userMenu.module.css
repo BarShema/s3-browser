@@ -1,0 +1,81 @@
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--theme-bg-primary);
+  flex-flow: wrap;
+  justify-content: center;
+  border-radius: 8px;
+  width: fit-content;
+  height: fit-content;
+  border: 1px solid var(--theme-border-primary);
+  padding: 8px 16px;
+  box-shadow: var(--theme-shadow-sm);
+  justify-self: end;
+}
+
+.userInfo {
+  display: flex;
+}
+
+.userDetails {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.userInfoDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--theme-text-primary);
+}
+
+.userEmail {
+  font-size: 12px;
+  color: var(--theme-text-secondary);
+}
+
+.settingsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-secondary);
+  border: 1px solid var(--theme-border-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settingsButton:hover {
+  background: var(--theme-bg-tertiary);
+  color: var(--theme-text-primary);
+  border-color: var(--theme-border-primary);
+}
+
+.logoutButton {
+  margin-left: 16px;
+  padding: 4px 12px;
+  background: var(--theme-bg-error-light);
+  color: var(--theme-error);
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+  background: var(--theme-bg-error-medium);
+}

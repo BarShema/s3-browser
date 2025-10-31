@@ -1,5 +1,6 @@
 "use client";
 
+import { appConfig } from "@/config/app";
 import { ChevronDown, ChevronRight, Folder, FolderOpen } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./directoryTree.module.css";
@@ -55,11 +56,11 @@ export function DirectoryTree({
 
       if (data.directories) {
         const tree = buildTreeStructure(data.directories);
-                setTreeData(tree);
+        setTreeData(tree);
 
         // Note: Auto-expansion to current path is handled in useEffect below
       } else {
-                setTreeData([]);
+        setTreeData([]);
       }
     } catch (error) {
       console.error("Error fetching directory structure:", error);
@@ -83,7 +84,7 @@ export function DirectoryTree({
 
       try {
         const response = await fetch(
-          `/api/s3?path=${bucketName}/${directoryKey}&limit=1000`
+          `${appConfig.apiBaseUrl}/api/s3?path=${bucketName}/${directoryKey}&limit=1000`
         );
         const data = await response.json();
 

@@ -15,6 +15,7 @@ import {
   ChevronsUpDown,
   Info
 } from 'lucide-react';
+import { isViewModeEnabled } from '@/lib/preferences';
 import { FileIcon } from './FileIcon';
 import { FileDetailsCell } from './FileDetailsCell';
 import styles from './fileList.module.css';
@@ -352,27 +353,30 @@ export function FileList({
                 </button>
               )}
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  startRename(item);
-                }}
-                className={`${styles.actionButton} yellow`}
-                title="Rename"
-              >
-                <Edit3 size={16} />
-              </button>
-              
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(item as FileItem);
-                }}
-                className={`${styles.actionButton} red`}
-                title="Delete"
-              >
-                <Trash2 size={16} />
-              </button>
+              {(!isViewModeEnabled()) && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startRename(item);
+                    }}
+                    className={`${styles.actionButton} yellow`}
+                    title="Rename"
+                  >
+                    <Edit3 size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(item as FileItem);
+                    }}
+                    className={`${styles.actionButton} red`}
+                    title="Delete"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

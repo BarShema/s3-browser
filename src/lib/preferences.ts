@@ -4,10 +4,12 @@
 
 export interface UserPreferences {
   deleteProtection: boolean;
+  viewMode: boolean;
 }
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   deleteProtection: true,
+  viewMode: true,
 };
 
 const PREFERENCES_KEY = "idits-drive-preferences";
@@ -52,5 +54,9 @@ export function updatePreference<K extends keyof UserPreferences>(
 
 export function isDeleteProtectionEnabled(): boolean {
   return getPreferences().deleteProtection;
+}
+
+export function isViewModeEnabled(): boolean {
+  return getPreferences().viewMode;
 }
 

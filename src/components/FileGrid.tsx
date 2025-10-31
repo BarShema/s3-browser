@@ -8,6 +8,7 @@ import {
   isVideo,
   Item,
 } from "@/lib/utils";
+import { isViewModeEnabled } from "@/lib/preferences";
 import {
   Calculator,
   Download,
@@ -163,6 +164,7 @@ export function FileGrid({
             <div className={styles.checkbox}>
               <input
                 type="checkbox"
+                className={styles.checkbox}
                 checked={selectedItems.includes(item.id)}
                 onChange={(e) => {
                   e.stopPropagation();
@@ -302,27 +304,31 @@ export function FileGrid({
                   </button>
                 )}
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    startRename(item);
-                  }}
-                  className={`${styles.actionButton} yellow`}
-                  title="Rename"
-                >
-                  <Edit3 size={14} />
-                </button>
+                {(!isViewModeEnabled()) && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startRename(item);
+                      }}
+                      className={`${styles.actionButton} yellow`}
+                      title="Rename"
+                    >
+                      <Edit3 size={14} />
+                    </button>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(item as FileItem);
-                  }}
-                  className={`${styles.actionButton} red`}
-                  title="Delete"
-                >
-                  <Trash2 size={14} />
-                </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(item as FileItem);
+                      }}
+                      className={`${styles.actionButton} red`}
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

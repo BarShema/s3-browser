@@ -11,6 +11,7 @@ import {
   isVideo,
   Item,
 } from "@/lib/utils";
+import { isViewModeEnabled } from "@/lib/preferences";
 import {
   Calculator,
   Download,
@@ -375,27 +376,31 @@ export function FilePreview({
                   </button>
                 )}
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    startRename(item);
-                  }}
-                  className={`${styles.actionButton} yellow`}
-                  title="Rename"
-                >
-                  <Edit3 size={14} />
-                </button>
+                {(!isViewModeEnabled()) && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startRename(item);
+                      }}
+                      className={`${styles.actionButton} yellow`}
+                      title="Rename"
+                    >
+                      <Edit3 size={14} />
+                    </button>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(item as FileItem);
-                  }}
-                  className={`${styles.actionButton} red`}
-                  title="Delete"
-                >
-                  <Trash2 size={14} />
-                </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(item as FileItem);
+                      }}
+                      className={`${styles.actionButton} red`}
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -109,6 +109,28 @@ export async function GET(request: NextRequest) {
 // Upload file
 export async function POST(request: NextRequest) {
   try {
+    const contentType = request.headers.get("content-type") || "";
+
+    // JSON body: create directory (zero-byte object with trailing slash)
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
+      const bucket = body.bucket as string;
+      let dirKey = body.dirKey as string;
+
+      if (!bucket || !dirKey) {
+        return NextResponse.json(
+          { error: "Missing required fields" },
+          { status: 400 }
+        );
+      }
+
+      if (!dirKey.endsWith("/")) dirKey = `${dirKey}/`;
+      const emptyBuffer = Buffer.from("");
+      await uploadToS3(bucket, dirKey, emptyBuffer, "application/x-directory");
+      return NextResponse.json({ success: true });
+    }
+
+    // Multipart form-data: file upload
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const bucket = formData.get("bucket") as string;

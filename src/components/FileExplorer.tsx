@@ -870,6 +870,26 @@ export function FileExplorer({
             viewMode={viewMode}
             onViewModeChange={handleViewModeChange}
             onUpload={() => setIsUploadModalOpen(true)}
+            onNewDirectory={async () => {
+              const name = prompt("New directory name:")?.trim();
+              if (!name) return;
+              // Basic sanitize
+              const safe = name.replace(/^[/.]+|[\\]/g, "");
+              const dirKey = currentPath ? `${currentPath}/${safe}` : safe;
+              try {
+                const res = await fetch('/api/s3', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ bucket: bucketName, dirKey }),
+                });
+                if (!res.ok) throw new Error('Failed to create directory');
+                toast.success('Directory created');
+                loadFiles(currentPath);
+              } catch (e) {
+                console.error(e);
+                toast.error('Could not create directory');
+              }
+            }}
             selectedCount={selectedItems.length}
             onDelete={async () => {
               // Check delete protection

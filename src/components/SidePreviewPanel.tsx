@@ -9,6 +9,7 @@ import {
   isPDF,
   isVideo,
 } from "@/lib/utils";
+import { isViewModeEnabled } from "@/lib/preferences";
 import {
   ChevronLeft,
   ChevronRight,
@@ -185,8 +186,10 @@ export function SidePreviewPanel({
 
   useEffect(() => {
     if (file && isEditableText(file.name)) {
-      setIsLoadingText(true);
-      setTextError(null);
+      setTimeout(() => {
+        setIsLoadingText(true);
+        setTextError(null);
+      }, 0);
 
       fetch(
         `/api/s3/content?path=${encodeURIComponent(
@@ -214,7 +217,7 @@ export function SidePreviewPanel({
   // Reset expanded state when panel closes or file changes
   useEffect(() => {
     if (!isOpen || !file) {
-      setIsExpanded(false);
+      setTimeout(() => setIsExpanded(false), 0);
     }
   }, [isOpen, file]);
 
@@ -222,10 +225,12 @@ export function SidePreviewPanel({
   useEffect(() => {
     if (!file) {
       console.log("loading preview false 1");
-      setIsLoadingPreview(false);
-      setCurrentPreviewKey("");
-      setPreviousFile(null);
-      previousFileRef.current = null;
+      setTimeout(() => {
+        setIsLoadingPreview(false);
+        setCurrentPreviewKey("");
+        setPreviousFile(null);
+        previousFileRef.current = null;
+      }, 0);
       return;
     }
 
@@ -250,10 +255,12 @@ export function SidePreviewPanel({
       setCurrentPreviewKey(newKey);
     } else {
       console.log("loading preview false 2");
-      setIsLoadingPreview(false);
-      setCurrentPreviewKey("");
-      setPreviousFile(null);
-      previousFileRef.current = null;
+      setTimeout(() => {
+        setIsLoadingPreview(false);
+        setCurrentPreviewKey("");
+        setPreviousFile(null);
+        previousFileRef.current = null;
+      }, 0);
     }
   }, [file, currentPreviewKey]);
 
@@ -337,6 +344,7 @@ export function SidePreviewPanel({
               onClick={() => onRename(file, file.name)}
               className={styles.actionButton}
               title="Rename"
+              style={{ display: isViewModeEnabled() ? 'none' : undefined }}
             >
               <Edit3 size={16} />
             </button>
@@ -345,6 +353,7 @@ export function SidePreviewPanel({
                 onClick={() => onEdit(file)}
                 className={styles.actionButton}
                 title="Edit Content"
+                style={{ display: isViewModeEnabled() ? 'none' : undefined }}
               >
                 <FileText size={16} />
               </button>
@@ -353,6 +362,7 @@ export function SidePreviewPanel({
               onClick={() => onDelete(file)}
               className={`${styles.actionButton} ${styles.deleteButton}`}
               title="Delete"
+              style={{ display: isViewModeEnabled() ? 'none' : undefined }}
             >
               <Trash2 size={16} />
             </button>
@@ -379,7 +389,7 @@ export function SidePreviewPanel({
               className={styles.actionButton}
               onClick={(e) => {
                 e.stopPropagation();
-                onPrev && onPrev();
+                if (onPrev) onPrev();
               }}
               title="Previous"
               disabled={onPrev ? !canPrev : true}
@@ -390,7 +400,7 @@ export function SidePreviewPanel({
               className={styles.actionButton}
               onClick={(e) => {
                 e.stopPropagation();
-                onNext && onNext();
+                if (onNext) onNext();
               }}
               title="Next"
               disabled={onNext ? !canNext : true}

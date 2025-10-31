@@ -91,6 +91,35 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </div>
             </div>
           </div>
+
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>View</h3>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <label className={styles.settingLabel}>View Mode</label>
+                <p className={styles.settingDescription}>
+                  When enabled, the app shows data only (no edit/rename/delete UI).
+                </p>
+              </div>
+              <div className={styles.switchContainer}>
+                <input
+                  type="checkbox"
+                  id="viewMode"
+                  className={styles.switch}
+                  checked={preferences.viewMode}
+                  onChange={(e) => handleToggle("viewMode", e.target.checked)}
+                />
+                <label
+                  htmlFor="viewMode"
+                  className={`${styles.switchLabel} ${
+                    preferences.viewMode ? styles.switchOn : ""
+                  }`}
+                >
+                  <span className={styles.switchSlider}></span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

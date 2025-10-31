@@ -1,12 +1,21 @@
 "use client";
 
+import { isViewModeEnabled } from "@/lib/preferences";
 import { ViewMode } from "@/lib/utils";
-import { FolderTree, Grid3X3, List, Trash2, Upload } from "lucide-react";
+import {
+  FolderPlus,
+  FolderTree,
+  Grid3X3,
+  List,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import styles from "./toolbar.module.css";
 interface ToolbarProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   onUpload: () => void;
+  onNewDirectory: () => void;
   selectedCount: number;
   onDelete: () => void;
   isTreeVisible: boolean;
@@ -18,6 +27,7 @@ export function Toolbar({
   viewMode,
   onViewModeChange,
   onUpload,
+  onNewDirectory,
   selectedCount,
   onDelete,
   isTreeVisible,
@@ -76,17 +86,30 @@ export function Toolbar({
         >
           ↻
         </button>
-        {selectedCount > 0 && (
+        {selectedCount > 0 && !isViewModeEnabled() && (
           <button onClick={onDelete} className={styles.deleteButton}>
             <Trash2 size={16} />
             <span>Delete ({selectedCount})</span>
           </button>
         )}
 
-        <button onClick={onUpload} className={styles.uploadButton}>
-          <Upload size={16} />
-          <span>Upload</span>
-        </button>
+        {!isViewModeEnabled() && (
+          <button
+            onClick={onNewDirectory}
+            className={styles.uploadButton}
+            title="New Directory"
+          >
+            <FolderPlus size={16} />
+            <span>New Directory</span>
+          </button>
+        )}
+
+        {!isViewModeEnabled() && (
+          <button onClick={onUpload} className={styles.uploadButton}>
+            <Upload size={16} />
+            <span>Upload</span>
+          </button>
+        )}
       </div>
     </div>
   );

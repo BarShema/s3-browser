@@ -954,3 +954,35 @@ body {
 .border-secondary {
   border-color: var(--theme-border-secondary);
 }
+
+/* Scrollbars - global */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--theme-accent-primary) var(--theme-bg-secondary); /* Firefox */
+}
+
+/* WebKit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-bg-secondary);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-accent-primary);
+  border-radius: 8px;
+  border: 2px solid var(--theme-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent-hover);
+}
+
+/* Darker track inside night theme glass areas */
+.theme-night ::-webkit-scrollbar-track {
+  background: var(--theme-bg-tertiary);
+}

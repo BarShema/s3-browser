@@ -148,9 +148,7 @@ Resources:
   # Bucket Policy to allow CloudFront OAI access  
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
-    DependsOn: 
-      - CloudFrontOAI
-      - CloudFrontDistribution
+    DependsOn: CloudFrontOAI
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
@@ -159,7 +157,7 @@ Resources:
           - Sid: AllowCloudFrontOriginAccess
             Effect: Allow
             Principal:
-              AWS: !GetAtt CloudFrontOAI.S3CanonicalUserId
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOAI}'
             Action: s3:GetObject
             Resource: !Sub 'arn:aws:s3:::${FrontendBucket}/*'
 

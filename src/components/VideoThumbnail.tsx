@@ -1,5 +1,6 @@
 "use client";
 
+import { apiFetch } from "@/lib/api-client";
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
 
@@ -27,7 +28,7 @@ export function VideoThumbnail({ src, alt, bucketName }: VideoThumbnailProps) {
     // Fetch the presigned URL from the API
     const fetchVideoUrl = async () => {
       try {
-        const response = await fetch(src);
+        const response = await apiFetch(src);
         if (!response.ok) {
           throw new Error('Failed to get video URL');
         }

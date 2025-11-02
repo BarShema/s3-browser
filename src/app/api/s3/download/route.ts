@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDownloadUrl } from '@/lib/s3';
+import { verifyAuthorizationToken } from '@/lib/api-auth-server';
 
 export async function GET(request: NextRequest) {
   try {
+    // Verify authorization
+    const authHeader = request.headers.get("authorization");
+    const authResult = await verifyAuthorizationToken(authHeader);
+    if (!authResult.valid) {
+      return NextResponse.json(
+        { error: authResult.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const path = searchParams.get('path');
     const expiresIn = parseInt(searchParams.get('expiresIn') || '3600');

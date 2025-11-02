@@ -1,5 +1,7 @@
 "use client";
 
+import { appConfig } from "@/config/app";
+import { apiFetch } from "@/lib/api-client";
 import { getFileExtension } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
@@ -39,8 +41,10 @@ export function VideoPreview({
     // Fetch video download URL
     const fetchVideoUrl = async () => {
       try {
-        const downloadResponse = await fetch(
-          `/api/s3/download?path=${encodeURIComponent(src)}`
+        const downloadResponse = await apiFetch(
+          `${appConfig.apiBaseUrl}/api/s3/download?path=${encodeURIComponent(
+            src
+          )}`
         );
 
         if (!downloadResponse.ok) {
@@ -52,9 +56,9 @@ export function VideoPreview({
 
         if (isThumbnail) {
           // For thumbnails, also fetch the preview image
-          const previewEndpointUrl = `/api/s3/preview?path=${encodeURIComponent(
-            src
-          )}&mw=800&mh=600`;
+          const previewEndpointUrl = `${
+            appConfig.apiBaseUrl
+          }/api/s3/preview?path=${encodeURIComponent(src)}&mw=800&mh=600`;
           const testImg = document.createElement("img");
 
           const handleLoad = () => {

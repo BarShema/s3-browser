@@ -1,7 +1,28 @@
 {
-    "workbench.colorCustomizations": {
-        "activityBar.background": "#113420",
-        "titleBar.activeBackground": "#18492D",
-        "titleBar.activeForeground": "#F4FBF7"
-    }
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/aws-cloudformation/cloudformation-cli/master/schema/provider.definition.schema.v1.json": [
+      "**/create-cloudfront-cf.yaml",
+      "**/*-cf.yaml"
+    ]
+  },
+  "yaml.customTags": [
+    "!Ref sequence",
+    "!GetAtt sequence",
+    "!Sub sequence",
+    "!If sequence",
+    "!Equals sequence",
+    "!Not sequence",
+    "!And sequence",
+    "!Or sequence",
+    "!Join sequence",
+    "!Split sequence",
+    "!Select sequence",
+    "!Base64 sequence",
+    "!Cidr sequence",
+    "!FindInMap sequence",
+    "!GetAZs sequence",
+    "!ImportValue sequence",
+    "!Transform sequence"
+  ],
+  "yaml.validate": false
 }

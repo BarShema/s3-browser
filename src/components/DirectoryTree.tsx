@@ -1,6 +1,7 @@
 "use client";
 
 import { appConfig } from "@/config/app";
+import { apiFetch } from "@/lib/api-client";
 import { ChevronDown, ChevronRight, Folder, FolderOpen } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./directoryTree.module.css";
@@ -51,7 +52,10 @@ export function DirectoryTree({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/s3?path=${bucketName}&limit=1000`);
+      console.log("appConfig.apiBaseUrl", appConfig.apiBaseUrl);
+      const response = await apiFetch(
+        `${appConfig.apiBaseUrl}/api/s3?path=${bucketName}&limit=1000`
+      );
       const data = await response.json();
 
       if (data.directories) {
@@ -83,7 +87,8 @@ export function DirectoryTree({
       setLoadingNodes((prev) => new Set(prev).add(directoryKey));
 
       try {
-        const response = await fetch(
+        console.log("appConfig.apiBaseUrl", appConfig.apiBaseUrl);
+        const response = await apiFetch(
           `${appConfig.apiBaseUrl}/api/s3?path=${bucketName}/${directoryKey}&limit=1000`
         );
         const data = await response.json();

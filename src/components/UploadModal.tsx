@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Minimize2, Maximize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { apiFetch } from '@/lib/api-client';
 import styles from './modal.module.css';
 import uploadStyles from './uploadModal.module.css';
 import { clz } from '@/lib/clz';
@@ -105,7 +106,7 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
       formData.append('bucket', bucketName);
       formData.append('key', uploadFile.key);
 
-      const response = await fetch('/api/s3', {
+      const response = await apiFetch('/api/s3', {
         method: 'POST',
         body: formData,
       });

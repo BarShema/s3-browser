@@ -4,6 +4,7 @@ import {
   GetObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import { verifyAuthorizationToken } from "@/lib/api-auth-server";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { exec } from "child_process";
@@ -16,6 +17,15 @@ const execAsync = promisify(exec);
 
 export async function GET(request: NextRequest) {
   try {
+    // Verify authorization
+    const authHeader = request.headers.get("authorization");
+    const authResult = await verifyAuthorizationToken(authHeader);
+    if (!authResult.valid) {
+      return NextResponse.json(
+        { error: authResult.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const path = searchParams.get("path");
     const mhParam = searchParams.get("mh");

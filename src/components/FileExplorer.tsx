@@ -13,17 +13,18 @@ import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
 import { appConfig } from "@/config/app";
+import { apiFetch } from "@/lib/api-client";
 import { isDeleteProtectionEnabled } from "@/lib/preferences";
 import { useResize } from "@/lib/useResize";
 import {
   DirectoryItem,
   FileItem,
   ViewMode,
+  generateStableIdFromString,
   getFileExtension,
   isAudio as isAudioFile,
   isImage as isImageFile,
   isVideo as isVideoFile,
-  generateStableIdFromString,
 } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
@@ -223,8 +224,10 @@ export function FileExplorer({
       }));
 
       try {
-        const response = await fetch(
-          `/api/s3/directory-size?path=${encodeURIComponent(
+        const response = await apiFetch(
+          `${
+            appConfig.apiBaseUrl
+          }/api/s3/directory-size?path=${encodeURIComponent(
             `${bucketName}/${dirKey}`
           )}`
         );
@@ -335,7 +338,10 @@ export function FileExplorer({
         if (typeFilter) params.append("type", typeFilter);
         if (extensionFilter) params.append("extension", extensionFilter);
 
-        const response = await fetch(`/api/s3?${params.toString()}`);
+        console.log("appConfig.apiBaseUrl", appConfig.apiBaseUrl);
+        const response = await apiFetch(
+          `${appConfig.apiBaseUrl}/api/s3?${params.toString()}`
+        );
 
         if (!response.ok) {
           throw new Error("Failed to load files");
@@ -577,14 +583,16 @@ export function FileExplorer({
     try {
       const url = new URL(window.location.href);
       url.searchParams.set("preview", file.key);
-      router.push(url.pathname + "?" + url.searchParams.toString(), { scroll: false });
+      router.push(url.pathname + "?" + url.searchParams.toString(), {
+        scroll: false,
+      });
     } catch {}
   };
 
   const handleDownload = async (file: FileItem) => {
     try {
-      const response = await fetch(
-        `/api/s3/download?path=${encodeURIComponent(
+      const response = await apiFetch(
+        `${appConfig.apiBaseUrl}/api/s3/download?path=${encodeURIComponent(
           `${bucketName}/${file.key}`
         )}`
       );
@@ -611,8 +619,10 @@ export function FileExplorer({
     try {
       toast.loading("Creating ZIP file...", { id: "zip-creation" });
 
-      const response = await fetch(
-        `/api/s3/download-directory?path=${encodeURIComponent(
+      const response = await apiFetch(
+        `${
+          appConfig.apiBaseUrl
+        }/api/s3/download-directory?path=${encodeURIComponent(
           `${bucketName}/${directory.key}`
         )}`
       );
@@ -670,8 +680,11 @@ export function FileExplorer({
   // Internal delete function without confirmation
   const deleteFile = async (file: FileItem): Promise<boolean> => {
     try {
-      const response = await fetch(
-        `/api/s3?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`,
+      console.log("appConfig.apiBaseUrl", appConfig.apiBaseUrl);
+      const response = await apiFetch(
+        `${appConfig.apiBaseUrl}/api/s3?path=${encodeURIComponent(
+          `${bucketName}/${file.key}`
+        )}`,
         {
           method: "DELETE",
         }
@@ -719,7 +732,7 @@ export function FileExplorer({
     const newKey = currentPath ? `${currentPath}/${newName}` : newName;
 
     try {
-      const response = await fetch("/api/s3", {
+      const response = await apiFetch("/api/s3", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -877,17 +890,17 @@ export function FileExplorer({
               const safe = name.replace(/^[/.]+|[\\]/g, "");
               const dirKey = currentPath ? `${currentPath}/${safe}` : safe;
               try {
-                const res = await fetch('/api/s3', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                const res = await apiFetch("/api/s3", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ bucket: bucketName, dirKey }),
                 });
-                if (!res.ok) throw new Error('Failed to create directory');
-                toast.success('Directory created');
+                if (!res.ok) throw new Error("Failed to create directory");
+                toast.success("Directory created");
                 loadFiles(currentPath);
               } catch (e) {
                 console.error(e);
-                toast.error('Could not create directory');
+                toast.error("Could not create directory");
               }
             }}
             selectedCount={selectedItems.length}
@@ -1053,7 +1066,9 @@ export function FileExplorer({
             const url = new URL(window.location.href);
             url.searchParams.delete("preview");
             const qs = url.searchParams.toString();
-            router.replace(url.pathname + (qs ? "?" + qs : ""), { scroll: false });
+            router.replace(url.pathname + (qs ? "?" + qs : ""), {
+              scroll: false,
+            });
           } catch {}
         }}
         onDownload={handleDownload}
@@ -1070,7 +1085,9 @@ export function FileExplorer({
             try {
               const url = new URL(window.location.href);
               url.searchParams.set("preview", nextFile.key);
-              router.replace(url.pathname + "?" + url.searchParams.toString(), { scroll: false });
+              router.replace(url.pathname + "?" + url.searchParams.toString(), {
+                scroll: false,
+              });
             } catch {}
           }
         }}
@@ -1083,7 +1100,9 @@ export function FileExplorer({
             try {
               const url = new URL(window.location.href);
               url.searchParams.set("preview", nextFile.key);
-              router.replace(url.pathname + "?" + url.searchParams.toString(), { scroll: false });
+              router.replace(url.pathname + "?" + url.searchParams.toString(), {
+                scroll: false,
+              });
             } catch {}
           }
         }}

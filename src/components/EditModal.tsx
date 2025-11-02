@@ -5,7 +5,9 @@ import { FileItem } from "@/lib/utils";
 import { Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/lib/api-client";
 import styles from "./modal.module.css";
+import { appConfig } from "@/config/app";
 
 interface EditModalProps {
   isOpen: boolean;
@@ -49,8 +51,8 @@ export function EditModal({
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/s3/content?path=${encodeURIComponent(
+      const response = await apiFetch(
+        `${appConfig.apiBaseUrl}/api/s3/content?path=${encodeURIComponent(
           `${bucketName}/${file.key}`
         )}`
       );
@@ -73,7 +75,7 @@ export function EditModal({
 
     setIsSaving(true);
     try {
-      const response = await fetch("/api/s3/content", {
+      const response = await apiFetch("/api/s3/content", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

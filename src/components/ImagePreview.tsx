@@ -1,5 +1,6 @@
 "use client";
 
+import { appConfig } from "@/config/app";
 import { useEffect, useRef, useState } from "react";
 
 interface ImagePreviewProps {
@@ -28,7 +29,7 @@ export function ImagePreview({
     let canceled = false;
     const fetchThumbnailUrl = async () => {
       try {
-        const previewUrl = `/api/s3/preview?path=${encodeURIComponent(
+        const previewUrl = `${appConfig.apiBaseUrl}/api/s3/preview?path=${encodeURIComponent(
           src
         )}&mw=${maxWidth}&mh=${maxHeight}`;
         const testImg = new window.Image();

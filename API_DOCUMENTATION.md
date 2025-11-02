@@ -32,10 +32,39 @@ All API endpoints are prefixed with `/api/s3`
 
 ## Authentication
 
-All API endpoints require AWS credentials to be configured via environment variables:
+All API endpoints require two levels of authentication:
+
+### 1. User Authentication (Authorization Header)
+
+All API requests **must** include a valid Authorization header with a Cognito ID token:
+
+```
+Authorization: Bearer <cognito-id-token>
+```
+
+**Token Format**: JWT token obtained from AWS Cognito after user sign-in.
+
+**Verification**: 
+- Tokens are verified using AWS Cognito JWT verification
+- Tokens must be valid and not expired
+- If Cognito is not configured, the system will allow requests in development mode (not recommended for production)
+
+**Getting the Token**:
+- Frontend: The token is automatically retrieved from the Cognito session and included in all requests via the `apiFetch` wrapper
+- Manual requests: Sign in via Cognito and extract the ID token from the session
+
+**Error Responses**:
+- `401 Unauthorized` - Missing or invalid Authorization header
+- `401 Unauthorized` - Token verification failed
+
+### 2. AWS Credentials (Server-side)
+
+Server-side operations require AWS credentials configured via environment variables:
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `AWS_REGION` (optional, defaults to `eu-west-1`)
+
+**Note**: The AWS credentials are used server-side to access S3. User authentication (Authorization header) is required to access the API endpoints.
 
 ---
 
@@ -52,6 +81,7 @@ All endpoints return errors in the following format:
 Status codes:
 - `200` - Success
 - `400` - Bad Request (missing or invalid parameters)
+- `401` - Unauthorized (missing or invalid Authorization header)
 - `404` - Not Found (resource doesn't exist)
 - `500` - Internal Server Error
 
@@ -117,7 +147,8 @@ Example paths:
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3?path=portfolio-files2/images/dance&page=1&limit=20&name=DSC&type=file"
+curl "http://localhost:3000/api/s3?path=portfolio-files2/images/dance&page=1&limit=20&name=DSC&type=file" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 ---
@@ -164,6 +195,7 @@ Note: `dirKey` will automatically have a trailing `/` appended if not present.
 **File Upload**:
 ```bash
 curl -X POST http://localhost:3000/api/s3 \
+  -H "Authorization: Bearer <your-cognito-id-token>" \
   -F "file=@photo.jpg" \
   -F "bucket=portfolio-files2" \
   -F "key=images/dance/photo.jpg"
@@ -172,6 +204,7 @@ curl -X POST http://localhost:3000/api/s3 \
 **Create Directory**:
 ```bash
 curl -X POST http://localhost:3000/api/s3 \
+  -H "Authorization: Bearer <your-cognito-id-token>" \
   -H "Content-Type: application/json" \
   -d '{"bucket": "portfolio-files2", "dirKey": "images/new-folder"}'
 ```
@@ -211,7 +244,8 @@ Delete a file or directory from S3.
 #### Example Request
 
 ```bash
-curl -X DELETE "http://localhost:3000/api/s3?path=portfolio-files2/images/dance/DSC00001.jpg"
+curl -X DELETE "http://localhost:3000/api/s3?path=portfolio-files2/images/dance/DSC00001.jpg" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 ---
@@ -244,6 +278,7 @@ Rename or move a file/directory in S3.
 
 ```bash
 curl -X PATCH http://localhost:3000/api/s3 \
+  -H "Authorization: Bearer <your-cognito-id-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "bucket": "portfolio-files2",
@@ -278,7 +313,8 @@ Generate a signed download URL for a file.
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3/download?path=portfolio-files2/images/dance/DSC00001.jpg&expiresIn=7200"
+curl "http://localhost:3000/api/s3/download?path=portfolio-files2/images/dance/DSC00001.jpg&expiresIn=7200" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 ---
@@ -325,7 +361,8 @@ Download a directory as a ZIP file (for small directories) or get download sugge
 #### Example Request
 
 ```bash
-curl -O "http://localhost:3000/api/s3/download-directory?path=portfolio-files2/images/dance"
+curl -O "http://localhost:3000/api/s3/download-directory?path=portfolio-files2/images/dance" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 ---
@@ -371,7 +408,9 @@ Returns binary image data (WebP format) with headers:
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3/preview?path=portfolio-files2/images/dance/DSC00001.jpg&mw=1000&mh=1000" -o thumbnail.webp
+curl "http://localhost:3000/api/s3/preview?path=portfolio-files2/images/dance/DSC00001.jpg&mw=1000&mh=1000" \
+  -H "Authorization: Bearer <your-cognito-id-token>" \
+  -o thumbnail.webp
 ```
 
 ---
@@ -416,7 +455,8 @@ Extract metadata from image or video files (dimensions, duration).
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3/metadata?path=portfolio-files2/images/dance/video.mp4"
+curl "http://localhost:3000/api/s3/metadata?path=portfolio-files2/images/dance/video.mp4" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 **Note**: Requires `ffprobe` to be installed for video metadata extraction.
@@ -449,7 +489,8 @@ Read text file content from S3.
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3/content?path=portfolio-files2/documents/readme.txt"
+curl "http://localhost:3000/api/s3/content?path=portfolio-files2/documents/readme.txt" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 ---
@@ -483,6 +524,7 @@ Update text file content in S3.
 
 ```bash
 curl -X PUT http://localhost:3000/api/s3/content \
+  -H "Authorization: Bearer <your-cognito-id-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "bucket": "portfolio-files2",
@@ -522,6 +564,7 @@ Generate a presigned URL for direct client-side uploads to S3.
 
 ```bash
 curl -X POST http://localhost:3000/api/s3/upload-url \
+  -H "Authorization: Bearer <your-cognito-id-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "bucket": "portfolio-files2",
@@ -555,7 +598,8 @@ List all S3 buckets accessible with the configured AWS credentials.
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3/buckets"
+curl "http://localhost:3000/api/s3/buckets" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 ---
@@ -586,7 +630,8 @@ Calculate total size and object count for an entire S3 bucket (drive).
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3/drive-size?drive=portfolio-files2"
+curl "http://localhost:3000/api/s3/drive-size?drive=portfolio-files2" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 **Note**: This operation can be slow for large buckets as it iterates through all objects.
@@ -641,7 +686,8 @@ If path points to root or no specific directory:
 #### Example Request
 
 ```bash
-curl "http://localhost:3000/api/s3/directory-size?path=portfolio-files2/images/dance"
+curl "http://localhost:3000/api/s3/directory-size?path=portfolio-files2/images/dance" \
+  -H "Authorization: Bearer <your-cognito-id-token>"
 ```
 
 **Note**: This operation can be slow for large directories as it iterates through all objects.

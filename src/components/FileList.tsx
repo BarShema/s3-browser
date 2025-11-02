@@ -19,6 +19,7 @@ import { isViewModeEnabled } from '@/lib/preferences';
 import { FileIcon } from './FileIcon';
 import { FileDetailsCell } from './FileDetailsCell';
 import styles from './fileList.module.css';
+import { appConfig } from '@/config/app';
 
 interface FileListProps {
   items: Item[];
@@ -281,7 +282,7 @@ export function FileList({
                   
                   const file = item as FileItem;
                   const fullPath = bucketName ? `${bucketName}/${file.key}` : file.key;
-                  fetch(`/api/s3/metadata?path=${encodeURIComponent(fullPath)}`)
+                  fetch(`${appConfig.apiBaseUrl}/api/s3/metadata?path=${encodeURIComponent(fullPath)}`)
                     .then(res => res.ok ? res.json() : null)
                     .then(metadata => {
                       if (metadata) {

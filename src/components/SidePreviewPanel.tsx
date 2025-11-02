@@ -27,6 +27,7 @@ import { useEffect, useRef, useState } from "react";
 import { ImagePreview } from "./ImagePreview";
 import { VideoPreview } from "./VideoPreview";
 import styles from "./sidePreviewPanel.module.css";
+import { appConfig } from "@/config/app";
 
 interface SidePreviewPanelProps {
   file: FileItem | null;
@@ -192,7 +193,7 @@ export function SidePreviewPanel({
       }, 0);
 
       fetch(
-        `/api/s3/content?path=${encodeURIComponent(
+        `${appConfig.apiBaseUrl}/api/s3/content?path=${encodeURIComponent(
           `${bucketName}/${file.key}`
         )}`
       )
@@ -421,7 +422,7 @@ export function SidePreviewPanel({
                       isVideo(previousFile.name)) && (
                       <div className={styles.previousPreview}>
                         <img
-                          src={`/api/s3/preview?path=${encodeURIComponent(
+                          src={`${appConfig.apiBaseUrl}/api/s3/preview?path=${encodeURIComponent(
                             `${bucketName}/${file.key}`
                           )}&mw=400&mh=400`}
                           alt={file.name}
@@ -464,7 +465,7 @@ export function SidePreviewPanel({
           ) : isPDF(file.name) ? (
             <div className={styles.pdfContainer}>
               <iframe
-                src={`/api/s3/download?path=${encodeURIComponent(
+                src={`${appConfig.apiBaseUrl}/api/s3/download?path=${encodeURIComponent(
                   `${bucketName}/${file.key}`
                 )}`}
                 className={styles.pdfViewer}

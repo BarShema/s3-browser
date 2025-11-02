@@ -5,6 +5,7 @@ import {
   renameS3Object,
   uploadToS3,
 } from "@/lib/s3";
+import { verifyAuthorizationToken } from "@/lib/api-auth-server";
 import { NextRequest, NextResponse } from "next/server";
 
 const defaultLimit = appConfig.defaultItemsPerPage;
@@ -12,6 +13,15 @@ const defaultLimit = appConfig.defaultItemsPerPage;
 // List files and directories
 export async function GET(request: NextRequest) {
   try {
+    // Verify authorization
+    const authHeader = request.headers.get("authorization");
+    const authResult = await verifyAuthorizationToken(authHeader);
+    if (!authResult.valid) {
+      return NextResponse.json(
+        { error: authResult.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const path = searchParams.get("path");
     const page = parseInt(searchParams.get("page") || "1");
@@ -109,6 +119,16 @@ export async function GET(request: NextRequest) {
 // Upload file
 export async function POST(request: NextRequest) {
   try {
+    // Verify authorization
+    const authHeader = request.headers.get("authorization");
+    const authResult = await verifyAuthorizationToken(authHeader);
+    if (!authResult.valid) {
+      return NextResponse.json(
+        { error: authResult.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const contentType = request.headers.get("content-type") || "";
 
     // JSON body: create directory (zero-byte object with trailing slash)
@@ -159,6 +179,16 @@ export async function POST(request: NextRequest) {
 // Delete file
 export async function DELETE(request: NextRequest) {
   try {
+    // Verify authorization
+    const authHeader = request.headers.get("authorization");
+    const authResult = await verifyAuthorizationToken(authHeader);
+    if (!authResult.valid) {
+      return NextResponse.json(
+        { error: authResult.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const path = searchParams.get("path");
 
@@ -192,6 +222,16 @@ export async function DELETE(request: NextRequest) {
 // Rename file
 export async function PATCH(request: NextRequest) {
   try {
+    // Verify authorization
+    const authHeader = request.headers.get("authorization");
+    const authResult = await verifyAuthorizationToken(authHeader);
+    if (!authResult.valid) {
+      return NextResponse.json(
+        { error: authResult.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { bucket, oldKey, newKey } = body;
 

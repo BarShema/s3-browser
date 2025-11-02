@@ -1,10 +1,20 @@
 import { s3Client } from "@/lib/s3";
+import { verifyAuthorizationToken } from "@/lib/api-auth-server";
 import { ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 import archiver from "archiver";
 
 export async function GET(request: NextRequest) {
   try {
+    // Verify authorization
+    const authHeader = request.headers.get("authorization");
+    const authResult = await verifyAuthorizationToken(authHeader);
+    if (!authResult.valid) {
+      return NextResponse.json(
+        { error: authResult.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const path = searchParams.get("path");
 

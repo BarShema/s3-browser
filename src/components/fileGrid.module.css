@@ -1,6 +1,7 @@
 .grid {
   display: grid;
   gap: 16px;
+  grid-template-columns: var(--grid-columns, repeat(auto-fill, minmax(150px, 1fr)));
 }
 
 .container {
@@ -210,6 +211,11 @@
 .item.selected {
   background: var(--theme-selected-bg);
   border-color: var(--theme-accent-primary);
+}
+
+.item.previewed {
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid var(--theme-accent-primary);
 }
 
 .checkbox {

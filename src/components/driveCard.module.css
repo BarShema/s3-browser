@@ -14,10 +14,9 @@
   overflow: hidden;
 }
 
-.bucketCard:hover {
+.driveCard:hover {
   border-color: var(--theme-accent-quinary);
   box-shadow: 0 4px 12px var(--theme-shadow-rgba-accent);
-  transform: translateY(-2px);
 }
 
 

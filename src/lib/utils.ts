@@ -276,7 +276,7 @@ export function generateId(): string {
 
 // Convert S3File to FileItem
 export function s3FileToFileItem(file: S3File): FileItem {
-  const fullPath = file.key; // key is unique and stable within bucket
+  const fullPath = file.key; // key is unique and stable within drive
   return {
     ...file,
     id: generateStableIdFromString(fullPath),

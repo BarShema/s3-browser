@@ -1,0 +1,16 @@
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+

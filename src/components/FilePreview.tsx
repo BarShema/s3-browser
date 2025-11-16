@@ -45,10 +45,11 @@ interface FilePreviewProps {
   onDelete: (file: FileItem) => void;
   onRename: (file: FileItem, newName: string) => void;
   onDetailsClick?: (file: FileItem) => void;
-  bucketName: string;
+  driveName: string;
   onDirectorySizeClick?: (directory: DirectoryItem) => void;
   itemsPerRow: number;
   onItemsPerRowChange: (count: number) => void;
+  previewedFileId?: string | null;
 }
 
 export function FilePreview({
@@ -63,10 +64,11 @@ export function FilePreview({
   onDelete,
   onRename,
   onDetailsClick,
-  bucketName,
+  driveName,
   onDirectorySizeClick,
   itemsPerRow,
   onItemsPerRowChange,
+  previewedFileId,
 }: FilePreviewProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -196,14 +198,14 @@ export function FilePreview({
       {/* Grid */}
       <div
         className={styles.grid}
-        style={{ gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)` }}
+        style={{ "--grid-columns": `repeat(${itemsPerRow}, 1fr)` } as React.CSSProperties}
       >
         {items.map((item) => (
           <div
             key={item.id}
             className={`${styles.item} ${
               selectedItems.includes(item.id) ? styles.selected : ""
-            }`}
+            } ${previewedFileId === item.id ? styles.previewed : ""}`}
             onClick={() => handleItemClick(item)}
             onDoubleClick={() => handleItemDoubleClick(item)}
           >
@@ -225,20 +227,20 @@ export function FilePreview({
                 <FileIcon filename={item.name} isDirectory={true} size={64} />
               ) : isImage(item.name) ? (
                 <ImageThumbnail
-                  src={`${bucketName}/${item.key}`}
+                  src={`${driveName}/${item.key}`}
                   alt={item.name}
                   maxWidth={400}
                   maxHeight={400}
                 />
               ) : isVideo(item.name) ? (
                 <VideoPreview
-                  src={`${bucketName}/${item.key}`}
+                  src={`${driveName}/${item.key}`}
                   className={styles.previewThumbnail}
                   isThumbnail={true}
                 />
               ) : isPDF(item.name) ? (
                 <PDFPreview
-                  src={`${bucketName}/${item.key}`}
+                  src={`${driveName}/${item.key}`}
                   className={styles.previewThumbnail}
                 />
               ) : (

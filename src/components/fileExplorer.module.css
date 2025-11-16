@@ -98,6 +98,8 @@
   padding-bottom: 20px;
   overflow: hidden;
   position: relative;
+  width: var(--tree-width, 250px);
+  min-width: var(--tree-width, 250px);
 }
 
 .treeResizer {

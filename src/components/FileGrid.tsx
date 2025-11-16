@@ -42,6 +42,7 @@ interface FileGridProps {
   onDirectorySizeClick?: (directory: DirectoryItem) => void;
   itemsPerRow: number;
   onItemsPerRowChange: (count: number) => void;
+  previewedFileId?: string | null;
 }
 
 export function FileGrid({
@@ -59,6 +60,7 @@ export function FileGrid({
   onDirectorySizeClick,
   itemsPerRow,
   onItemsPerRowChange,
+  previewedFileId,
 }: FileGridProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -149,14 +151,14 @@ export function FileGrid({
       {/* Grid */}
       <div
         className={styles.grid}
-        style={{ gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)` }}
+        style={{ "--grid-columns": `repeat(${itemsPerRow}, 1fr)` } as React.CSSProperties}
       >
         {items.map((item) => (
           <div
             key={item.id}
             className={`${styles.item} ${
               selectedItems.includes(item.id) ? styles.selected : ""
-            }`}
+            } ${previewedFileId === item.id ? styles.previewed : ""}`}
             onClick={() => handleItemClick(item)}
             onDoubleClick={() => handleItemDoubleClick(item)}
           >

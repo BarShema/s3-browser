@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
   Maximize,
   Minimize,
+  Pause,
+  Play,
   SkipBack,
   SkipForward,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./customVideoPlayer.module.css";
 
 interface CustomVideoPlayerProps {
@@ -32,10 +32,14 @@ export function CustomVideoPlayer({
   const volumeRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [bufferedProgress, setBufferedProgress] = useState(0);
+  const [videoOrientation, setVideoOrientation] = useState<
+    "vertical" | "horizontal" | null
+  >(null);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -46,9 +50,18 @@ export function CustomVideoPlayer({
   const [previewPosition, setPreviewPosition] = useState(0);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [showPlayPauseAnimation, setShowPlayPauseAnimation] = useState(false);
-  const [animationAction, setAnimationAction] = useState<"play" | "pause">("play");
-  
+  const [animationAction, setAnimationAction] = useState<"play" | "pause">(
+    "play"
+  );
+
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Reset orientation when src changes
+  useEffect(() => {
+    setTimeout(() => {
+      setVideoOrientation(null);
+    }, 0);
+  }, [src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -60,9 +73,29 @@ export function CustomVideoPlayer({
     const handlePause = () => setIsPlaying(false);
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
+
+      // Detect video orientation
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      if (videoWidth > 0 && videoHeight > 0) {
+        const orientation =
+          videoHeight > videoWidth ? "vertical" : "horizontal";
+        setVideoOrientation(orientation);
+      }
+
       onLoad?.();
       if (autoPlay) {
         video.play().catch(() => setIsPlaying(false));
+      }
+    };
+    const updateBuffered = () => {
+      if (video.buffered.length > 0 && video.duration > 0) {
+        // Get the end of the last buffered range
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const bufferedPercent = (bufferedEnd / video.duration) * 100;
+        setBufferedProgress(bufferedPercent);
+      } else {
+        setBufferedProgress(0);
       }
     };
 
@@ -71,6 +104,8 @@ export function CustomVideoPlayer({
     video.addEventListener("durationchange", updateDuration);
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
+    video.addEventListener("progress", updateBuffered);
+    video.addEventListener("loadeddata", updateBuffered);
 
     // Handle fullscreen changes
     const handleFullscreenChange = () => {
@@ -85,6 +120,8 @@ export function CustomVideoPlayer({
       video.removeEventListener("durationchange", updateDuration);
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
+      video.removeEventListener("progress", updateBuffered);
+      video.removeEventListener("loadeddata", updateBuffered);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, [src, autoPlay]);
@@ -101,74 +138,77 @@ export function CustomVideoPlayer({
       setAnimationAction("play");
       video.play();
     }
-    
+
     setShowPlayPauseAnimation(true);
     setTimeout(() => {
       setShowPlayPauseAnimation(false);
     }, 600);
   };
 
-  const captureFrame = useCallback(async (time: number): Promise<string | null> => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas || !duration) return null;
+  const captureFrame = useCallback(
+    async (time: number): Promise<string | null> => {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!video || !canvas || !duration) return null;
 
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth || 320;
-    canvas.height = video.videoHeight || 180;
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth || 320;
+      canvas.height = video.videoHeight || 180;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
 
-    // Store current time to restore later
-    const originalTime = video.currentTime;
-    const wasPlaying = !video.paused;
+      // Store current time to restore later
+      const originalTime = video.currentTime;
+      const wasPlaying = !video.paused;
 
-    // Pause and seek to preview time
-    if (wasPlaying) {
-      video.pause();
-    }
-    video.currentTime = time;
+      // Pause and seek to preview time
+      if (wasPlaying) {
+        video.pause();
+      }
+      video.currentTime = time;
 
-    // Wait for seeked event before capturing
-    return new Promise<string | null>((resolve) => {
-      const handleSeeked = () => {
-        try {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
-          
-          // Restore original time and play state
+      // Wait for seeked event before capturing
+      return new Promise<string | null>((resolve) => {
+        const handleSeeked = () => {
+          try {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+
+            // Restore original time and play state
+            video.currentTime = originalTime;
+            if (wasPlaying) {
+              video.play().catch(() => {});
+            }
+
+            video.removeEventListener("seeked", handleSeeked);
+            resolve(dataUrl);
+          } catch (error) {
+            console.error("Error capturing frame:", error);
+            video.currentTime = originalTime;
+            if (wasPlaying) {
+              video.play().catch(() => {});
+            }
+            video.removeEventListener("seeked", handleSeeked);
+            resolve(null);
+          }
+        };
+
+        video.addEventListener("seeked", handleSeeked, { once: true });
+
+        // Timeout fallback
+        setTimeout(() => {
+          video.removeEventListener("seeked", handleSeeked);
           video.currentTime = originalTime;
           if (wasPlaying) {
             video.play().catch(() => {});
           }
-          
-          video.removeEventListener("seeked", handleSeeked);
-          resolve(dataUrl);
-        } catch (error) {
-          console.error("Error capturing frame:", error);
-          video.currentTime = originalTime;
-          if (wasPlaying) {
-            video.play().catch(() => {});
-          }
-          video.removeEventListener("seeked", handleSeeked);
           resolve(null);
-        }
-      };
-
-      video.addEventListener("seeked", handleSeeked, { once: true });
-      
-      // Timeout fallback
-      setTimeout(() => {
-        video.removeEventListener("seeked", handleSeeked);
-        video.currentTime = originalTime;
-        if (wasPlaying) {
-          video.play().catch(() => {});
-        }
-        resolve(null);
-      }, 1000);
-    });
-  }, [duration]);
+        }, 1000);
+      });
+    },
+    [duration]
+  );
 
   // Handle dragging progress bar
   useEffect(() => {
@@ -198,19 +238,19 @@ export function CustomVideoPlayer({
 
     const handleMouseUp = (e: MouseEvent) => {
       setIsDraggingProgress(false);
-      
+
       // Now seek to the final position on mouse up
       const rect = progress.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       const clampedPos = Math.max(0, Math.min(1, pos));
       const finalTime = clampedPos * duration;
-      
+
       const video = videoRef.current;
       if (video) {
         video.currentTime = finalTime;
         setCurrentTime(finalTime);
       }
-      
+
       if (wasPlayingBeforeSeek) {
         videoRef.current?.play();
       }
@@ -237,7 +277,7 @@ export function CustomVideoPlayer({
     const pos = (e.clientX - rect.left) / rect.width;
     const clampedPos = Math.max(0, Math.min(1, pos));
     const previewTime = clampedPos * duration;
-    
+
     setPreviewTime(previewTime);
     setPreviewPosition(clampedPos * 100);
 
@@ -266,7 +306,7 @@ export function CustomVideoPlayer({
     setCurrentTime(newTime);
     setPreviewTime(null);
     setPreviewThumbnail(null);
-    
+
     // Clear preview timeout
     if (previewTimeoutRef.current) {
       clearTimeout(previewTimeoutRef.current);
@@ -309,12 +349,12 @@ export function CustomVideoPlayer({
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging || !volumeRef.current) return;
-      
+
       const rect = volumeRef.current.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       const newVolume = Math.max(0, Math.min(1, pos));
       const video = videoRef.current;
-      
+
       if (video) {
         setVolume(newVolume);
         video.volume = newVolume;
@@ -331,18 +371,18 @@ export function CustomVideoPlayer({
     const handleMouseDown = (e: MouseEvent) => {
       e.stopPropagation();
       isDragging = true;
-      
+
       const rect = volumeSlider.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       const newVolume = Math.max(0, Math.min(1, pos));
       const video = videoRef.current;
-      
+
       if (video) {
         setVolume(newVolume);
         video.volume = newVolume;
         setIsMuted(newVolume === 0);
       }
-      
+
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     };
@@ -386,12 +426,15 @@ export function CustomVideoPlayer({
     const video = videoRef.current;
     if (!video) return;
 
-    video.currentTime = Math.max(0, Math.min(duration, video.currentTime + seconds));
+    video.currentTime = Math.max(
+      0,
+      Math.min(duration, video.currentTime + seconds)
+    );
   };
 
   const formatTime = (time: number): string => {
     if (!isFinite(time)) return "0:00";
-    
+
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor((time % 3600) / 60);
     const secs = Math.floor(time % 60);
@@ -441,7 +484,9 @@ export function CustomVideoPlayer({
   return (
     <div
       ref={containerRef}
-      className={`${styles.videoContainer} ${className || ""}`}
+      className={`${styles.videoContainer} ${
+        videoOrientation ? styles[videoOrientation] : ""
+      } ${className || ""}`}
       onMouseMove={showControls}
       onMouseLeave={hideControls}
       onDoubleClick={toggleFullscreen}
@@ -453,7 +498,7 @@ export function CustomVideoPlayer({
         onClick={togglePlay}
         playsInline
       />
-      
+
       {/* Play/Pause Animation */}
       {showPlayPauseAnimation && (
         <div className={styles.playPauseAnimation}>
@@ -475,11 +520,15 @@ export function CustomVideoPlayer({
         <div
           ref={progressRef}
           className={styles.progressBar}
-          onClick={handleSeek}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSeek(e);
+          }}
           onMouseEnter={handleProgressMouseEnter}
           onMouseMove={updatePreview}
           onMouseLeave={handleProgressMouseLeave}
           onMouseDown={(e) => {
+            e.stopPropagation();
             setIsDraggingProgress(true);
             setWasPlayingBeforeSeek(isPlaying);
             if (isPlaying) {
@@ -489,16 +538,20 @@ export function CustomVideoPlayer({
             updatePreview(e);
           }}
         >
-          <canvas ref={canvasRef} style={{ display: "none" }} />
+          <canvas ref={canvasRef} className={styles.canvasHidden} />
           <div className={styles.progressTrack} />
           <div
+            className={styles.progressBuffered}
+            style={{ "--buffered-progress": `${bufferedProgress}%` } as React.CSSProperties}
+          />
+          <div
             className={styles.progressFill}
-            style={{ width: `${progress}%` }}
+            style={{ "--progress": `${progress}%` } as React.CSSProperties}
           />
           {previewTime !== null && previewThumbnail && (
             <div
               className={styles.previewThumbnail}
-              style={{ left: `${previewPosition}%` }}
+              style={{ "--preview-position": `${previewPosition}%` } as React.CSSProperties}
             >
               <img src={previewThumbnail} alt="Preview" />
               <span className={styles.previewTime}>
@@ -508,28 +561,36 @@ export function CustomVideoPlayer({
           )}
           <div
             className={styles.progressHandle}
-            style={{ left: `${progress}%` }}
+            style={{ "--progress": `${progress}%` } as React.CSSProperties}
           />
         </div>
 
         {/* Controls */}
-        <div className={styles.controlsBar}>
-          <div className={styles.controlsLeft}>
+        <div
+          className={styles.controlsBar}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className={styles.controlsLeft}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               className={styles.controlButton}
-              onClick={togglePlay}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+              }}
               title={isPlaying ? "Pause" : "Play"}
             >
-              {isPlaying ? (
-                <Pause size={20} />
-              ) : (
-                <Play size={20} />
-              )}
+              {isPlaying ? <Pause size={20} /> : <Play size={20} />}
             </button>
 
             <button
               className={styles.controlButton}
-              onClick={() => skip(-10)}
+              onClick={(e) => {
+                e.stopPropagation();
+                skip(-10);
+              }}
               title="Rewind 10s"
             >
               <SkipBack size={18} />
@@ -537,13 +598,19 @@ export function CustomVideoPlayer({
 
             <button
               className={styles.controlButton}
-              onClick={() => skip(10)}
+              onClick={(e) => {
+                e.stopPropagation();
+                skip(10);
+              }}
               title="Forward 10s"
             >
               <SkipForward size={18} />
             </button>
 
-            <div className={styles.volumeControl}>
+            <div
+              className={styles.volumeControl}
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 className={styles.controlButton}
                 onClick={(e) => {
@@ -552,11 +619,7 @@ export function CustomVideoPlayer({
                 }}
                 title={isMuted ? "Unmute" : "Mute"}
               >
-                {isMuted ? (
-                  <VolumeX size={18} />
-                ) : (
-                  <Volume2 size={18} />
-                )}
+                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
               </button>
               <div
                 ref={volumeRef}
@@ -569,29 +632,34 @@ export function CustomVideoPlayer({
                 <div className={styles.volumeTrack} />
                 <div
                   className={styles.volumeFill}
-                  style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
+                  style={{ "--volume": `${(isMuted ? 0 : volume) * 100}%` } as React.CSSProperties}
                 />
               </div>
             </div>
 
-            <div className={styles.timeDisplay}>
+            <div
+              className={styles.timeDisplay}
+              onClick={(e) => e.stopPropagation()}
+            >
               <span>{formatTime(currentTime)}</span>
               <span className={styles.timeSeparator}>/</span>
               <span>{formatTime(duration)}</span>
             </div>
           </div>
 
-          <div className={styles.controlsRight}>
+          <div
+            className={styles.controlsRight}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               className={styles.controlButton}
-              onClick={toggleFullscreen}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFullscreen();
+              }}
               title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             >
-              {isFullscreen ? (
-                <Minimize size={18} />
-              ) : (
-                <Maximize size={18} />
-              )}
+              {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
             </button>
           </div>
         </div>
@@ -599,4 +667,3 @@ export function CustomVideoPlayer({
     </div>
   );
 }
-

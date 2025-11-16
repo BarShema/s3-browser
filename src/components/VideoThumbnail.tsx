@@ -6,10 +6,10 @@ import { Play } from "lucide-react";
 interface VideoThumbnailProps {
   src: string;
   alt: string;
-  bucketName: string;
+  driveName: string;
 }
 
-export function VideoThumbnail({ src, alt, bucketName }: VideoThumbnailProps) {
+export function VideoThumbnail({ src, alt, driveName }: VideoThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);

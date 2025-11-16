@@ -3,14 +3,14 @@ import { UserMenu } from "./UserMenu";
 import styles from "./pageHeader.module.css";
 
 export interface PageHeaderProps {
-  bucketName: string;
+  driveName: string;
   user: { username?: string; email?: string } | null;
   handleLogout: () => void;
   setIsSettingsOpen: (isOpen: boolean) => void;
 }
 
 export function PageHeader({
-  bucketName,
+  driveName,
   user,
   handleLogout,
   setIsSettingsOpen,
@@ -32,12 +32,12 @@ export function PageHeader({
             <p className={styles.subtitle}>
               Browse, manage, and organize your files with ease
             </p>
-            {bucketName && (
-              <div className={styles.bucketInfo}>
-                <span className={styles.bucketLabel}>
+            {driveName && (
+              <div className={styles.driveInfo}>
+                <span className={styles.driveLabel}>
                   Current Drive:{" "}
-                  <span className={styles.bucketName}>{bucketName}</span>
-                  <Link href="/" className={styles.changeBucket}>
+                  <span className={styles.driveName}>{driveName}</span>
+                  <Link href="/" className={styles.changeDrive}>
                     Change
                   </Link>
                 </span>

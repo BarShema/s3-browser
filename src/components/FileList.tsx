@@ -36,7 +36,8 @@ interface FileListProps {
   sortColumn?: string | null;
   sortDirection?: 'asc' | 'desc' | null;
   onSort?: (column: string) => void;
-  bucketName?: string;
+  driveName?: string;
+  previewedFileId?: string | null;
 }
 
 export function FileList({
@@ -55,7 +56,8 @@ export function FileList({
   sortColumn,
   sortDirection,
   onSort,
-  bucketName,
+  driveName,
+  previewedFileId,
 }: FileListProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -198,7 +200,7 @@ export function FileList({
       {items.map((item) => (
         <div
           key={item.id}
-          className={`${styles.row} ${selectedItems.includes(item.id) ? styles.selected : ''}`}
+          className={`${styles.row} ${selectedItems.includes(item.id) ? styles.selected : ''} ${previewedFileId === item.id ? styles.previewed : ''}`}
           onClick={() => handleItemClick(item)}
           onDoubleClick={() => handleItemDoubleClick(item)}
         >
@@ -280,7 +282,7 @@ export function FileList({
                   setLoadingMetadata(prev => new Set(prev).add(fileId));
                   
                   const file = item as FileItem;
-                  const fullPath = bucketName ? `${bucketName}/${file.key}` : file.key;
+                  const fullPath = driveName ? `${driveName}/${file.key}` : file.key;
                   api.drive.file.getMetadata({ path: fullPath })
                     .then(metadata => {
                       if (metadata) {

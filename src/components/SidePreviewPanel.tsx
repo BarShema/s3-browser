@@ -31,7 +31,7 @@ import styles from "./sidePreviewPanel.module.css";
 
 interface SidePreviewPanelProps {
   file: FileItem | null;
-  bucketName: string;
+  driveName: string;
   isOpen: boolean;
   onClose: () => void;
   onDownload: (file: FileItem) => void;
@@ -47,7 +47,7 @@ interface SidePreviewPanelProps {
 
 export function SidePreviewPanel({
   file,
-  bucketName,
+  driveName,
   isOpen,
   onClose,
   onDownload,
@@ -193,7 +193,7 @@ export function SidePreviewPanel({
       }, 0);
 
       api.drive.file.getContent({
-        path: `${bucketName}/${file.key}`,
+        path: `${driveName}/${file.key}`,
       })
         .then((data) => {
           setTextContent(data.content);
@@ -205,7 +205,7 @@ export function SidePreviewPanel({
           setIsLoadingText(false);
         });
     }
-  }, [file, bucketName]);
+  }, [file, driveName]);
 
   // Reset expanded state when panel closes or file changes
   useEffect(() => {
@@ -217,7 +217,7 @@ export function SidePreviewPanel({
   // Handle preview loading state when switching between images/videos
   useEffect(() => {
     if (!file) {
-      console.log("loading preview false 1");
+      console.log("[SidePreviewPanel] No file, clearing loading state");
       setTimeout(() => {
         setIsLoadingPreview(false);
         setCurrentPreviewKey("");
@@ -231,7 +231,12 @@ export function SidePreviewPanel({
     if (isImage(file.name) || isVideo(file.name)) {
       const newKey = `${file.id}-${file.key}`;
 
-      console.log("keys", { newKey, currentPreviewKey });
+      console.log("[SidePreviewPanel] Image/Video detected", {
+        fileName: file.name,
+        newKey,
+        currentPreviewKey,
+        isDifferent: newKey !== currentPreviewKey,
+      });
 
       // If it's a different file, show loader and hide current content
       if (newKey !== currentPreviewKey) {
@@ -239,15 +244,17 @@ export function SidePreviewPanel({
         if (previousFileRef.current) {
           setPreviousFile(previousFileRef.current);
         }
-        console.log("loading preview true 1");
+        console.log("[SidePreviewPanel] Setting loading to TRUE (new file)");
         setIsLoadingPreview(true);
+      } else {
+        console.log("[SidePreviewPanel] Same file, keeping current loading state:", isLoadingPreview);
       }
 
       // Update the ref to track the current file for next switch
       previousFileRef.current = file;
       setCurrentPreviewKey(newKey);
     } else {
-      console.log("loading preview false 2");
+      console.log("[SidePreviewPanel] Not image/video, clearing loading state");
       setTimeout(() => {
         setIsLoadingPreview(false);
         setCurrentPreviewKey("");
@@ -255,11 +262,11 @@ export function SidePreviewPanel({
         previousFileRef.current = null;
       }, 0);
     }
-  }, [file, currentPreviewKey]);
+  }, [file, currentPreviewKey, isLoadingPreview]);
 
   // Callback to handle when preview finishes loading
   const handlePreviewLoaded = () => {
-    console.log("loading preview false 3");
+    console.log("[SidePreviewPanel] handlePreviewLoaded called - setting loading to FALSE");
     setIsLoadingPreview(false);
   };
 
@@ -290,7 +297,7 @@ export function SidePreviewPanel({
     <div
       className={`${styles.overlay} ${isExpanded ? styles.expanded : ""}`}
       onClick={handleOverlayClick}
-      style={isExpanded ? {} : { width: `${effectiveWidth}%` }}
+      style={!isExpanded ? { "--overlay-width": `${effectiveWidth}%` } as React.CSSProperties : undefined}
     >
       {!isExpanded && (
         <div
@@ -335,27 +342,24 @@ export function SidePreviewPanel({
             )}
             <button
               onClick={() => onRename(file, file.name)}
-              className={styles.actionButton}
+              className={`${styles.actionButton} ${isViewModeEnabled() ? styles.hidden : ""}`}
               title="Rename"
-              style={{ display: isViewModeEnabled() ? 'none' : undefined }}
             >
               <Edit3 size={16} />
             </button>
             {isEditableText(file.name) && (
               <button
                 onClick={() => onEdit(file)}
-                className={styles.actionButton}
+                className={`${styles.actionButton} ${isViewModeEnabled() ? styles.hidden : ""}`}
                 title="Edit Content"
-                style={{ display: isViewModeEnabled() ? 'none' : undefined }}
               >
                 <FileText size={16} />
               </button>
             )}
             <button
               onClick={() => onDelete(file)}
-              className={`${styles.actionButton} ${styles.deleteButton}`}
+              className={`${styles.actionButton} ${styles.deleteButton} ${isViewModeEnabled() ? styles.hidden : ""}`}
               title="Delete"
-              style={{ display: isViewModeEnabled() ? 'none' : undefined }}
             >
               <Trash2 size={16} />
             </button>
@@ -407,52 +411,56 @@ export function SidePreviewPanel({
         <div className={styles.content}>
           {isImage(file.name) || isVideo(file.name) ? (
             <>
-              {isLoadingPreview && (
-                <div className={styles.previewLoader}>
-                  {previousFile &&
-                    (isImage(previousFile.name) ||
-                      isVideo(previousFile.name)) && (
-                      <div className={styles.previousPreview}>
-                        <img
-                          src={api.drive.file.getPreviewUrl({
-                            path: `${bucketName}/${file.key}`,
-                            maxWidth: 400,
-                            maxHeight: 400,
-                          })}
-                          alt={file.name}
-                          className={styles.previousPreviewImage}
-                        />
-                      </div>
-                    )}
-                  <div className={styles.loaderOverlay}>
-                    <Loader2 size={48} className={styles.loaderIcon} />
-                    <p className={styles.loaderText}>Loading...</p>
-                  </div>
-                </div>
-              )}
-              <div
-                style={{
-                  display: isLoadingPreview ? "none" : "block",
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
+              <div className={styles.mediaContainer}>
                 {isImage(file.name) ? (
-                  <ImagePreview
-                    src={`${bucketName}/${file.key}`}
-                    alt={file.name}
-                    className={styles.previewContent}
-                    maxWidth={1000}
-                    maxHeight={1000}
-                    onLoad={handlePreviewLoaded}
-                  />
+                  (() => {
+                    const previewPath = `${driveName}/${file.key}`;
+                    console.log("[SidePreviewPanel] Rendering ImagePreview", {
+                      previewPath,
+                      isLoadingPreview,
+                      hasOnLoad: !!handlePreviewLoaded,
+                    });
+                    return (
+                      <ImagePreview
+                        src={previewPath}
+                        alt={file.name}
+                        className={styles.previewContent}
+                        maxWidth={1000}
+                        maxHeight={1000}
+                        onLoad={handlePreviewLoaded}
+                      />
+                    );
+                  })()
                 ) : (
                   <VideoPreview
-                    src={`${bucketName}/${file.key}`}
+                    src={`${driveName}/${file.key}`}
                     className={styles.previewContent}
                     autoPlay={true}
                     onLoad={handlePreviewLoaded}
                   />
+                )}
+                {isLoadingPreview && (
+                  <div className={styles.previewLoader}>
+                    {previousFile &&
+                      (isImage(previousFile.name) ||
+                        isVideo(previousFile.name)) && (
+                        <div className={styles.previousPreview}>
+                          <img
+                            src={api.drive.file.getPreviewUrl({
+                              path: `${driveName}/${previousFile.key}`,
+                              maxWidth: 400,
+                              maxHeight: 400,
+                            })}
+                            alt={previousFile.name}
+                            className={styles.previousPreviewImage}
+                          />
+                        </div>
+                      )}
+                    <div className={styles.loaderOverlay}>
+                      <Loader2 size={48} className={styles.loaderIcon} />
+                      <p className={styles.loaderText}>Loading...</p>
+                    </div>
+                  </div>
                 )}
               </div>
             </>
@@ -460,7 +468,7 @@ export function SidePreviewPanel({
             <div className={styles.pdfContainer}>
               <iframe
                 src={api.drive.file.getPreviewUrl({
-                  path: `${bucketName}/${file.key}`,
+                  path: `${driveName}/${file.key}`,
                 })}
                 className={styles.pdfViewer}
                 title={file.name}

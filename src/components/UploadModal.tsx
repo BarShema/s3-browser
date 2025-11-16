@@ -13,7 +13,7 @@ interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
-  bucketName: string;
+  driveName: string;
   currentPath: string;
 }
 
@@ -25,7 +25,7 @@ interface UploadFile {
   error?: string;
 }
 
-export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPath }: UploadModalProps) {
+export function UploadModal({ isOpen, onClose, onComplete, driveName, currentPath }: UploadModalProps) {
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -103,7 +103,7 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
 
       await api.drive.file.upload({
         file: uploadFile.file,
-        bucket: bucketName,
+        drive: driveName,
         key: uploadFile.key,
       });
 
@@ -279,7 +279,7 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
               {isDragActive ? 'Drop files here' : 'Drag & drop files here, or click to select'}
             </p>
             <p className={uploadStyles.pathHint}>
-              Upload to: {currentPath || bucketName}
+              Upload to: {currentPath || driveName}
             </p>
           </div>
 

@@ -12,14 +12,14 @@ interface FileDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   file: FileItem | null;
-  bucketName: string;
+  driveName: string;
 }
 
 export function FileDetailsModal({
   isOpen,
   onClose,
   file,
-  bucketName,
+  driveName,
 }: FileDetailsModalProps) {
   const [metadata, setMetadata] = useState<{
     width?: number;
@@ -58,7 +58,7 @@ export function FileDetailsModal({
     // Fetch metadata for images and videos
     if (isImage(file.name) || isVideo(file.name)) {
       setIsLoadingMetadata(true);
-      const fullPath = bucketName ? `${bucketName}/${file.key}` : file.key;
+      const fullPath = driveName ? `${driveName}/${file.key}` : file.key;
       
       api.drive.file.getMetadata({ path: fullPath })
         .then((data) => {
@@ -77,7 +77,7 @@ export function FileDetailsModal({
           setIsLoadingMetadata(false);
         });
     }
-  }, [isOpen, file, bucketName]);
+  }, [isOpen, file, driveName]);
 
   if (!isOpen || !file) {
     return null;
@@ -87,7 +87,7 @@ export function FileDetailsModal({
   const hasPreview = isImage(file.name) || isVideo(file.name) || isPDF(file.name);
   const previewUrl = hasPreview
     ? api.drive.file.getPreviewUrl({
-        path: `${bucketName}/${file.key}`,
+        path: `${driveName}/${file.key}`,
         maxWidth: 400,
         maxHeight: 400,
       })
@@ -203,8 +203,8 @@ export function FileDetailsModal({
 
               <div className={fileDetailsStyles.propertyRow}>
                 <span className={fileDetailsStyles.propertyLabel}>Path</span>
-                <span className={fileDetailsStyles.propertyValue} title={`${bucketName}/${file.key}`}>
-                  {bucketName ? `${bucketName}/${file.key}` : file.key}
+                <span className={fileDetailsStyles.propertyValue} title={`${driveName}/${file.key}`}>
+                  {driveName ? `${driveName}/${file.key}` : file.key}
                 </span>
               </div>
             </div>

@@ -17,18 +17,23 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Idit File Browser",
-  description: "A modern file browser for Amazon S3 buckets",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
+  description: "A modern file browser for drive storage",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
     apple: "/favicon.svg",
   },
 };
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
+// Force dynamic rendering - content changes frequently per user/drive
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function RootLayout({
   children,

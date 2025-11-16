@@ -40,3 +40,48 @@
   padding: 2px 4px;
   min-width: 18px;
 }
+
+/* Icon colors */
+.iconFolder {
+  color: var(--theme-accent-primary);
+}
+
+.iconImage {
+  color: #10b981;
+}
+
+.iconVideo {
+  color: #f59e0b;
+}
+
+.iconMusic {
+  color: #8b5cf6;
+}
+
+.iconText {
+  color: #3b82f6;
+}
+
+.iconTable {
+  color: #059669;
+}
+
+.iconPresentation {
+  color: #dc2626;
+}
+
+.iconArchive {
+  color: #7c3aed;
+}
+
+.iconCode {
+  color: #ea580c;
+}
+
+.iconCpu {
+  color: #6b7280;
+}
+
+.iconFile {
+  color: #6b7280;
+}

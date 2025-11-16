@@ -5,6 +5,6 @@ export const driveConfig = {
     "idits-drive",
     "portfolio-files2"
   ],
-  tempDrive: appConfig.tempBucketName,
+  tempDrive: appConfig.tempDriveName,
   region: appConfig.region,
 };

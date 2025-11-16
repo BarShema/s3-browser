@@ -10,11 +10,14 @@
   justify-content: center;
 }
 
+/* Vertical and horizontal video styles can be added here if needed */
+
 .video {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
+
 }
 
 .playPauseAnimation {
@@ -47,12 +50,12 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(
+  /* background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.8) 0%,
     rgba(0, 0, 0, 0.6) 50%,
     transparent 100%
-  );
+  ); */
   padding: 12px 16px;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -85,19 +88,34 @@
   border-radius: 3px;
 }
 
+.progressBuffered {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: var(--buffered-progress, 0%);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+  z-index: 0;
+  transition: width 0.2s linear;
+}
+
 .progressFill {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
+  width: var(--progress, 0%);
   background: var(--theme-accent-primary);
   border-radius: 3px;
   transition: width 0.1s linear;
+  z-index: 1;
 }
 
 .progressHandle {
   position: absolute;
   top: 50%;
+  left: var(--progress, 0%);
   transform: translate(-50%, -50%);
   width: 14px;
   height: 14px;
@@ -106,7 +124,7 @@
   border: 2px solid #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, left 0.1s linear;
   z-index: 2;
 }
 
@@ -117,7 +135,7 @@
 .previewThumbnail {
   position: absolute;
   bottom: 100%;
-  left: 0;
+  left: var(--preview-position, 0%);
   transform: translateX(-50%);
   margin-bottom: 12px;
   background: rgba(0, 0, 0, 0.95);
@@ -252,9 +270,14 @@
   top: 0;
   left: 0;
   height: 100%;
+  width: var(--volume, 100%);
   background: #ffffff;
   border-radius: 2px;
   transition: width 0.1s linear;
+}
+
+.canvasHidden {
+  display: none;
 }
 
 .timeDisplay {
@@ -332,6 +355,7 @@
 .videoContainer:fullscreen .video {
   width: 100vw;
   height: 100vh;
+  background: #333;
 }
 
 /* Theme-aware adjustments */
@@ -339,12 +363,5 @@
   background: var(--theme-bg-primary);
 }
 
-.theme-night .controls {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.7) 50%,
-    transparent 100%
-  );
-}
+/* Theme-night controls styles can be added here if needed */
 

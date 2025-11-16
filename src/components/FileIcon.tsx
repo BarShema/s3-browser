@@ -39,7 +39,7 @@ export function FileIcon({
         className={`${styles.iconContainer} ${className || ""}`}
         data-size={size <= 24 ? "small" : size >= 48 ? "large" : "medium"}
       >
-        <Folder size={size} style={{ color: "var(--theme-accent-primary)" }} />
+        <Folder size={size} className={styles.iconFolder} />
       </div>
     );
   }
@@ -49,25 +49,25 @@ export function FileIcon({
   const renderIcon = () => {
     switch (iconType) {
       case "image":
-        return <FileImage size={size} style={{ color: "#10b981" }} />;
+        return <FileImage size={size} className={styles.iconImage} />;
       case "video":
-        return <FileVideo size={size} style={{ color: "#f59e0b" }} />;
+        return <FileVideo size={size} className={styles.iconVideo} />;
       case "music":
-        return <FileAudio size={size} style={{ color: "#8b5cf6" }} />;
+        return <FileAudio size={size} className={styles.iconMusic} />;
       case "file-text":
-        return <FileText size={size} style={{ color: "#3b82f6" }} />;
+        return <FileText size={size} className={styles.iconText} />;
       case "table":
-        return <FileSpreadsheet size={size} style={{ color: "#059669" }} />;
+        return <FileSpreadsheet size={size} className={styles.iconTable} />;
       case "presentation":
-        return <Presentation size={size} style={{ color: "#dc2626" }} />;
+        return <Presentation size={size} className={styles.iconPresentation} />;
       case "archive":
-        return <Archive size={size} style={{ color: "#7c3aed" }} />;
+        return <Archive size={size} className={styles.iconArchive} />;
       case "code":
-        return <FileCode size={size} style={{ color: "#ea580c" }} />;
+        return <FileCode size={size} className={styles.iconCode} />;
       case "cpu":
-        return <Cpu size={size} style={{ color: "#6b7280" }} />;
+        return <Cpu size={size} className={styles.iconCpu} />;
       default:
-        return <File size={size} style={{ color: "#6b7280" }} />;
+        return <File size={size} className={styles.iconFile} />;
     }
   };
 

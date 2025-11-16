@@ -17,15 +17,15 @@ export default function Home() {
   const params = useParams();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Get bucket name from URL path
-  const bucketName = Array.isArray(params.path)
+  // Get drive name from URL path
+  const driveName = Array.isArray(params.path)
     ? params.path[0] || ""
     : params.path || "";
 
-  const buckets = driveConfig.drives;
+  const drives = driveConfig.drives;
 
-  const handleBucketSelect = (bucket: string) => {
-    router.push(`/${bucket}`);
+  const handleDriveSelect = (drive: string) => {
+    router.push(`/${drive}`);
   };
 
   const handleLogout = async () => {
@@ -44,29 +44,29 @@ export default function Home() {
       <main className={styles.mainContainer}>
         <div className={styles.container}>
           <PageHeader
-            bucketName={bucketName}
+            driveName={driveName}
             user={user}
             handleLogout={handleLogout}
             setIsSettingsOpen={setIsSettingsOpen}
           />
 
-          {bucketName ? (
+          {driveName ? (
             <FileExplorer
-              bucketName={bucketName}
+              driveName={driveName}
               onOpenSettings={() => setIsSettingsOpen(true)}
             />
           ) : (
-            <div className={styles.bucketSelectContainer}>
-              <h2 className={styles.bucketSelectTitle}>Select an S3 Bucket</h2>
-              <div className={styles.bucketGrid}>
-                {buckets.map((bucket) => (
+            <div className={styles.driveSelectContainer}>
+              <h2 className={styles.driveSelectTitle}>Select a Drive</h2>
+              <div className={styles.driveGrid}>
+                {drives.map((drive) => (
                   <button
-                    key={bucket}
-                    onClick={() => handleBucketSelect(bucket)}
-                    className={styles.bucketCard}
+                    key={drive}
+                    onClick={() => handleDriveSelect(drive)}
+                    className={styles.driveCard}
                   >
-                    <span>{bucket}</span>
-                    <span className={styles.bucketArrow}>→</span>
+                    <span>{drive}</span>
+                    <span className={styles.driveArrow}>→</span>
                   </button>
                 ))}
               </div>

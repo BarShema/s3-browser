@@ -7,17 +7,17 @@ import styles from "./modal.module.css";
 interface ConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (bucket: string) => void;
-  initialBucket?: string;
+  onSave: (drive: string) => void;
+  initialDrive?: string;
 }
 
 export function ConfigModal({
   isOpen,
   onClose,
   onSave,
-  initialBucket = "",
+  initialDrive = "",
 }: ConfigModalProps) {
-  const [bucket, setBucket] = useState(initialBucket);
+  const [drive, setDrive] = useState(initialDrive);
 
   // Disable body scroll when modal is open
   useEffect(() => {
@@ -33,8 +33,8 @@ export function ConfigModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (bucket.trim()) {
-      onSave(bucket.trim());
+    if (drive.trim()) {
+      onSave(drive.trim());
     }
   };
 
@@ -44,20 +44,20 @@ export function ConfigModal({
     <div className={styles.overlay}>
       <div className={styles.modal}>
         <div className={configStyles.modalContent}>
-          <h2 className={configStyles.title}>Configure S3 Bucket</h2>
+          <h2 className={configStyles.title}>Configure Drive</h2>
 
           <form onSubmit={handleSubmit}>
             <div className={configStyles.formField}>
-              <label htmlFor="bucket" className={configStyles.label}>
-                S3 Bucket Name
+              <label htmlFor="drive" className={configStyles.label}>
+                Drive Name
               </label>
               <input
                 type="text"
-                id="bucket"
-                value={bucket}
-                onChange={(e) => setBucket(e.target.value)}
+                id="drive"
+                value={drive}
+                onChange={(e) => setDrive(e.target.value)}
                 className={configStyles.input}
-                placeholder="Enter your S3 bucket name"
+                placeholder="Enter your drive name"
                 required
               />
             </div>

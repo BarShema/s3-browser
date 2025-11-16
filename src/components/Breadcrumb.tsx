@@ -4,13 +4,13 @@ import styles from "./breadcrumb.module.css";
 
 interface BreadcrumbProps {
   currentPath: string;
-  bucketName: string;
+  driveName: string;
   onPathClick: (path: string) => void;
 }
 
 export function Breadcrumb({
   currentPath,
-  bucketName,
+  driveName,
   onPathClick,
 }: BreadcrumbProps) {
   const pathSegments = currentPath.split("/").filter(Boolean);
@@ -23,7 +23,7 @@ export function Breadcrumb({
   return (
     <div className={styles.container}>
       <button onClick={() => onPathClick("")} className={styles.breadcrum}>
-        {bucketName}
+        {driveName}
       </button>
 
       {pathSegments.map((segment, index) => (

@@ -13,7 +13,7 @@ interface EditModalProps {
   onClose: () => void;
   onComplete: () => void;
   file: FileItem | null;
-  bucketName: string;
+  driveName: string;
 }
 
 export function EditModal({
@@ -21,7 +21,7 @@ export function EditModal({
   onClose,
   onComplete,
   file,
-  bucketName,
+  driveName,
 }: EditModalProps) {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +51,7 @@ export function EditModal({
     setIsLoading(true);
     try {
       const data = await api.drive.file.getContent({
-        path: `${bucketName}/${file.key}`,
+        path: `${driveName}/${file.key}`,
       });
       setContent(data.content);
     } catch (error) {
@@ -68,7 +68,7 @@ export function EditModal({
     setIsSaving(true);
     try {
       await api.drive.file.saveContent({
-        bucket: bucketName,
+        drive: driveName,
         key: file.key,
         content: content,
         contentType: "text/plain",

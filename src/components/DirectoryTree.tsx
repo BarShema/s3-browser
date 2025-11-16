@@ -16,14 +16,14 @@ interface DirectoryNode {
 }
 
 interface DirectoryTreeProps {
-  bucketName: string;
+  driveName: string;
   currentPath: string;
   onPathClick: (path: string) => void;
   isVisible: boolean;
 }
 
 export function DirectoryTree({
-  bucketName,
+  driveName,
   currentPath,
   onPathClick,
   isVisible,
@@ -48,12 +48,12 @@ export function DirectoryTree({
 
   // Fetch directory structure
   const fetchDirectoryStructure = useCallback(async () => {
-    if (!bucketName) return;
+    if (!driveName) return;
 
     setIsLoading(true);
     try {
       const data = await api.drive.list({
-        path: bucketName,
+        path: driveName,
         limit: 1000,
       });
 
@@ -70,13 +70,13 @@ export function DirectoryTree({
     } finally {
       setIsLoading(false);
     }
-  }, [bucketName]);
+  }, [driveName]);
 
   // Load subdirectories for a specific directory
   const loadSubdirectories = useCallback(
     async (directoryKey: string) => {
       if (
-        !bucketName ||
+        !driveName ||
         loadedNodes.has(directoryKey) ||
         loadingNodes.has(directoryKey)
       ) {
@@ -87,7 +87,7 @@ export function DirectoryTree({
 
       try {
         const data = await api.drive.list({
-          path: `${bucketName}/${directoryKey}`,
+          path: `${driveName}/${directoryKey}`,
           limit: 1000,
         });
 
@@ -155,7 +155,7 @@ export function DirectoryTree({
         });
       }
     },
-    [bucketName, loadedNodes, loadingNodes]
+    [driveName, loadedNodes, loadingNodes]
   );
 
   // Build hierarchical tree structure from flat directory list
@@ -216,7 +216,7 @@ export function DirectoryTree({
   // Expand path to current location and load necessary directories
   const expandToPath = useCallback(
     async (path: string) => {
-      if (!path || !bucketName) return;
+      if (!path || !driveName) return;
 
       const pathParts = path.split("/").filter(Boolean);
       const expandedSet = new Set<string>();
@@ -240,7 +240,7 @@ export function DirectoryTree({
         }
       }
     },
-    [bucketName, loadedNodes, loadSubdirectories]
+    [driveName, loadedNodes, loadSubdirectories]
   );
 
   // Toggle node expansion
@@ -271,7 +271,7 @@ export function DirectoryTree({
           className={`${styles.nodeContent} ${
             isCurrentPath ? styles.currentPath : ""
           }`}
-          style={{ paddingLeft: `${node.level * 16 + 8}px` }}
+          style={{ "--node-padding": `${node.level * 16 + 8}px` } as React.CSSProperties}
         >
           {/* Plus icon for loading subdirectories */}
           <button
@@ -320,9 +320,9 @@ export function DirectoryTree({
     );
   };
 
-  // Load directory structure on mount and when bucket changes
+  // Load directory structure on mount and when drive changes
   useEffect(() => {
-    setHasInitialized(false); // Reset initialization state when bucket changes
+    setHasInitialized(false); // Reset initialization state when drive changes
     fetchDirectoryStructure();
   }, [fetchDirectoryStructure]);
 

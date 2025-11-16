@@ -30,25 +30,25 @@
   color: var(--theme-text-septenary);
 }
 
-.bucketInfo {
+.driveInfo {
   margin-top: 16px;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.bucketLabel {
+.driveLabel {
   font-size: 14px;
   color: var(--theme-text-secondary);
 }
 
-.bucketName {
+.driveName {
   font-weight: 500;
   color: var(--theme-text-primary);
   margin: 0 5px;
 }
 
-.changeBucket {
+.changeDrive {
   font-size: 14px;
   color: var(--theme-accent-primary);
   background: none;
@@ -60,7 +60,7 @@
   padding: 0;
 }
 
-.changeBucket:hover {
+.changeDrive:hover {
   color: var(--theme-accent-hover);
 }
 

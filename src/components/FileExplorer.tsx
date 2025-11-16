@@ -34,7 +34,7 @@ import { DeleteProtectionModal } from "./DeleteProtectionModal";
 import styles from "./fileExplorer.module.css";
 
 interface FileExplorerProps {
-  bucketName: string;
+  driveName: string;
   onOpenSettings?: () => void;
 }
 
@@ -52,7 +52,7 @@ interface S3Directory {
 }
 
 export function FileExplorer({
-  bucketName,
+  driveName,
   onOpenSettings,
 }: FileExplorerProps) {
   const params = useParams();
@@ -142,15 +142,15 @@ export function FileExplorer({
     storageKey: "idits-drive-tree-width",
   });
 
-  // Extract bucket and path from URL
-  // URL format: /{bucket}/{path/to/directory}
+  // Extract drive and path from URL
+  // URL format: /{drive}/{path/to/directory}
   const getCurrentPath = useCallback(() => {
     if (!params.path) return "";
     const pathSegments = Array.isArray(params.path)
       ? params.path
       : [params.path];
 
-    // Skip the first segment (bucket name) and get the rest as the path
+    // Skip the first segment (drive name) and get the rest as the path
     if (pathSegments.length <= 1) return "";
 
     // Join the path segments and decode only once
@@ -225,42 +225,24 @@ export function FileExplorer({
 
       try {
         const data = await api.drive.directory.getSize({
-          path: `${bucketName}/${dirKey}`,
+          path: `${driveName}/${dirKey}`,
         });
 
-        // Check if there's an error in the response
-        if (data.error) {
+        // Check if it's AllDirectoriesSizeResponse (has directorySizes property)
+        if ('directorySizes' in data) {
+          // This is for root - we don't handle this case in the UI
           setDirectorySizes((prev) => ({
             ...prev,
             [dirKey]: {
               size: 0,
               objects: 0,
-              formattedSize: (
-                <X
-                  size={16}
-                  className={styles.errorIcon}
-                  onClick={() => calculateDirectorySize(directory)}
-                />
-              ),
+              formattedSize: "",
               isLoading: false,
-              hasError: true,
+              hasError: false,
             },
           }));
-
-          // Revert back to calculator after 5 seconds
-          setTimeout(() => {
-            setDirectorySizes((prev) => ({
-              ...prev,
-              [dirKey]: {
-                size: 0,
-                objects: 0,
-                formattedSize: "",
-                isLoading: false,
-                hasError: false,
-              },
-            }));
-          }, 5000);
         } else {
+          // Single directory response
           setDirectorySizes((prev) => ({
             ...prev,
             [dirKey]: {
@@ -305,15 +287,15 @@ export function FileExplorer({
         }, 5000);
       }
     },
-    [bucketName, directorySizes]
+    [driveName, directorySizes]
   );
 
   const loadFiles = useCallback(
     async (path: string = "") => {
       setIsLoading(true);
       try {
-        // Construct the full path: bucketName/path
-        const fullPath = path ? `${bucketName}/${path}` : bucketName;
+        // Construct the full path: driveName/path
+        const fullPath = path ? `${driveName}/${path}` : driveName;
 
         const data = await api.drive.list({
           path: fullPath,
@@ -422,7 +404,7 @@ export function FileExplorer({
       }
     },
     [
-      bucketName,
+      driveName,
       currentPage,
       itemsPerPage,
       nameFilter,
@@ -458,27 +440,27 @@ export function FileExplorer({
     };
   });
 
-  // Update page title based on current path and bucket
+  // Update page title based on current path and drive
   useEffect(() => {
-    if (bucketName) {
+    if (driveName) {
       if (currentPath) {
         const pathParts = currentPath.split("/").filter(Boolean);
-        const currentDir = pathParts[pathParts.length - 1] || bucketName;
+        const currentDir = pathParts[pathParts.length - 1] || driveName;
         document.title = `${currentDir} | Idit File Browser`;
       } else {
-        document.title = `${bucketName} | Idit File Browser`;
+        document.title = `${driveName} | Idit File Browser`;
       }
     } else {
       document.title = "Idit File Browser";
     }
-  }, [bucketName, currentPath]);
+  }, [driveName, currentPath]);
 
   const handleDirectoryClick = (directory: DirectoryItem) => {
     const newPath = directory.key;
     // Remove trailing slash if present
     const cleanPath = newPath.endsWith("/") ? newPath.slice(0, -1) : newPath;
-    // Encode each path segment for the URL (including bucket name)
-    const encodedPath = [bucketName, cleanPath]
+    // Encode each path segment for the URL (including drive name)
+    const encodedPath = [driveName, cleanPath]
       .filter(Boolean)
       .map((segment) =>
         segment.split("/").map((segment) => encodeURIComponent(segment))
@@ -492,8 +474,8 @@ export function FileExplorer({
   const handleBreadcrumbClick = (path: string) => {
     // Remove trailing slash if present
     const cleanPath = path.endsWith("/") ? path.slice(0, -1) : path;
-    // Encode each path segment for the URL (including bucket name)
-    const encodedPath = [bucketName, cleanPath]
+    // Encode each path segment for the URL (including drive name)
+    const encodedPath = [driveName, cleanPath]
       .filter(Boolean)
       .map((segment) =>
         segment.split("/").map((segment) => encodeURIComponent(segment))
@@ -565,18 +547,16 @@ export function FileExplorer({
   const handleDownload = async (file: FileItem) => {
     try {
       const response = await api.drive.file.download({
-        path: `${bucketName}/${file.key}`,
+        path: `${driveName}/${file.key}`,
       });
       
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      // Response is now DownloadUrlResponse with downloadUrl
       const link = document.createElement("a");
-      link.href = url;
+      link.href = response.downloadUrl;
       link.download = file.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
 
       toast.success("Download started");
     } catch (error) {
@@ -590,15 +570,32 @@ export function FileExplorer({
       toast.loading("Creating ZIP file...", { id: "zip-creation" });
 
       const response = await api.drive.directory.download({
-        path: `${bucketName}/${directory.key}`,
+        path: `${driveName}/${directory.key}`,
       });
 
-      // Check if response is JSON (large directory) or ZIP (small directory)
-      const contentType = response.headers.get("content-type");
+      // Check if response is Response (ZIP blob) or JSON error object
+      if (response instanceof Response) {
+        // Small directory - download ZIP
+        const zipBlob = await response.blob();
 
-      if (contentType?.includes("application/json")) {
+        // Create download link
+        const url = window.URL.createObjectURL(zipBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${directory.name}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the URL object
+        window.URL.revokeObjectURL(url);
+
+        toast.success(`${directory.name}.zip downloaded successfully`, {
+          id: "zip-creation",
+        });
+      } else {
         // Large directory - show detailed message
-        const data = await response.json();
+        const data = response;
 
         const message = data.totalSizeMB
           ? `Directory too large: ${data.fileCount} files (${
@@ -612,27 +609,7 @@ export function FileExplorer({
           id: "zip-creation",
           duration: 10000,
         });
-        return;
       }
-
-      // Small directory - download ZIP
-      const zipBlob = await response.blob();
-
-      // Create download link
-      const url = window.URL.createObjectURL(zipBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${directory.name}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Clean up the URL object
-      window.URL.revokeObjectURL(url);
-
-      toast.success(`${directory.name}.zip downloaded successfully`, {
-        id: "zip-creation",
-      });
     } catch (error) {
       console.error("Error downloading directory:", error);
       toast.error("Failed to download directory", { id: "zip-creation" });
@@ -643,7 +620,7 @@ export function FileExplorer({
   const deleteFile = async (file: FileItem): Promise<boolean> => {
     try {
       await api.drive.file.delete({
-        path: `${bucketName}/${file.key}`,
+        path: `${driveName}/${file.key}`,
       });
 
       return true;
@@ -685,7 +662,7 @@ export function FileExplorer({
 
     try {
       await api.drive.file.rename({
-        bucket: bucketName,
+        drive: driveName,
         oldKey: file.key,
         newKey: newKey,
       });
@@ -796,13 +773,10 @@ export function FileExplorer({
         <>
           <div
             className={styles.treeSidebar}
-            style={{
-              width: `${treeResize.width}px`,
-              minWidth: `${treeResize.width}px`,
-            }}
+            style={{ "--tree-width": `${treeResize.width}px` } as React.CSSProperties}
           >
             <DirectoryTree
-              bucketName={bucketName}
+              driveName={driveName}
               currentPath={currentPath}
               onPathClick={handleBreadcrumbClick}
               isVisible={isTreeVisible}
@@ -833,7 +807,7 @@ export function FileExplorer({
               const dirKey = currentPath ? `${currentPath}/${safe}` : safe;
               try {
                 await api.drive.directory.create({
-                  bucket: bucketName,
+                  drive: driveName,
                   dirKey,
                 });
                 toast.success('Directory created');
@@ -895,7 +869,7 @@ export function FileExplorer({
 
           <Breadcrumb
             currentPath={currentPath}
-            bucketName={bucketName}
+            driveName={driveName}
             onPathClick={handleBreadcrumbClick}
           />
         </div>
@@ -925,7 +899,8 @@ export function FileExplorer({
                   sortColumn={sortColumn}
                   sortDirection={sortDirection}
                   onSort={handleSort}
-                  bucketName={bucketName}
+                  driveName={driveName}
+                  previewedFileId={previewFile?.id || null}
                 />
               )}
 
@@ -944,6 +919,7 @@ export function FileExplorer({
                   onDirectorySizeClick={calculateDirectorySize}
                   itemsPerRow={gridItemsPerRow}
                   onItemsPerRowChange={handleGridItemsPerRowChange}
+                  previewedFileId={previewFile?.id || null}
                 />
               )}
 
@@ -960,10 +936,11 @@ export function FileExplorer({
                   onDelete={handleDelete}
                   onRename={handleRename}
                   onDetailsClick={handleDetailsClick}
-                  bucketName={bucketName}
+                  driveName={driveName}
                   onDirectorySizeClick={calculateDirectorySize}
                   itemsPerRow={previewItemsPerRow}
                   onItemsPerRowChange={handlePreviewItemsPerRowChange}
+                  previewedFileId={previewFile?.id || null}
                 />
               )}
             </>
@@ -983,7 +960,7 @@ export function FileExplorer({
           isOpen={isUploadModalOpen}
           onClose={() => setIsUploadModalOpen(false)}
           onComplete={handleUploadComplete}
-          bucketName={bucketName}
+          driveName={driveName}
           currentPath={currentPath}
         />
 
@@ -992,13 +969,13 @@ export function FileExplorer({
           onClose={() => setIsEditModalOpen(false)}
           onComplete={handleEditComplete}
           file={editingFile}
-          bucketName={bucketName}
+          driveName={driveName}
         />
       </div>
       {/* Side Preview Panel */}
       <SidePreviewPanel
         file={previewFile}
-        bucketName={bucketName}
+        driveName={driveName}
         isOpen={isPreviewOpen}
         onClose={() => {
           handleClosePreview();
@@ -1065,7 +1042,7 @@ export function FileExplorer({
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         file={detailsFile}
-        bucketName={bucketName}
+        driveName={driveName}
       />
     </div>
   );

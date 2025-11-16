@@ -2,9 +2,10 @@
 
 import { api } from "@/lib/api";
 import { getFileExtension } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
-import styles from "./fileIcon.module.css";
+import fileIconStyles from "./fileIcon.module.css";
+import styles from "./videoPreview.module.css";
 
 interface VideoPreviewProps {
   src: string;
@@ -25,17 +26,48 @@ export function VideoPreview({
   const [hasError, setHasError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const videoUrlRef = useRef<string | null>(null);
+  const testImgRef = useRef<HTMLImageElement | null>(null);
+  const onLoadRef = useRef(onLoad);
+  const isFetchingRef = useRef(false);
+  const fetchingSrcRef = useRef<string | null>(null);
 
   // Extract filename from src to get extension
   const filename = src.split("/").pop() || "";
   const extension = getFileExtension(filename);
 
+  // Update onLoad ref when it changes (without triggering useEffect)
   useEffect(() => {
+    onLoadRef.current = onLoad;
+  }, [onLoad]);
+
+  useEffect(() => {
+    // Prevent duplicate requests for the same src
+    if (isFetchingRef.current && fetchingSrcRef.current === src) {
+      return;
+    }
+
     // Reset states when src changes
     setIsLoading(true);
     setHasError(false);
     setPreviewUrl(null);
     setVideoUrl(null);
+    isFetchingRef.current = true;
+    fetchingSrcRef.current = src;
+
+    // Revoke previous video URL if it exists (only if it's a blob URL)
+    if (videoUrlRef.current && videoUrlRef.current.startsWith("blob:")) {
+      window.URL.revokeObjectURL(videoUrlRef.current);
+      videoUrlRef.current = null;
+    }
+
+    // Clean up previous test image
+    if (testImgRef.current) {
+      const img = testImgRef.current;
+      img.removeEventListener("load", () => {});
+      img.removeEventListener("error", () => {});
+      testImgRef.current = null;
+    }
 
     // Fetch video download URL
     const fetchVideoUrl = async () => {
@@ -44,18 +76,20 @@ export function VideoPreview({
           path: src,
         });
 
-        const blob = await downloadResponse.blob();
-        const url = window.URL.createObjectURL(blob);
-        setVideoUrl(url);
+        // Validate downloadResponse has a downloadUrl
+        if (!downloadResponse || !downloadResponse.downloadUrl) {
+          throw new Error("Invalid download response: missing downloadUrl");
+        }
 
         if (isThumbnail) {
-          // For thumbnails, also fetch the preview image
+          // For thumbnails, fetch the preview image
           const previewEndpointUrl = api.drive.file.getPreviewUrl({
             path: src,
             maxWidth: 800,
             maxHeight: 600,
           });
           const testImg = document.createElement("img");
+          testImgRef.current = testImg;
 
           const handleLoad = () => {
             setPreviewUrl(previewEndpointUrl);
@@ -71,69 +105,69 @@ export function VideoPreview({
           testImg.addEventListener("error", handleError);
 
           testImg.src = previewEndpointUrl;
-
-          return () => {
-            testImg.removeEventListener("load", handleLoad);
-            testImg.removeEventListener("error", handleError);
-          };
         } else {
-          // For video player, just set loading to false
+          // For video player, use the download URL directly for streaming
+          // No need to download the entire blob - the browser will stream it
+          videoUrlRef.current = downloadResponse.downloadUrl;
+          setVideoUrl(downloadResponse.downloadUrl);
           setIsLoading(false);
-          onLoad?.();
+          onLoadRef.current?.();
         }
+        isFetchingRef.current = false;
       } catch (error) {
-        console.error("Error loading video:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        console.error("Error loading video:", {
+          error,
+          message: errorMessage,
+          src,
+          isThumbnail,
+        });
         setHasError(true);
         setIsLoading(false);
+        isFetchingRef.current = false;
       }
     };
 
     fetchVideoUrl();
+
+    // Cleanup function
+    return () => {
+      isFetchingRef.current = false;
+      fetchingSrcRef.current = null;
+      // Only revoke object URL if we created one (for thumbnails, not for streaming)
+      // For streaming mode, videoUrl is just the download URL string, not an object URL
+      if (videoUrlRef.current && videoUrlRef.current.startsWith("blob:")) {
+        window.URL.revokeObjectURL(videoUrlRef.current);
+        videoUrlRef.current = null;
+      }
+      // Clean up test image event listeners
+      if (testImgRef.current) {
+        const img = testImgRef.current;
+        img.removeEventListener("load", () => {});
+        img.removeEventListener("error", () => {});
+        testImgRef.current = null;
+      }
+    };
   }, [src, isThumbnail]);
 
   // Thumbnail mode (for grid/preview views)
   if (isThumbnail) {
     return (
-      <div
-        className={styles.iconContainer}
-        style={{ position: "relative", width: "100%", height: "100%" }}
-      >
+      <div className={styles.iconContainer}>
         {hasError ? (
-          <div
-            className={className}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "#f3f4f6",
-              color: "#9ca3af",
-            }}
-          >
+          <div className={`${styles.errorContainer} ${className || ""}`}>
             Video preview unavailable
           </div>
         ) : isLoading ? (
-          <div
-            className={className}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "#f3f4f6",
-              color: "#9ca3af",
-            }}
-          >
+          <div className={`${styles.loadingContainer} ${className || ""}`}>
             Loading video preview...
           </div>
         ) : previewUrl ? (
           <img
             src={previewUrl}
             alt="Video Preview"
-            className={className}
-            style={{
-              maxWidth: "100%",
-              maxHeight: "70vh",
-              objectFit: "contain",
-            }}
+            className={`${styles.previewImage} ${className || ""}`}
           />
         ) : (
           <div className={className}>
@@ -141,8 +175,8 @@ export function VideoPreview({
           </div>
         )}
         {extension && (
-          <div className={styles.extensionBox}>
-            <span className={styles.extensionText}>
+          <div className={fileIconStyles.extensionBox}>
+            <span className={fileIconStyles.extensionText}>
               {extension.toUpperCase()}
             </span>
           </div>
@@ -153,38 +187,13 @@ export function VideoPreview({
 
   // Video player mode (for preview panel)
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <div className={styles.videoPlayerContainer}>
       {hasError ? (
-        <div
-          className={className}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#f3f4f6",
-            color: "#9ca3af",
-          }}
-        >
+        <div className={`${styles.videoErrorContainer} ${className || ""}`}>
           Video unavailable
         </div>
-      ) : !isLoading ? (
-        <div
-          className={className}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#9ca3af",
-          }}
-        >
+      ) : isLoading ? (
+        <div className={`${styles.videoLoadingContainer} ${className || ""}`}>
           Loading...
         </div>
       ) : videoUrl ? (

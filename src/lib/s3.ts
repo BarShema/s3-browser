@@ -53,13 +53,13 @@ export interface S3Directory {
   isDirectory: boolean;
 }
 
-export interface S3Bucket {
+export interface S3Drive {
   name: string;
   creationDate?: Date;
 }
 
-// List all S3 buckets
-export async function listBuckets(): Promise<S3Bucket[]> {
+// List all drives
+export async function listDrives(): Promise<S3Drive[]> {
   try {
     const command = new ListBucketsCommand({});
     const response = await s3Client.send(command);
@@ -73,19 +73,19 @@ export async function listBuckets(): Promise<S3Bucket[]> {
       creationDate: bucket.CreationDate,
     }));
   } catch (error) {
-    console.error("Error listing S3 buckets:", error);
-    throw new Error("Failed to list buckets");
+    console.error("Error listing drives:", error);
+    throw new Error("Failed to list drives");
   }
 }
 
-// List objects in a bucket with optional prefix (folder)
+// List objects in a drive with optional prefix (folder)
 export async function listS3Objects(
-  bucket: string,
+  drive: string,
   prefix: string = ""
 ): Promise<{ files: S3File[]; directories: S3Directory[] }> {
   try {
     const command = new ListObjectsV2Command({
-      Bucket: bucket,
+      Bucket: drive,
       Prefix: prefix,
       Delimiter: "/",
     });
@@ -173,13 +173,13 @@ export async function listS3Objects(
 
 // Get signed URL for downloading a file
 export async function getDownloadUrl(
-  bucket: string,
+  drive: string,
   key: string,
   expiresIn: number = 3600
 ): Promise<string> {
   try {
     const command = new GetObjectCommand({
-      Bucket: bucket,
+      Bucket: drive,
       Key: key,
     });
 
@@ -192,14 +192,14 @@ export async function getDownloadUrl(
 
 // Upload file to S3
 export async function uploadToS3(
-  bucket: string,
+  drive: string,
   key: string,
   file: Buffer,
   contentType: string
 ): Promise<void> {
   try {
     const command = new PutObjectCommand({
-      Bucket: bucket,
+      Bucket: drive,
       Key: key,
       Body: file,
       ContentType: contentType,
@@ -213,10 +213,10 @@ export async function uploadToS3(
 }
 
 // Delete file from S3
-export async function deleteFromS3(bucket: string, key: string): Promise<void> {
+export async function deleteFromS3(drive: string, key: string): Promise<void> {
   try {
     const command = new DeleteObjectCommand({
-      Bucket: bucket,
+      Bucket: drive,
       Key: key,
     });
 
@@ -229,22 +229,22 @@ export async function deleteFromS3(bucket: string, key: string): Promise<void> {
 
 // Rename/move file in S3
 export async function renameS3Object(
-  bucket: string,
+  drive: string,
   oldKey: string,
   newKey: string
 ): Promise<void> {
   try {
     // Copy object to new location
     const copyCommand = new CopyObjectCommand({
-      Bucket: bucket,
-      CopySource: `${bucket}/${oldKey}`,
+      Bucket: drive,
+      CopySource: `${drive}/${oldKey}`,
       Key: newKey,
     });
 
     await s3Client.send(copyCommand);
 
     // Delete original object
-    await deleteFromS3(bucket, oldKey);
+    await deleteFromS3(drive, oldKey);
   } catch (error) {
     console.error("Error renaming S3 object:", error);
     throw new Error("Failed to rename file in S3");
@@ -253,12 +253,12 @@ export async function renameS3Object(
 
 // Get file metadata
 export async function getFileMetadata(
-  bucket: string,
+  drive: string,
   key: string
 ): Promise<HeadObjectCommandOutput> {
   try {
     const command = new HeadObjectCommand({
-      Bucket: bucket,
+      Bucket: drive,
       Key: key,
     });
 
@@ -272,14 +272,14 @@ export async function getFileMetadata(
 
 // Get signed URL for uploading a file
 export async function getUploadUrl(
-  bucket: string,
+  drive: string,
   key: string,
   contentType: string,
   expiresIn: number = 3600
 ): Promise<string> {
   try {
     const command = new PutObjectCommand({
-      Bucket: bucket,
+      Bucket: drive,
       Key: key,
       ContentType: contentType,
     });
@@ -291,25 +291,25 @@ export async function getUploadUrl(
   }
 }
 
-// Get bucket region
-export async function getBucketRegion(bucket: string): Promise<string> {
+// Get drive region
+export async function getDriveRegion(drive: string): Promise<string> {
   try {
     const command = new GetBucketLocationCommand({
-      Bucket: bucket,
+      Bucket: drive,
     });
     const response = await s3Client.send(command);
     // GetBucketLocation returns null for us-east-1, which is the default
     return response.LocationConstraint || "us-east-1";
   } catch (error) {
-    console.error("Error getting bucket region:", error);
+    console.error("Error getting drive region:", error);
     // Fallback to default region
     return process.env.AWS_REGION || "eu-west-1";
   }
 }
 
-// Get S3 client for a specific bucket (with correct region)
-export async function getS3ClientForBucket(bucket: string): Promise<S3Client> {
-  const region = await getBucketRegion(bucket);
+// Get S3 client for a specific drive (with correct region)
+export async function getS3ClientForDrive(drive: string): Promise<S3Client> {
+  const region = await getDriveRegion(drive);
   const config = getS3Config();
 
   // If region matches, return existing client
@@ -317,7 +317,7 @@ export async function getS3ClientForBucket(bucket: string): Promise<S3Client> {
     return s3Client;
   }
 
-  // Create new client with bucket's region
+  // Create new client with drive's region
   return new S3Client({
     ...config,
     region,

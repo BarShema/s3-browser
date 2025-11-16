@@ -215,6 +215,11 @@
   background: var(--theme-selected-bg);
 }
 
+.row.previewed {
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid var(--theme-accent-primary);
+}
+
 .cell {
   display: flex;
   align-items: center;

@@ -79,7 +79,7 @@
   }
 }
 
-.bucketCard {
+.driveCard {
   padding: 16px 24px;
   background: var(--theme-bg-primary);
   border: 1px solid var(--theme-border-secondary);
@@ -92,17 +92,17 @@
   transition: all 0.2s;
 }
 
-.bucketCard:hover {
+.driveCard:hover {
   background: var(--theme-bg-quaternary);
   border-color: var(--theme-accent-quinary);
 }
 
-.bucketName {
+.driveName {
   font-weight: 500;
   color: var(--theme-text-primary);
   margin: 0 5px;
 }
 
-.bucketArrow {
+.driveArrow {
   color: var(--theme-accent-primary);
 }

@@ -37,7 +37,7 @@ export default function Home() {
       <main className={styles.mainContainer}>
         <div className={styles.container}>
           <PageHeader
-            bucketName={""}
+            driveName={""}
             user={user}
             handleLogout={handleLogout}
             setIsSettingsOpen={setIsSettingsOpen}

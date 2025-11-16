@@ -1,6 +1,7 @@
 .grid {
   display: grid;
   gap: 24px;
+  grid-template-columns: var(--grid-columns, repeat(auto-fill, minmax(200px, 1fr)));
 }
 
 .container {
@@ -209,6 +210,11 @@
 }
 
 .item.selected {
+  box-shadow: 0 0 0 2px var(--theme-accent-primary);
+}
+
+.item.previewed {
+  background: rgba(59, 130, 246, 0.1);
   box-shadow: 0 0 0 2px var(--theme-accent-primary);
 }
 

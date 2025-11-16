@@ -18,6 +18,7 @@ interface CustomVideoPlayerProps {
   className?: string;
   autoPlay?: boolean;
   onLoad?: () => void;
+  orientation?: "vertical" | "horizontal" | null;
 }
 
 export function CustomVideoPlayer({
@@ -25,6 +26,7 @@ export function CustomVideoPlayer({
   className,
   autoPlay = false,
   onLoad,
+  orientation,
 }: CustomVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,9 +39,6 @@ export function CustomVideoPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [bufferedProgress, setBufferedProgress] = useState(0);
-  const [videoOrientation, setVideoOrientation] = useState<
-    "vertical" | "horizontal" | null
-  >(null);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -56,13 +55,6 @@ export function CustomVideoPlayer({
 
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Reset orientation when src changes
-  useEffect(() => {
-    setTimeout(() => {
-      setVideoOrientation(null);
-    }, 0);
-  }, [src]);
-
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -73,16 +65,6 @@ export function CustomVideoPlayer({
     const handlePause = () => setIsPlaying(false);
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
-
-      // Detect video orientation
-      const videoWidth = video.videoWidth;
-      const videoHeight = video.videoHeight;
-      if (videoWidth > 0 && videoHeight > 0) {
-        const orientation =
-          videoHeight > videoWidth ? "vertical" : "horizontal";
-        setVideoOrientation(orientation);
-      }
-
       onLoad?.();
       if (autoPlay) {
         video.play().catch(() => setIsPlaying(false));
@@ -485,7 +467,7 @@ export function CustomVideoPlayer({
     <div
       ref={containerRef}
       className={`${styles.videoContainer} ${
-        videoOrientation ? styles[videoOrientation] : ""
+        orientation ? styles[orientation] : ""
       } ${className || ""}`}
       onMouseMove={showControls}
       onMouseLeave={hideControls}

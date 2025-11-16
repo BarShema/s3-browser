@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/lib/api";
+import { clz } from "@/lib/clz";
 import { getFileExtension } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
@@ -26,8 +27,12 @@ export function VideoPreview({
   const [hasError, setHasError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoOrientation, setVideoOrientation] = useState<
+    "vertical" | "horizontal" | null
+  >(null);
   const videoUrlRef = useRef<string | null>(null);
   const testImgRef = useRef<HTMLImageElement | null>(null);
+  const orientationVideoRef = useRef<HTMLVideoElement | null>(null);
   const onLoadRef = useRef(onLoad);
   const isFetchingRef = useRef(false);
   const fetchingSrcRef = useRef<string | null>(null);
@@ -52,6 +57,7 @@ export function VideoPreview({
     setHasError(false);
     setPreviewUrl(null);
     setVideoUrl(null);
+    setVideoOrientation(null);
     isFetchingRef.current = true;
     fetchingSrcRef.current = src;
 
@@ -110,6 +116,31 @@ export function VideoPreview({
           // No need to download the entire blob - the browser will stream it
           videoUrlRef.current = downloadResponse.downloadUrl;
           setVideoUrl(downloadResponse.downloadUrl);
+
+          // Detect video orientation by loading metadata
+          const tempVideo = document.createElement("video");
+          orientationVideoRef.current = tempVideo;
+
+          const handleMetadataLoaded = () => {
+            const videoWidth = tempVideo.videoWidth;
+            const videoHeight = tempVideo.videoHeight;
+            if (videoWidth > 0 && videoHeight > 0) {
+              const orientation =
+                videoHeight > videoWidth ? "vertical" : "horizontal";
+              setVideoOrientation(orientation);
+            }
+            tempVideo.removeEventListener(
+              "loadedmetadata",
+              handleMetadataLoaded
+            );
+            tempVideo.src = "";
+            orientationVideoRef.current = null;
+          };
+
+          tempVideo.addEventListener("loadedmetadata", handleMetadataLoaded);
+          tempVideo.src = downloadResponse.downloadUrl;
+          tempVideo.load();
+
           setIsLoading(false);
           onLoadRef.current?.();
         }
@@ -147,6 +178,12 @@ export function VideoPreview({
         img.removeEventListener("load", () => {});
         img.removeEventListener("error", () => {});
         testImgRef.current = null;
+      }
+      // Clean up orientation detection video
+      if (orientationVideoRef.current) {
+        const video = orientationVideoRef.current;
+        video.src = "";
+        orientationVideoRef.current = null;
       }
     };
   }, [src, isThumbnail]);
@@ -187,7 +224,7 @@ export function VideoPreview({
 
   // Video player mode (for preview panel)
   return (
-    <div className={styles.videoPlayerContainer}>
+    <div className={clz(styles.videoPlayerContainer, styles[videoOrientation])}>
       {hasError ? (
         <div className={`${styles.videoErrorContainer} ${className || ""}`}>
           Video unavailable
@@ -202,6 +239,7 @@ export function VideoPreview({
           className={className}
           autoPlay={autoPlay}
           onLoad={onLoad}
+          orientation={videoOrientation}
         />
       ) : (
         <div className={className}>

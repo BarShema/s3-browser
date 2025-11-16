@@ -35,6 +35,10 @@
   justify-content: center;
 }
 
+.videoPlayerContainer.vertical {
+  height: 100%;
+}
+
 .videoErrorContainer {
   display: flex;
   align-items: center;
@@ -49,4 +53,3 @@
   justify-content: center;
   color: #9ca3af;
 }
-

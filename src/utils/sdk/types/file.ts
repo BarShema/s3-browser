@@ -9,7 +9,7 @@ import { SuccessResponse } from "./common";
  */
 export interface UploadFileParams {
   file: File;
-  bucket: string;
+  drive: string;
   key: string;
 }
 
@@ -24,7 +24,7 @@ export interface DeleteFileParams {
  * Request parameters for renaming a file
  */
 export interface RenameFileParams {
-  bucket: string;
+  drive: string;
   oldKey: string;
   newKey: string;
 }
@@ -47,7 +47,7 @@ export interface FileContentResponse {
  * Request parameters for saving file content
  */
 export interface SaveFileContentParams {
-  bucket: string;
+  drive: string;
   key: string;
   content: string;
   contentType?: string;
@@ -92,7 +92,7 @@ export interface GetPreviewUrlParams {
  * Request parameters for getting upload URL
  */
 export interface GetUploadUrlParams {
-  bucket: string;
+  drive: string;
   key: string;
   contentType: string;
   expiresIn?: number;

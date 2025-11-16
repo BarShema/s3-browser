@@ -26,7 +26,7 @@ export class DirectoryAPI extends BaseAPI {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        bucket: data.bucket,
+        bucket: data.drive,
         dirKey: data.dirKey,
       }),
     });
@@ -55,7 +55,7 @@ export class DirectoryAPI extends BaseAPI {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        bucket: data.bucket,
+        bucket: data.drive,
         oldKey: data.oldKey,
         newKey: data.newKey,
       }),

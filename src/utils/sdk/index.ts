@@ -11,21 +11,21 @@ import { DriveAPI } from "./drive";
  * import api from '@/utils/sdk';
  * 
  * // Directory operations
- * api.drive.directory.create({ bucket: 'my-bucket', dirKey: 'folder' });
- * api.drive.directory.delete({ path: 'my-bucket/folder' });
- * api.drive.directory.rename({ bucket: 'my-bucket', oldKey: 'old', newKey: 'new' });
+ * api.drive.directory.create({ drive: 'my-drive', dirKey: 'folder' });
+ * api.drive.directory.delete({ path: 'my-drive/folder' });
+ * api.drive.directory.rename({ drive: 'my-drive', oldKey: 'old', newKey: 'new' });
  * 
  * // File operations
- * api.drive.file.upload({ file: myFile, bucket: 'my-bucket', key: 'file.txt' });
- * api.drive.file.delete({ path: 'my-bucket/file.txt' });
- * api.drive.file.getContent({ path: 'my-bucket/file.txt' });
+ * api.drive.file.upload({ file: myFile, drive: 'my-drive', key: 'file.txt' });
+ * api.drive.file.delete({ path: 'my-drive/file.txt' });
+ * api.drive.file.getContent({ path: 'my-drive/file.txt' });
  * 
- * // Bucket operations
- * api.drive.bucket.list();
- * api.drive.bucket.getSize({ drive: 'my-bucket' });
+ * // Drive operations
+ * api.drive.listDrives();
+ * api.drive.getSize({ drive: 'my-drive' });
  * 
  * // List files and directories
- * api.drive.list({ path: 'my-bucket', page: 1, limit: 20 });
+ * api.drive.list({ path: 'my-drive', page: 1, limit: 20 });
  * ```
  * 
  * Base URL Configuration:

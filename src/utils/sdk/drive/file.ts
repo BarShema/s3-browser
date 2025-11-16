@@ -29,7 +29,7 @@ export class FileAPI extends BaseAPI {
   async upload(data: UploadFileParams): Promise<UploadFileResponse> {
     const formData = new FormData();
     formData.append("file", data.file);
-    formData.append("bucket", data.bucket);
+    formData.append("bucket", data.drive);
     formData.append("key", data.key);
 
     return this.request("api/s3", {
@@ -61,7 +61,7 @@ export class FileAPI extends BaseAPI {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        bucket: data.bucket,
+        bucket: data.drive,
         oldKey: data.oldKey,
         newKey: data.newKey,
       }),
@@ -89,7 +89,7 @@ export class FileAPI extends BaseAPI {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        bucket: data.bucket,
+        bucket: data.drive,
         key: data.key,
         content: data.content,
         contentType: data.contentType || "text/plain",
@@ -148,7 +148,7 @@ export class FileAPI extends BaseAPI {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        bucket: data.bucket,
+        bucket: data.drive,
         key: data.key,
         contentType: data.contentType,
         expiresIn: data.expiresIn || 3600,

@@ -8,7 +8,7 @@ import { SuccessResponse } from "./common";
  * Request parameters for creating a directory
  */
 export interface CreateDirectoryParams {
-  bucket: string;
+  drive: string;
   dirKey: string;
 }
 
@@ -23,7 +23,7 @@ export interface DeleteDirectoryParams {
  * Request parameters for renaming a directory
  */
 export interface RenameDirectoryParams {
-  bucket: string;
+  drive: string;
   oldKey: string;
   newKey: string;
 }

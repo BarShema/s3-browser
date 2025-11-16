@@ -48,3 +48,31 @@ export interface ListFilesResponse {
   currentPage: number;
 }
 
+/**
+ * Drive information
+ */
+export interface Drive {
+  name: string;
+  creationDate?: string;
+}
+
+/**
+ * Request parameters for getting drive size
+ */
+export interface GetDriveSizeParams {
+  drive: string;
+}
+
+/**
+ * Response for drive size
+ */
+export interface DriveSizeResponse {
+  size: number;
+  sizeFormatted: string;
+}
+
+/**
+ * Response types
+ */
+export type ListDrivesResponse = Array<Drive>;
+

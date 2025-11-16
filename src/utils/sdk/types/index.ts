@@ -19,6 +19,6 @@ export * from "./directory";
 // File types
 export * from "./file";
 
-// Bucket types
-export * from "./bucket";
+// Drive types (includes drive listing and size)
+// Note: Drive types are exported from "./drive"
 

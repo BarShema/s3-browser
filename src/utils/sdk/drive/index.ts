@@ -1,10 +1,12 @@
 import { BaseAPI } from "../base";
 import { DirectoryAPI } from "./directory";
 import { FileAPI } from "./file";
-import { BucketAPI } from "./bucket";
 import type {
   ListFilesParams,
   ListFilesResponse,
+  ListDrivesResponse,
+  GetDriveSizeParams,
+  DriveSizeResponse,
 } from "../types";
 
 /**
@@ -13,19 +15,18 @@ import type {
  * Handles all S3-related API operations including file management,
  * directory operations, uploads, downloads, and metadata.
  * 
- * Organized by resource type: directory, file, and bucket.
+ * Organized by resource type: directory and file. Drive-level operations
+ * (like listing drives and getting drive size) are at the drive level.
  */
 export class DriveAPI extends BaseAPI {
   public directory: DirectoryAPI;
   public file: FileAPI;
-  public bucket: BucketAPI;
 
   constructor(baseUrl?: string | null) {
     super(baseUrl);
     // Initialize nested API classes with the same baseUrl
     this.directory = new DirectoryAPI(baseUrl);
     this.file = new FileAPI(baseUrl);
-    this.bucket = new BucketAPI(baseUrl);
   }
 
   /**
@@ -35,11 +36,10 @@ export class DriveAPI extends BaseAPI {
     super.setBaseUrl(baseUrl);
     this.directory.setBaseUrl(baseUrl);
     this.file.setBaseUrl(baseUrl);
-    this.bucket.setBaseUrl(baseUrl);
   }
 
   /**
-   * List files and directories in an S3 bucket
+   * List files and directories in a drive
    */
   async list(params: ListFilesParams): Promise<ListFilesResponse> {
     const queryParams = new URLSearchParams({
@@ -53,6 +53,24 @@ export class DriveAPI extends BaseAPI {
     if (params.extension) queryParams.append("extension", params.extension);
 
     return this.request(`api/s3?${queryParams.toString()}`);
+  }
+
+  /**
+   * List all drives
+   */
+  async listDrives(): Promise<ListDrivesResponse> {
+    return this.request("api/s3/buckets");
+  }
+
+  /**
+   * Get drive size
+   */
+  async getSize(params: GetDriveSizeParams): Promise<DriveSizeResponse> {
+    const queryParams = new URLSearchParams({
+      drive: params.drive,
+    });
+
+    return this.request(`api/s3/drive-size?${queryParams.toString()}`);
   }
 }
 

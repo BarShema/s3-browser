@@ -24,7 +24,7 @@ info:
 servers:
   - url: http://localhost:3010
     description: Local development server
-  - url: https://{api-gateway-url}
+  - url: https://xtat5bijhb.execute-api.eu-west-1.amazonaws.com
     description: Production server
     variables:
       api-gateway-url:

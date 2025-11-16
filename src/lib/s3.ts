@@ -298,8 +298,8 @@ export async function getBucketRegion(bucket: string): Promise<string> {
       Bucket: bucket,
     });
     const response = await s3Client.send(command);
-    // GetBucketLocation returns null for us-east-1, which is the default
-    return response.LocationConstraint || "us-east-1";
+    // GetBucketLocation returns null for eu-west-1, which is the default
+    return response.LocationConstraint || "eu-west-1";
   } catch (error) {
     console.error("Error getting bucket region:", error);
     // Fallback to default region

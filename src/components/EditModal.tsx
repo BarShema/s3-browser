@@ -6,6 +6,7 @@ import { Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import styles from "./modal.module.css";
+import { appConfig } from "@/config/app";
 
 interface EditModalProps {
   isOpen: boolean;
@@ -50,7 +51,7 @@ export function EditModal({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/s3/content?path=${encodeURIComponent(
+        `${appConfig.apiBaseUrl}/api/s3/content?path=${encodeURIComponent(
           `${bucketName}/${file.key}`
         )}`
       );

@@ -23,7 +23,12 @@
     "pm2:stop:lcl": "./scripts/pm2-manage.sh stop lcl",
     "pm2:restart:lcl": "./scripts/pm2-manage.sh restart lcl",
     "pm2:logs:lcl": "./scripts/pm2-manage.sh logs lcl",
-    "pm2:status:lcl": "./scripts/pm2-manage.sh status lcl"
+    "pm2:status:lcl": "./scripts/pm2-manage.sh status lcl",
+    "deploy:cloudfront": "./scripts/deploy-cloudfront.sh",
+    "deploy:cloudfront:dev": "env=dev ./scripts/deploy-cloudfront.sh",
+    "deploy:cloudfront:prd": "env=prd ./scripts/deploy-cloudfront.sh",
+    "deploy:cloudfront:staging": "env=staging ./scripts/deploy-cloudfront.sh",
+    "fix:cloudfront:routing": "./scripts/fix-cloudfront-spa-routing.sh"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.917.0",

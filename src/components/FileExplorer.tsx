@@ -224,7 +224,7 @@ export function FileExplorer({
 
       try {
         const response = await fetch(
-          `/api/s3/directory-size?path=${encodeURIComponent(
+          `${appConfig.apiBaseUrl}/api/s3/directory-size?path=${encodeURIComponent(
             `${bucketName}/${dirKey}`
           )}`
         );
@@ -335,7 +335,7 @@ export function FileExplorer({
         if (typeFilter) params.append("type", typeFilter);
         if (extensionFilter) params.append("extension", extensionFilter);
 
-        const response = await fetch(`/api/s3?${params.toString()}`);
+        const response = await fetch(`${appConfig.apiBaseUrl}/api/s3?${params.toString()}`);
 
         if (!response.ok) {
           throw new Error("Failed to load files");
@@ -584,7 +584,7 @@ export function FileExplorer({
   const handleDownload = async (file: FileItem) => {
     try {
       const response = await fetch(
-        `/api/s3/download?path=${encodeURIComponent(
+        `${appConfig.apiBaseUrl}/api/s3/download?path=${encodeURIComponent(
           `${bucketName}/${file.key}`
         )}`
       );
@@ -612,7 +612,7 @@ export function FileExplorer({
       toast.loading("Creating ZIP file...", { id: "zip-creation" });
 
       const response = await fetch(
-        `/api/s3/download-directory?path=${encodeURIComponent(
+        `${appConfig.apiBaseUrl}/api/s3/download-directory?path=${encodeURIComponent(
           `${bucketName}/${directory.key}`
         )}`
       );
@@ -671,7 +671,7 @@ export function FileExplorer({
   const deleteFile = async (file: FileItem): Promise<boolean> => {
     try {
       const response = await fetch(
-        `/api/s3?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`,
+        `${appConfig.apiBaseUrl}/api/s3?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`,
         {
           method: "DELETE",
         }
@@ -951,7 +951,7 @@ export function FileExplorer({
           {isLoading ? (
             <div className={styles.loadingContainer}>
               <div className={styles.loader}></div>
-              <span className={styles.loadingText}>Loading...</span>
+              <span className={styles.loadingText}>Loading...3</span>
             </div>
           ) : (
             <>

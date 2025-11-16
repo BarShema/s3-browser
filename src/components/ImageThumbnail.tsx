@@ -4,6 +4,7 @@ import { Image } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getFileExtension } from "@/lib/utils";
 import styles from "./fileIcon.module.css";
+import { appConfig } from "@/config/app";
 
 interface ImageThumbnailProps {
   src: string;
@@ -35,7 +36,7 @@ export function ImageThumbnail({
     // Use the preview endpoint directly as image source
     const fetchThumbnailUrl = async () => {
       try {
-        const previewUrl = `/api/s3/preview?path=${encodeURIComponent(
+        const previewUrl = `${appConfig.apiBaseUrl}/api/s3/preview?path=${encodeURIComponent(
           src
         )}&mw=${maxWidth}&mh=${maxHeight}`;
 
@@ -104,7 +105,7 @@ export function ImageThumbnail({
           }}
         >
           <div style={{ fontSize: "0.875rem", color: "#9ca3af" }}>
-            Loading...
+            Loading...4
           </div>
         </div>
       ) : (

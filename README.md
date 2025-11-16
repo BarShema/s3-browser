@@ -58,7 +58,7 @@ npm install
    # AWS S3 Configuration
    AWS_ACCESS_KEY_ID=your_access_key_here
    AWS_SECRET_ACCESS_KEY=your_secret_key_here
-   AWS_REGION=us-east-1
+   AWS_REGION=eu-west-1
 
    # AWS Cognito Configuration
    NEXT_PUBLIC_COGNITO_USER_POOL_ID=eu-west-1_8z9y5UukG

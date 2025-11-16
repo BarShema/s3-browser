@@ -24,5 +24,10 @@
     "!ImportValue sequence",
     "!Transform sequence"
   ],
-  "yaml.validate": false
+  "yaml.validate": false,
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#471C4C",
+    "titleBar.activeBackground": "#63276A",
+    "titleBar.activeForeground": "#FCF8FD"
+  }
 }

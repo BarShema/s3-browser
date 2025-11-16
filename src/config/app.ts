@@ -40,7 +40,7 @@ export const appConfig = {
 
   // S3 Configuration
   tempBucketName: "idits-drive-tmp",
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000",
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL,
 
   // Thumbnail Configuration
   thumbnailMaxWidth: 200,

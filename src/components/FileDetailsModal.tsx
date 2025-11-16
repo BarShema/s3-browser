@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FileIcon } from "./FileIcon";
 import styles from "./modal.module.css";
 import fileDetailsStyles from "./fileDetailsModal.module.css";
+import { appConfig } from "@/config/app";
 
 interface FileDetailsModalProps {
   isOpen: boolean;
@@ -59,7 +60,7 @@ export function FileDetailsModal({
       setIsLoadingMetadata(true);
       const fullPath = bucketName ? `${bucketName}/${file.key}` : file.key;
       
-      fetch(`/api/s3/metadata?path=${encodeURIComponent(fullPath)}`)
+      fetch(`${appConfig.apiBaseUrl}/api/s3/metadata?path=${encodeURIComponent(fullPath)}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data) {
@@ -86,7 +87,7 @@ export function FileDetailsModal({
   const extension = getFileExtension(file.name);
   const hasPreview = isImage(file.name) || isVideo(file.name) || isPDF(file.name);
   const previewUrl = hasPreview
-    ? `/api/s3/preview?path=${encodeURIComponent(`${bucketName}/${file.key}`)}&mw=400&mh=400`
+    ? `${appConfig.apiBaseUrl}/api/s3/preview?path=${encodeURIComponent(`${bucketName}/${file.key}`)}&mw=400&mh=400`
     : null;
 
   return (

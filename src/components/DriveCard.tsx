@@ -3,6 +3,7 @@
 import { Calculator, HardDrive, Loader2 } from "lucide-react";
 import { useState } from "react";
 import styles from "./driveCard.module.css";
+import { appConfig } from "@/config/app";
 
 interface DriveInfo {
   drive: string;
@@ -31,8 +32,9 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
       setIsLoading(true);
       setError(null);
 
+      console.log('appConfig.apiBaseUrl', appConfig.apiBaseUrl);
       const response = await fetch(
-        `/api/s3/drive-size?drive=${encodeURIComponent(drive)}`
+        `${appConfig.apiBaseUrl}/api/s3/drive-size?drive=${encodeURIComponent(drive)}`
       );
 
       if (!response.ok) {

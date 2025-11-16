@@ -69,7 +69,7 @@ export function ConfigModal({
               <div className={configStyles.infoList}>
                 <div>AWS_ACCESS_KEY_ID</div>
                 <div>AWS_SECRET_ACCESS_KEY</div>
-                <div>AWS_REGION (optional, defaults to us-east-1)</div>
+                <div>AWS_REGION (optional, defaults to eu-west-1)</div>
               </div>
             </div>
 

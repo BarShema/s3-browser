@@ -30,7 +30,7 @@ export function PageHeader({
             </h1>
 
             <p className={styles.subtitle}>
-              Browse, manage, and organize your files with ease
+              Browse, manage and organize your files with ease
             </p>
             {bucketName && (
               <div className={styles.bucketInfo}>

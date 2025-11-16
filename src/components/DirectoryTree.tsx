@@ -51,7 +51,7 @@ export function DirectoryTree({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/s3?path=${bucketName}&limit=1000`);
+      const response = await fetch(`${appConfig.apiBaseUrl}/api/s3?path=${bucketName}&limit=1000`);
       const data = await response.json();
 
       if (data.directories) {
@@ -276,7 +276,7 @@ export function DirectoryTree({
             onClick={() => toggleNode(node.key)}
             disabled={isLoading}
             title={
-              isLoading ? "Loading..." : isExpanded ? "Collapse" : "Expand"
+              isLoading ? "Loading...2" : isExpanded ? "Collapse" : "Expand"
             }
           >
             {isLoading ? (

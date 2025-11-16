@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/api";
 import { Calculator, HardDrive, Loader2 } from "lucide-react";
 import { useState } from "react";
 import styles from "./driveCard.module.css";
@@ -31,16 +32,13 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(
-        `/api/s3/drive-size?drive=${encodeURIComponent(drive)}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch drive size: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setDriveInfo(data);
+      const data = await api.drive.getSize({ drive });
+      setDriveInfo({
+        drive: data.sizeFormatted,
+        totalSize: data.size,
+        totalObjects: 0, // API doesn't return this, keeping for compatibility
+        formattedSize: data.sizeFormatted,
+      });
       setHasCalculated(true);
     } catch (err) {
       console.error("Error fetching drive size:", err);

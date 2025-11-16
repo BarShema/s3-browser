@@ -1,0 +1,957 @@
+openapi: 3.0.3
+info:
+  title: IDITS Drive Backend API
+  description: |
+    RESTful API for managing files and directories in S3-based drive storage.
+
+    ## Path Format
+    All paths use the format: `{drive}/{key}` where:
+    - `drive`: Drive name (e.g., `idits-drive`)
+    - `key`: File or directory path within the drive (e.g., `folder/subfolder/file.txt`)
+
+    Example: `idits-drive/folder/subfolder/file.txt`
+
+    ## CORS
+    All endpoints support CORS with the following headers:
+    - `Access-Control-Allow-Origin: *`
+    - `Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS`
+    - `Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With`
+
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3010
+    description: Local development server
+  - url: https://{api-gateway-url}
+    description: Production server
+    variables:
+      api-gateway-url:
+        default: api.example.com
+
+tags:
+  - name: Drive
+    description: Drive operations (list, size calculation) and operations on both files and directories
+  - name: Directory
+    description: Directory operations (download, size calculation)
+  - name: File
+    description: File operations (upload, delete, rename, download, preview, metadata, content)
+
+paths:
+  /api/drive:
+    get:
+      tags:
+        - Drive
+      summary: List files and directories or get file content
+      description: |
+        **List files and directories:**
+        List files and directories in a drive with pagination and filtering support.
+        Supports filtering by name, type (file/directory), and file extension.
+
+        **Get file content:**
+        Read the content of a text file by setting `content=true` query parameter.
+        Only works for files with `text/*` content type.
+      operationId: listFiles
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: |
+            Path in format `{drive}/{key}`. 
+            Example: `idits-drive/folder/subfolder` or `idits-drive` for root
+          schema:
+            type: string
+            example: idits-drive/folder/subfolder
+        - name: content
+          in: query
+          required: false
+          description: If set to "true", returns file content instead of listing (only for text files)
+          schema:
+            type: string
+            enum: ["true", "false"]
+            default: "false"
+            example: "false"
+        - name: page
+          in: query
+          required: false
+          description: "Page number (must be a positive integer, default: 1). Ignored when content=true"
+          schema:
+            type: string
+            default: "1"
+            example: "1"
+        - name: limit
+          in: query
+          required: false
+          description: "Items per page (must be a positive integer, default: 20). Ignored when content=true"
+          schema:
+            type: string
+            default: "20"
+            example: "20"
+        - name: name
+          in: query
+          required: false
+          description: Filter by name (partial match). Ignored when content=true
+          schema:
+            type: string
+            example: "document"
+        - name: type
+          in: query
+          required: false
+          description: Filter by type. Ignored when content=true
+          schema:
+            type: string
+            enum: [directory, file, ""]
+            default: ""
+            example: "file"
+        - name: extension
+          in: query
+          required: false
+          description: Filter by file extension (without dot). Ignored when content=true
+          schema:
+            type: string
+            example: "pdf"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ListFilesResponse"
+                  - $ref: "#/components/schemas/FileContentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+      x-codegen-request-body-name: ListFilesRequest
+
+    post:
+      tags:
+        - Drive
+      summary: Upload file or create directory
+      description: |
+        Upload a file using multipart/form-data or create a directory using JSON.
+
+        **File Upload (multipart/form-data):**
+        - `drive`: Drive name
+        - `key`: File path within the drive
+        - `file`: The file to upload
+
+        **Directory Creation (application/json):**
+        - `drive`: Drive name
+        - `dirKey`: Directory path (will be normalized to end with `/`)
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - drive
+                - key
+                - file
+              properties:
+                drive:
+                  type: string
+                  description: Drive name
+                  example: idits-drive
+                key:
+                  type: string
+                  description: File path within the drive
+                  example: folder/subfolder/file.txt
+                file:
+                  type: string
+                  format: binary
+                  description: File to upload
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDirectoryRequest"
+      responses:
+        "200":
+          description: File uploaded or directory created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      tags:
+        - Drive
+      summary: Delete file or directory
+      description: Delete a file or directory from the drive
+      operationId: deleteFile
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Path in format `{drive}/{key}`
+          schema:
+            type: string
+            example: idits-drive/folder/file.txt
+      responses:
+        "200":
+          description: File or directory deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    patch:
+      tags:
+        - Drive
+      summary: Rename file or directory
+      description: Rename a file or directory by copying to new key and deleting old key
+      operationId: renameFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameFileRequest"
+      responses:
+        "200":
+          description: File or directory renamed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/list:
+    get:
+      tags:
+        - Drive
+      summary: List all drives
+      description: List all available S3 buckets (drives)
+      operationId: listDrives
+      responses:
+        "200":
+          description: List of drives
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListDrivesResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/size:
+    get:
+      tags:
+        - Drive
+      summary: Get drive size
+      description: Calculate total size and object count for a drive
+      operationId: driveSize
+      parameters:
+        - name: drive
+          in: query
+          required: true
+          description: Drive name (drive name)
+          schema:
+            type: string
+            example: idits-drive
+      responses:
+        "200":
+          description: Drive size information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriveSizeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/directory/download:
+    get:
+      tags:
+        - Directory
+      summary: Download directory as ZIP
+      description: |
+        Download a directory as a ZIP archive. 
+        Only works for directories with ≤100 files and ≤50MB total size.
+        For larger directories, returns metadata and suggestions.
+      operationId: downloadDirectory
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Path in format `{drive}/{key}` pointing to a directory
+          schema:
+            type: string
+            example: idits-drive/folder/subfolder
+      responses:
+        "200":
+          description: Directory download response
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+                description: ZIP archive of the directory
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryTooLargeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/directory/size:
+    get:
+      tags:
+        - Directory
+      summary: Get directory size
+      description: |
+        Calculate total size and object count for a directory.
+        If path points to root (empty key), returns sizes for all directories.
+      operationId: directorySize
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: |
+            Path in format `{drive}/{key}`. 
+            Use `{drive}` or `{drive}/` for root to get all directory sizes.
+          schema:
+            type: string
+            example: idits-drive/folder/subfolder
+      responses:
+        "200":
+          description: Directory size information
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/DirectorySizeResponse"
+                  - $ref: "#/components/schemas/AllDirectoriesSizeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/file:
+    put:
+      tags:
+        - File
+      summary: Update file content
+      description: Update the content of a text file
+      operationId: updateFileContent
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Path in format `{drive}/{key}` to a text file
+          schema:
+            type: string
+            example: idits-drive/documents/readme.txt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFileContentRequest"
+      responses:
+        "200":
+          description: File content updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/file/download:
+    get:
+      tags:
+        - File
+      summary: Get download URL
+      description: Generate a presigned URL for downloading a file
+      operationId: downloadFile
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Path in format `{drive}/{key}`
+          schema:
+            type: string
+            example: idits-drive/folder/file.pdf
+        - name: expiresIn
+          in: query
+          required: false
+          description: "URL expiration time in seconds (must be a positive integer, default: 3600)"
+          schema:
+            type: string
+            default: "3600"
+            example: "3600"
+      responses:
+        "200":
+          description: Download URL generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadUrlResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/file/preview:
+    get:
+      tags:
+        - File
+      summary: Get file preview/thumbnail
+      description: |
+        Get a thumbnail/preview of an image or video file.
+        Returns cached thumbnail if available, otherwise generates a new one.
+        Supports max width and height parameters for resizing.
+      operationId: preview
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Path in format `{drive}/{key}` to an image or video file
+          schema:
+            type: string
+            example: idits-drive/photos/image.jpg
+        - name: mw
+          in: query
+          required: false
+          description: Maximum width in pixels (must be a non-negative integer, 0 = no limit)
+          schema:
+            type: string
+            default: "0"
+            example: "200"
+        - name: mh
+          in: query
+          required: false
+          description: Maximum height in pixels (must be a non-negative integer, 0 = no limit)
+          schema:
+            type: string
+            default: "0"
+            example: "200"
+      responses:
+        "200":
+          description: Thumbnail image (WebP format, base64 encoded)
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: max-age=31536000
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: base64
+                description: Base64-encoded WebP image
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/file/metadata:
+    get:
+      tags:
+        - File
+      summary: Get file metadata
+      description: |
+        Extract metadata from image or video files.
+        Returns EXIF data for images and video metadata for video files.
+      operationId: metadata
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Path in format `{drive}/{key}` to an image or video file
+          schema:
+            type: string
+            example: idits-drive/photos/image.jpg
+      responses:
+        "200":
+          description: File metadata
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ImageMetadata"
+                  - $ref: "#/components/schemas/VideoMetadata"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/drive/file/upload-url:
+    post:
+      tags:
+        - File
+      summary: Get presigned upload URL
+      description: Generate a presigned URL for uploading a file directly to S3
+      operationId: uploadUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Presigned upload URL generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  schemas:
+    S3File:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Full S3 key path
+          example: folder/subfolder/file.txt
+        name:
+          type: string
+          description: File or directory name
+          example: file.txt
+        size:
+          type: integer
+          description: File size in bytes
+          example: 1024
+        lastModified:
+          type: string
+          format: date-time
+          description: Last modification timestamp
+          example: "2024-01-15T10:30:00Z"
+        isDirectory:
+          type: boolean
+          description: Whether this is a directory
+          example: false
+        etag:
+          type: string
+          description: S3 ETag (optional)
+          example: '"d41d8cd98f00b204e9800998ecf8427e"'
+
+    ListFilesResponse:
+      type: object
+      properties:
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/S3File"
+          description: List of files in current page
+        directories:
+          type: array
+          items:
+            $ref: "#/components/schemas/S3File"
+          description: List of directories in current page
+        totalFiles:
+          type: integer
+          description: Total number of files
+          example: 150
+        totalDirectories:
+          type: integer
+          description: Total number of directories
+          example: 25
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 8
+        currentPage:
+          type: integer
+          description: Current page number
+          example: 1
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    CreateDirectoryRequest:
+      type: object
+      required:
+        - drive
+        - dirKey
+      properties:
+        drive:
+          type: string
+          description: Drive name
+          example: idits-drive
+        dirKey:
+          type: string
+          description: Directory path (will be normalized to end with /)
+          example: folder/subfolder
+
+    RenameFileRequest:
+      type: object
+      required:
+        - drive
+        - oldKey
+        - newKey
+      properties:
+        drive:
+          type: string
+          description: Drive name
+          example: idits-drive
+        oldKey:
+          type: string
+          description: Current file/directory path
+          example: folder/old-name.txt
+        newKey:
+          type: string
+          description: New file/directory path
+          example: folder/new-name.txt
+
+    DownloadUrlResponse:
+      type: object
+      properties:
+        downloadUrl:
+          type: string
+          format: uri
+          description: Presigned download URL
+          example: "https://idits-drive.s3.amazonaws.com/folder/file.pdf?X-Amz-Algorithm=..."
+
+    DirectoryTooLargeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: "Directory is too large for ZIP download (150 files, 75.5 MB)"
+        directoryName:
+          type: string
+          description: Directory name
+          example: "subfolder"
+        fileCount:
+          type: integer
+          description: Number of files in directory
+          example: 150
+        totalSizeMB:
+          type: string
+          description: Total size in MB (formatted)
+          example: "75.50"
+        suggestions:
+          type: array
+          items:
+            type: string
+          description: Suggestions for handling large directories
+          example:
+            - "Download individual files using the file browser"
+            - "Contact administrator for bulk download assistance"
+            - "Consider using S3 Transfer Acceleration for large downloads"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/S3File"
+          description: First 10 files in the directory
+
+    ImageMetadata:
+      type: object
+      description: Image metadata (EXIF data)
+      properties:
+        width:
+          type: integer
+          description: Image width in pixels
+          example: 1920
+        height:
+          type: integer
+          description: Image height in pixels
+          example: 1080
+        format:
+          type: string
+          description: Image format
+          example: "jpeg"
+        size:
+          type: integer
+          description: File size in bytes
+          example: 524288
+        exif:
+          type: object
+          description: EXIF data (varies by image)
+          additionalProperties: true
+          example:
+            orientation: 1
+            dateTime: "2024:01:15 10:30:00"
+
+    VideoMetadata:
+      type: object
+      description: Video metadata
+      properties:
+        width:
+          type: integer
+          description: Video width in pixels
+          example: 1920
+        height:
+          type: integer
+          description: Video height in pixels
+          example: 1080
+        duration:
+          type: number
+          description: Duration in seconds
+          example: 120.5
+        format:
+          type: string
+          description: Video format/codec
+          example: "mp4"
+        size:
+          type: integer
+          description: File size in bytes
+          example: 10485760
+        bitrate:
+          type: integer
+          description: Bitrate in bits per second
+          example: 5000000
+        fps:
+          type: number
+          description: Frames per second
+          example: 30.0
+
+    FileContentResponse:
+      type: object
+      properties:
+        content:
+          type: string
+          description: File content as UTF-8 string
+          example: "Hello, World!\nThis is a text file."
+        contentType:
+          type: string
+          description: MIME type
+          example: "text/plain"
+        lastModified:
+          type: string
+          format: date-time
+          description: Last modification timestamp
+          example: "2024-01-15T10:30:00Z"
+        size:
+          type: integer
+          description: File size in bytes
+          example: 28
+
+    UpdateFileContentRequest:
+      type: object
+      required:
+        - drive
+        - key
+        - content
+      properties:
+        drive:
+          type: string
+          description: Drive name
+          example: idits-drive
+        key:
+          type: string
+          description: File path within the drive
+          example: documents/readme.txt
+        content:
+          type: string
+          description: New file content
+          example: "Updated content here"
+        contentType:
+          type: string
+          description: MIME type (optional, defaults to text/plain)
+          example: "text/plain"
+
+    UploadUrlRequest:
+      type: object
+      required:
+        - drive
+        - key
+      properties:
+        drive:
+          type: string
+          description: Drive name
+          example: idits-drive
+        key:
+          type: string
+          description: File path within the drive
+          example: folder/file.pdf
+        contentType:
+          type: string
+          description: MIME type (optional)
+          example: "application/pdf"
+        expiresIn:
+          type: integer
+          description: "URL expiration time in seconds (default: 3600)"
+          minimum: 1
+          maximum: 604800
+          default: 3600
+          example: 3600
+
+    UploadUrlResponse:
+      type: object
+      properties:
+        uploadUrl:
+          type: string
+          format: uri
+          description: Presigned upload URL
+          example: "https://idits-drive.s3.amazonaws.com/folder/file.pdf?X-Amz-Algorithm=..."
+
+    ListDrivesResponse:
+      type: object
+      properties:
+        drives:
+          type: array
+          items:
+            type: string
+          description: List of drive names
+          example:
+            - idits-drive
+            - idits-drive-backup
+
+    DriveSizeResponse:
+      type: object
+      properties:
+        drive:
+          type: string
+          description: Drive name
+          example: idits-drive
+        totalSize:
+          type: integer
+          description: Total size in bytes
+          example: 1073741824
+        totalObjects:
+          type: integer
+          description: Total number of objects
+          example: 1500
+        formattedSize:
+          type: string
+          description: Human-readable formatted size
+          example: "1.00 GB"
+
+    DirectorySizeResponse:
+      type: object
+      properties:
+        totalSize:
+          type: integer
+          description: Total size in bytes
+          example: 52428800
+        totalObjects:
+          type: integer
+          description: Total number of objects
+          example: 100
+        formattedSize:
+          type: string
+          description: Human-readable formatted size
+          example: "50.00 MB"
+
+    AllDirectoriesSizeResponse:
+      type: object
+      properties:
+        drive:
+          type: string
+          description: Drive name
+          example: idits-drive
+        prefix:
+          type: string
+          description: Prefix (empty for root)
+          example: ""
+        directorySizes:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              size:
+                type: integer
+                description: Directory size in bytes
+              objects:
+                type: integer
+                description: Number of objects in directory
+              formattedSize:
+                type: string
+                description: Human-readable formatted size
+          description: Map of directory paths to their sizes
+          example:
+            "folder/":
+              size: 52428800
+              objects: 100
+              formattedSize: "50.00 MB"
+            "folder/subfolder/":
+              size: 10485760
+              objects: 20
+              formattedSize: "10.00 MB"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Missing required parameter: path"
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+            example: "*"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+            example: "*"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+            example: "*"
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: API key authentication (if implemented)

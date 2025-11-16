@@ -6,6 +6,7 @@ import { Upload, X, File, Minimize2, Maximize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import styles from './modal.module.css';
 import uploadStyles from './uploadModal.module.css';
+import { api } from '@/lib/api';
 import { clz } from '@/lib/clz';
 
 interface UploadModalProps {
@@ -100,19 +101,11 @@ export function UploadModal({ isOpen, onClose, onComplete, bucketName, currentPa
         f.key === uploadFile.key ? { ...f, status: 'uploading', progress: 0 } : f
       ));
 
-      const formData = new FormData();
-      formData.append('file', uploadFile.file);
-      formData.append('bucket', bucketName);
-      formData.append('key', uploadFile.key);
-
-      const response = await fetch('/api/s3', {
-        method: 'POST',
-        body: formData,
+      await api.drive.file.upload({
+        file: uploadFile.file,
+        bucket: bucketName,
+        key: uploadFile.key,
       });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
 
       setUploadFiles(prev => prev.map(f => 
         f.key === uploadFile.key ? { ...f, status: 'completed', progress: 100 } : f

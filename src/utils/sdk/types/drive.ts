@@ -67,12 +67,16 @@ export interface GetDriveSizeParams {
  * Response for drive size
  */
 export interface DriveSizeResponse {
-  size: number;
-  sizeFormatted: string;
+  drive: string;
+  totalSize: number;
+  totalObjects: number;
+  formattedSize: string;
 }
 
 /**
- * Response types
+ * Response for listing drives
  */
-export type ListDrivesResponse = Array<Drive>;
+export interface ListDrivesResponse {
+  drives: string[];
+}
 

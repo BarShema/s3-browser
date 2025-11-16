@@ -1,6 +1,7 @@
 "use client";
 
 import { appConfig } from "@/config/app";
+import { api } from "@/lib/api";
 import { ChevronDown, ChevronRight, Folder, FolderOpen } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./directoryTree.module.css";
@@ -51,8 +52,10 @@ export function DirectoryTree({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/s3?path=${bucketName}&limit=1000`);
-      const data = await response.json();
+      const data = await api.drive.list({
+        path: bucketName,
+        limit: 1000,
+      });
 
       if (data.directories) {
         const tree = buildTreeStructure(data.directories);
@@ -83,10 +86,10 @@ export function DirectoryTree({
       setLoadingNodes((prev) => new Set(prev).add(directoryKey));
 
       try {
-        const response = await fetch(
-          `${appConfig.apiBaseUrl}/api/s3?path=${bucketName}/${directoryKey}&limit=1000`
-        );
-        const data = await response.json();
+        const data = await api.drive.list({
+          path: `${bucketName}/${directoryKey}`,
+          limit: 1000,
+        });
 
         // Filter out the origin directory and any parent directories from the results
         const filteredDirectories =

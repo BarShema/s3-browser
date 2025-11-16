@@ -13,6 +13,7 @@ import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
 import { appConfig } from "@/config/app";
+import { api } from "@/lib/api";
 import { isDeleteProtectionEnabled } from "@/lib/preferences";
 import { useResize } from "@/lib/useResize";
 import {
@@ -223,19 +224,9 @@ export function FileExplorer({
       }));
 
       try {
-        const response = await fetch(
-          `/api/s3/directory-size?path=${encodeURIComponent(
-            `${bucketName}/${dirKey}`
-          )}`
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch directory size: ${response.statusText}`
-          );
-        }
-
-        const data = await response.json();
+        const data = await api.drive.directory.getSize({
+          path: `${bucketName}/${dirKey}`,
+        });
 
         // Check if there's an error in the response
         if (data.error) {
@@ -324,24 +315,14 @@ export function FileExplorer({
         // Construct the full path: bucketName/path
         const fullPath = path ? `${bucketName}/${path}` : bucketName;
 
-        // Build query parameters
-        const params = new URLSearchParams({
+        const data = await api.drive.list({
           path: fullPath,
-          page: currentPage.toString(),
-          limit: itemsPerPage.toString(),
+          page: currentPage,
+          limit: itemsPerPage,
+          name: nameFilter || undefined,
+          type: typeFilter || undefined,
+          extension: extensionFilter || undefined,
         });
-
-        if (nameFilter) params.append("name", nameFilter);
-        if (typeFilter) params.append("type", typeFilter);
-        if (extensionFilter) params.append("extension", extensionFilter);
-
-        const response = await fetch(`/api/s3?${params.toString()}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to load files");
-        }
-
-        const data = await response.json();
 
         // Convert S3 objects to our item types (deterministic IDs based on key)
         const fileItems = data.files.map((file: S3File) => ({
@@ -583,22 +564,19 @@ export function FileExplorer({
 
   const handleDownload = async (file: FileItem) => {
     try {
-      const response = await fetch(
-        `/api/s3/download?path=${encodeURIComponent(
-          `${bucketName}/${file.key}`
-        )}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to get download URL");
-      }
-
-      const data = await response.json();
+      const response = await api.drive.file.download({
+        path: `${bucketName}/${file.key}`,
+      });
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = data.downloadUrl;
+      link.href = url;
       link.download = file.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       toast.success("Download started");
     } catch (error) {
@@ -611,15 +589,9 @@ export function FileExplorer({
     try {
       toast.loading("Creating ZIP file...", { id: "zip-creation" });
 
-      const response = await fetch(
-        `/api/s3/download-directory?path=${encodeURIComponent(
-          `${bucketName}/${directory.key}`
-        )}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to process directory");
-      }
+      const response = await api.drive.directory.download({
+        path: `${bucketName}/${directory.key}`,
+      });
 
       // Check if response is JSON (large directory) or ZIP (small directory)
       const contentType = response.headers.get("content-type");
@@ -670,16 +642,9 @@ export function FileExplorer({
   // Internal delete function without confirmation
   const deleteFile = async (file: FileItem): Promise<boolean> => {
     try {
-      const response = await fetch(
-        `/api/s3?path=${encodeURIComponent(`${bucketName}/${file.key}`)}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete file");
-      }
+      await api.drive.file.delete({
+        path: `${bucketName}/${file.key}`,
+      });
 
       return true;
     } catch (error) {
@@ -719,21 +684,11 @@ export function FileExplorer({
     const newKey = currentPath ? `${currentPath}/${newName}` : newName;
 
     try {
-      const response = await fetch("/api/s3", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bucket: bucketName,
-          oldKey: file.key,
-          newKey: newKey,
-        }),
+      await api.drive.file.rename({
+        bucket: bucketName,
+        oldKey: file.key,
+        newKey: newKey,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to rename file");
-      }
 
       toast.success("File renamed successfully");
       loadFiles(currentPath);
@@ -877,12 +832,10 @@ export function FileExplorer({
               const safe = name.replace(/^[/.]+|[\\]/g, "");
               const dirKey = currentPath ? `${currentPath}/${safe}` : safe;
               try {
-                const res = await fetch('/api/s3', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ bucket: bucketName, dirKey }),
+                await api.drive.directory.create({
+                  bucket: bucketName,
+                  dirKey,
                 });
-                if (!res.ok) throw new Error('Failed to create directory');
                 toast.success('Directory created');
                 loadFiles(currentPath);
               } catch (e) {

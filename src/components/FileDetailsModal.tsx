@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/api";
 import { FileItem, formatDate, formatFileSize, getFileExtension, isImage, isPDF, isVideo } from "@/lib/utils";
 import { X, Ruler, Clock, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -59,8 +60,7 @@ export function FileDetailsModal({
       setIsLoadingMetadata(true);
       const fullPath = bucketName ? `${bucketName}/${file.key}` : file.key;
       
-      fetch(`/api/s3/metadata?path=${encodeURIComponent(fullPath)}`)
-        .then((res) => (res.ok ? res.json() : null))
+      api.drive.file.getMetadata({ path: fullPath })
         .then((data) => {
           if (data) {
             setMetadata({
@@ -86,7 +86,11 @@ export function FileDetailsModal({
   const extension = getFileExtension(file.name);
   const hasPreview = isImage(file.name) || isVideo(file.name) || isPDF(file.name);
   const previewUrl = hasPreview
-    ? `/api/s3/preview?path=${encodeURIComponent(`${bucketName}/${file.key}`)}&mw=400&mh=400`
+    ? api.drive.file.getPreviewUrl({
+        path: `${bucketName}/${file.key}`,
+        maxWidth: 400,
+        maxHeight: 400,
+      })
     : null;
 
   return (

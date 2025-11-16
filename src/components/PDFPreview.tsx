@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { getFileExtension } from "@/lib/utils";
 import styles from "./fileIcon.module.css";
@@ -27,7 +28,11 @@ export function PDFPreview({ src, className }: PDFPreviewProps) {
     // Use the preview endpoint to get PDF first page as image
     const fetchPDFPreview = async () => {
       try {
-        const previewUrl = `/api/s3/preview?path=${encodeURIComponent(src)}&mw=800&mh=600`;
+        const previewUrl = api.drive.file.getPreviewUrl({
+          path: src,
+          maxWidth: 800,
+          maxHeight: 600,
+        });
         
         // Test if the preview URL loads
         const testImg = document.createElement('img');

@@ -41,6 +41,9 @@ export interface GetFileContentParams {
  */
 export interface FileContentResponse {
   content: string;
+  contentType: string;
+  lastModified: string;
+  size: number;
 }
 
 /**
@@ -58,6 +61,7 @@ export interface SaveFileContentParams {
  */
 export interface DownloadFileParams {
   path: string;
+  expiresIn?: number;
 }
 
 /**
@@ -68,16 +72,33 @@ export interface GetFileMetadataParams {
 }
 
 /**
- * Response for file metadata
+ * Image metadata response
  */
-export interface FileMetadataResponse {
-  key: string;
+export interface ImageMetadata {
+  width: number;
+  height: number;
+  format: string;
   size: number;
-  lastModified: string;
-  contentType: string;
-  etag: string;
-  metadata?: Record<string, string>;
+  exif?: Record<string, any>;
 }
+
+/**
+ * Video metadata response
+ */
+export interface VideoMetadata {
+  width: number;
+  height: number;
+  duration: number;
+  format: string;
+  size: number;
+  bitrate?: number;
+  fps?: number;
+}
+
+/**
+ * Response for file metadata (can be image or video)
+ */
+export type FileMetadataResponse = ImageMetadata | VideoMetadata;
 
 /**
  * Request parameters for getting preview URL
@@ -94,7 +115,7 @@ export interface GetPreviewUrlParams {
 export interface GetUploadUrlParams {
   drive: string;
   key: string;
-  contentType: string;
+  contentType?: string;
   expiresIn?: number;
 }
 
@@ -102,8 +123,14 @@ export interface GetUploadUrlParams {
  * Response for upload URL
  */
 export interface UploadUrlResponse {
-  url: string;
-  expiresAt: string;
+  uploadUrl: string;
+}
+
+/**
+ * Response for download URL
+ */
+export interface DownloadUrlResponse {
+  downloadUrl: string;
 }
 
 /**
@@ -113,5 +140,8 @@ export type UploadFileResponse = SuccessResponse;
 export type DeleteFileResponse = SuccessResponse;
 export type RenameFileResponse = SuccessResponse;
 export type SaveFileContentResponse = SuccessResponse;
-export type DownloadFileResponse = Response;
+export type DownloadFileResponse = DownloadUrlResponse;
+
+// Export metadata types
+export type { ImageMetadata, VideoMetadata };
 

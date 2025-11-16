@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/api";
 import { Image } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getFileExtension } from "@/lib/utils";
@@ -35,9 +36,11 @@ export function ImageThumbnail({
     // Use the preview endpoint directly as image source
     const fetchThumbnailUrl = async () => {
       try {
-        const previewUrl = `/api/s3/preview?path=${encodeURIComponent(
-          src
-        )}&mw=${maxWidth}&mh=${maxHeight}`;
+        const previewUrl = api.drive.file.getPreviewUrl({
+          path: src,
+          maxWidth,
+          maxHeight,
+        });
 
         // Test if the preview URL loads
         const testImg = document.createElement("img");

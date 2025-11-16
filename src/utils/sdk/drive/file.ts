@@ -24,44 +24,44 @@ import type {
  */
 export class FileAPI extends BaseAPI {
   /**
-   * Upload a file to S3
+   * Upload a file
    */
   async upload(data: UploadFileParams): Promise<UploadFileResponse> {
     const formData = new FormData();
     formData.append("file", data.file);
-    formData.append("bucket", data.drive);
+    formData.append("drive", data.drive);
     formData.append("key", data.key);
 
-    return this.request("api/s3", {
+    return this.request("api/drive", {
       method: "POST",
       body: formData,
     });
   }
 
   /**
-   * Delete a file from S3
+   * Delete a file
    */
   async delete(params: DeleteFileParams): Promise<DeleteFileResponse> {
     const queryParams = new URLSearchParams({
       path: params.path,
     });
 
-    return this.request(`api/s3?${queryParams.toString()}`, {
+    return this.request(`api/drive?${queryParams.toString()}`, {
       method: "DELETE",
     });
   }
 
   /**
-   * Rename a file in S3
+   * Rename a file
    */
   async rename(data: RenameFileParams): Promise<RenameFileResponse> {
-    return this.request("api/s3", {
+    return this.request("api/drive", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        bucket: data.drive,
+        drive: data.drive,
         oldKey: data.oldKey,
         newKey: data.newKey,
       }),
@@ -70,42 +70,58 @@ export class FileAPI extends BaseAPI {
 
   /**
    * Get file content
+   * Uses GET /api/drive with content=true parameter
    */
   async getContent(params: GetFileContentParams): Promise<FileContentResponse> {
     const queryParams = new URLSearchParams({
       path: params.path,
+      content: "true",
     });
 
-    return this.request(`api/s3/content?${queryParams.toString()}`);
+    return this.request(`api/drive?${queryParams.toString()}`);
   }
 
   /**
    * Save file content
+   * Uses PUT /api/drive/file with path in query parameter
    */
   async saveContent(data: SaveFileContentParams): Promise<SaveFileContentResponse> {
-    return this.request("api/s3/content", {
+    const queryParams = new URLSearchParams({
+      path: `${data.drive}/${data.key}`,
+    });
+
+    const body: any = {
+      drive: data.drive,
+      key: data.key,
+      content: data.content,
+    };
+
+    if (data.contentType) {
+      body.contentType = data.contentType;
+    }
+
+    return this.request(`api/drive/file?${queryParams.toString()}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        bucket: data.drive,
-        key: data.key,
-        content: data.content,
-        contentType: data.contentType || "text/plain",
-      }),
+      body: JSON.stringify(body),
     });
   }
 
   /**
-   * Download a file
+   * Get download URL (presigned URL)
    */
   async download(params: DownloadFileParams): Promise<DownloadFileResponse> {
     const queryParams = new URLSearchParams({
       path: params.path,
     });
 
-    return this.request<Response>(`api/s3/download?${queryParams.toString()}`);
+    if (params.expiresIn) {
+      queryParams.append("expiresIn", params.expiresIn.toString());
+    }
+
+    return this.request(`api/drive/file/download?${queryParams.toString()}`);
   }
 
   /**
@@ -116,7 +132,7 @@ export class FileAPI extends BaseAPI {
       path: params.path,
     });
 
-    return this.request(`api/s3/metadata?${queryParams.toString()}`);
+    return this.request(`api/drive/file/metadata?${queryParams.toString()}`);
   }
 
   /**
@@ -135,24 +151,31 @@ export class FileAPI extends BaseAPI {
       queryParams.append("mh", params.maxHeight.toString());
     }
 
-    return this.buildUrl(`api/s3/preview?${queryParams.toString()}`);
+    return this.buildUrl(`api/drive/file/preview?${queryParams.toString()}`);
   }
 
   /**
    * Get upload URL (presigned URL)
    */
   async getUploadUrl(data: GetUploadUrlParams): Promise<UploadUrlResponse> {
-    return this.request("api/s3/upload-url", {
+    const body: any = {
+      drive: data.drive,
+      key: data.key,
+    };
+
+    if (data.contentType) {
+      body.contentType = data.contentType;
+    }
+    if (data.expiresIn) {
+      body.expiresIn = data.expiresIn;
+    }
+
+    return this.request("api/drive/file/upload-url", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        bucket: data.drive,
-        key: data.key,
-        contentType: data.contentType,
-        expiresIn: data.expiresIn || 3600,
-      }),
+      body: JSON.stringify(body),
     });
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { clz } from "@/lib/clz";
+import { api } from "@/lib/api";
 import { FileItem } from "@/lib/utils";
 import { Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -49,16 +50,9 @@ export function EditModal({
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/s3/content?path=${encodeURIComponent(
-          `${bucketName}/${file.key}`
-        )}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to load file content");
-      }
-
-      const data = await response.json();
+      const data = await api.drive.file.getContent({
+        path: `${bucketName}/${file.key}`,
+      });
       setContent(data.content);
     } catch (error) {
       console.error("Error loading file content:", error);
@@ -73,22 +67,12 @@ export function EditModal({
 
     setIsSaving(true);
     try {
-      const response = await fetch("/api/s3/content", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bucket: bucketName,
-          key: file.key,
-          content: content,
-          contentType: "text/plain",
-        }),
+      await api.drive.file.saveContent({
+        bucket: bucketName,
+        key: file.key,
+        content: content,
+        contentType: "text/plain",
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to save file");
-      }
 
       toast.success("File saved successfully");
       onComplete();

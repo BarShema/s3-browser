@@ -281,8 +281,7 @@ export function FileList({
                   
                   const file = item as FileItem;
                   const fullPath = bucketName ? `${bucketName}/${file.key}` : file.key;
-                  fetch(`/api/s3/metadata?path=${encodeURIComponent(fullPath)}`)
-                    .then(res => res.ok ? res.json() : null)
+                  api.drive.file.getMetadata({ path: fullPath })
                     .then(metadata => {
                       if (metadata) {
                         const details = isVideo(file.name) && metadata.duration

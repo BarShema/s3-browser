@@ -52,14 +52,14 @@ export class DriveAPI extends BaseAPI {
     if (params.type) queryParams.append("type", params.type);
     if (params.extension) queryParams.append("extension", params.extension);
 
-    return this.request(`api/s3?${queryParams.toString()}`);
+    return this.request(`api/drive?${queryParams.toString()}`);
   }
 
   /**
    * List all drives
    */
   async listDrives(): Promise<ListDrivesResponse> {
-    return this.request("api/s3/buckets");
+    return this.request("api/drive/list");
   }
 
   /**
@@ -70,7 +70,7 @@ export class DriveAPI extends BaseAPI {
       drive: params.drive,
     });
 
-    return this.request(`api/s3/drive-size?${queryParams.toString()}`);
+    return this.request(`api/drive/size?${queryParams.toString()}`);
   }
 }
 

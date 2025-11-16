@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/api";
 import { clz } from "@/lib/clz";
 import {
   FileItem,
@@ -191,19 +192,11 @@ export function SidePreviewPanel({
         setTextError(null);
       }, 0);
 
-      fetch(
-        `/api/s3/content?path=${encodeURIComponent(
-          `${bucketName}/${file.key}`
-        )}`
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch file content");
-          }
-          return response.text();
-        })
-        .then((content) => {
-          setTextContent(content);
+      api.drive.file.getContent({
+        path: `${bucketName}/${file.key}`,
+      })
+        .then((data) => {
+          setTextContent(data.content);
           setIsLoadingText(false);
         })
         .catch((error) => {
@@ -421,9 +414,11 @@ export function SidePreviewPanel({
                       isVideo(previousFile.name)) && (
                       <div className={styles.previousPreview}>
                         <img
-                          src={`/api/s3/preview?path=${encodeURIComponent(
-                            `${bucketName}/${file.key}`
-                          )}&mw=400&mh=400`}
+                          src={api.drive.file.getPreviewUrl({
+                            path: `${bucketName}/${file.key}`,
+                            maxWidth: 400,
+                            maxHeight: 400,
+                          })}
                           alt={file.name}
                           className={styles.previousPreviewImage}
                         />
@@ -464,9 +459,9 @@ export function SidePreviewPanel({
           ) : isPDF(file.name) ? (
             <div className={styles.pdfContainer}>
               <iframe
-                src={`/api/s3/download?path=${encodeURIComponent(
-                  `${bucketName}/${file.key}`
-                )}`}
+                src={api.drive.file.getPreviewUrl({
+                  path: `${bucketName}/${file.key}`,
+                })}
                 className={styles.pdfViewer}
                 title={file.name}
               />

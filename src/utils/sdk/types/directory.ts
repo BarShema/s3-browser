@@ -36,11 +36,25 @@ export interface GetDirectorySizeParams {
 }
 
 /**
- * Response for directory size
+ * Response for single directory size
  */
 export interface DirectorySizeResponse {
-  size: number;
-  sizeFormatted: string;
+  totalSize: number;
+  totalObjects: number;
+  formattedSize: string;
+}
+
+/**
+ * Response for all directories size (when path is root)
+ */
+export interface AllDirectoriesSizeResponse {
+  drive: string;
+  prefix: string;
+  directorySizes: Record<string, {
+    size: number;
+    objects: number;
+    formattedSize: string;
+  }>;
 }
 
 /**
@@ -56,5 +70,22 @@ export interface DownloadDirectoryParams {
 export type CreateDirectoryResponse = SuccessResponse;
 export type DeleteDirectoryResponse = SuccessResponse;
 export type RenameDirectoryResponse = SuccessResponse;
-export type DownloadDirectoryResponse = Response;
+export type DownloadDirectoryResponse = Response | {
+  message: string;
+  directoryName: string;
+  fileCount: number;
+  totalSizeMB?: string;
+  suggestions?: string[];
+  files?: Array<{
+    key: string;
+    name: string;
+    size: number;
+    lastModified: string;
+    isDirectory: boolean;
+    etag?: string;
+  }>;
+};
+
+// Export AllDirectoriesSizeResponse
+export type { AllDirectoriesSizeResponse };
 

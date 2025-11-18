@@ -141,7 +141,3 @@ export type DeleteFileResponse = SuccessResponse;
 export type RenameFileResponse = SuccessResponse;
 export type SaveFileContentResponse = SuccessResponse;
 export type DownloadFileResponse = DownloadUrlResponse;
-
-// Export metadata types
-export type { ImageMetadata, VideoMetadata };
-

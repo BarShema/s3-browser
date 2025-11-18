@@ -34,10 +34,10 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
 
       const data = await api.drive.getSize({ drive });
       setDriveInfo({
-        drive: data.sizeFormatted,
-        totalSize: data.size,
+        drive: data.drive,
+        totalSize: data.totalSize,
         totalObjects: 0, // API doesn't return this, keeping for compatibility
-        formattedSize: data.sizeFormatted,
+        formattedSize: data.formattedSize,
       });
       setHasCalculated(true);
     } catch (err) {

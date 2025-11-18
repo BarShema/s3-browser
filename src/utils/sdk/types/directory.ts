@@ -85,7 +85,3 @@ export type DownloadDirectoryResponse = Response | {
     etag?: string;
   }>;
 };
-
-// Export AllDirectoriesSizeResponse
-export type { AllDirectoriesSizeResponse };
-

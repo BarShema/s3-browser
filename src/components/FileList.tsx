@@ -19,6 +19,7 @@ import { isViewModeEnabled } from '@/lib/preferences';
 import { FileIcon } from './FileIcon';
 import { FileDetailsCell } from './FileDetailsCell';
 import styles from './fileList.module.css';
+import api from '@/utils/sdk';
 
 interface FileListProps {
   items: Item[];
@@ -286,7 +287,7 @@ export function FileList({
                   api.drive.file.getMetadata({ path: fullPath })
                     .then(metadata => {
                       if (metadata) {
-                        const details = isVideo(file.name) && metadata.duration
+                        const details = isVideo(file.name) && 'duration' in metadata && metadata.duration
                           ? formatDuration(metadata.duration)
                           : (isImage(file.name) && metadata.width && metadata.height)
                           ? formatDimensions(metadata.width, metadata.height)

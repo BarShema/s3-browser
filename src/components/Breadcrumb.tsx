@@ -6,12 +6,16 @@ interface BreadcrumbProps {
   currentPath: string;
   driveName: string;
   onPathClick: (path: string) => void;
+  totalFiles?: number;
+  totalDirectories?: number;
 }
 
 export function Breadcrumb({
   currentPath,
   driveName,
   onPathClick,
+  totalFiles = 0,
+  totalDirectories = 0,
 }: BreadcrumbProps) {
   const pathSegments = currentPath.split("/").filter(Boolean);
 
@@ -41,6 +45,14 @@ export function Breadcrumb({
           )}
         </div>
       ))}
+
+      {(totalDirectories > 0 || totalFiles > 0) && (
+        <div className={styles.counterWrapper}>
+          <span className={styles.counter}>
+            {totalDirectories} {totalDirectories === 1 ? "directory" : "directories"} | {totalFiles} {totalFiles === 1 ? "file" : "files"}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

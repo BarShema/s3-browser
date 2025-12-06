@@ -79,6 +79,16 @@ export function Toolbar({
       </div>
 
       <div className={styles.actionsGroup}>
+        <button onClick={onUpload} className={styles.uploadButton}>
+          <Upload size={16} />
+        </button>
+        <button
+          onClick={onNewDirectory}
+          className={styles.uploadButton}
+          title="Create Directory"
+        >
+          <FolderPlus size={16} />
+        </button>
         <button
           onClick={onRefresh}
           className={styles.viewButton}
@@ -90,24 +100,6 @@ export function Toolbar({
           <button onClick={onDelete} className={styles.deleteButton}>
             <Trash2 size={16} />
             <span>Delete ({selectedCount})</span>
-          </button>
-        )}
-
-        {!isViewModeEnabled() && (
-          <button
-            onClick={onNewDirectory}
-            className={styles.uploadButton}
-            title="New Directory"
-          >
-            <FolderPlus size={16} />
-            <span>New Directory</span>
-          </button>
-        )}
-
-        {!isViewModeEnabled() && (
-          <button onClick={onUpload} className={styles.uploadButton}>
-            <Upload size={16} />
-            <span>Upload</span>
           </button>
         )}
       </div>

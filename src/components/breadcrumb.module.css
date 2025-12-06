@@ -113,3 +113,45 @@ button.breadcrum:disabled {
   color: var(--theme-text-secondary);
   font-weight: 500;
 }
+
+.counterWrapper {
+  position: relative;
+  margin-left: auto;
+}
+
+.counter {
+  font-weight: 500;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--theme-text-secondary);
+  white-space: nowrap;
+}
+
+/* Responsive adjustments for counter */
+@media (max-width: 1400px) {
+  .counter {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .counter {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .counter {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .counter {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+}

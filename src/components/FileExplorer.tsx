@@ -60,6 +60,8 @@ export function FileExplorer({
   const searchParams = useSearchParams();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [directories, setDirectories] = useState<DirectoryItem[]>([]);
+  const [totalFilesCount, setTotalFilesCount] = useState(0);
+  const [totalDirectoriesCount, setTotalDirectoriesCount] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("idits-drive-view-mode");
@@ -395,6 +397,8 @@ export function FileExplorer({
         setDirectories(filteredDirectories);
         setTotalPages(data.totalPages || 1);
         setTotalItems((data.totalFiles || 0) + (data.totalDirectories || 0));
+        setTotalFilesCount(data.totalFiles || 0);
+        setTotalDirectoriesCount(data.totalDirectories || 0);
         setSelectedItems([]);
       } catch (error) {
         console.error("Error loading files:", error);
@@ -871,6 +875,8 @@ export function FileExplorer({
             currentPath={currentPath}
             driveName={driveName}
             onPathClick={handleBreadcrumbClick}
+            totalFiles={totalFilesCount}
+            totalDirectories={totalDirectoriesCount}
           />
         </div>
 

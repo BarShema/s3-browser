@@ -163,6 +163,48 @@ export function isPDF(filename: string): boolean {
   return getFileExtension(filename) === "pdf";
 }
 
+// Document extensions (for filtering)
+export const DOCUMENT_EXTENSIONS = [
+  "pdf",
+  "doc",
+  "docx",
+  "txt",
+  "rtf",
+  "odt",
+  "xls",
+  "xlsx",
+  "csv",
+  "ods",
+  "ppt",
+  "pptx",
+  "odp",
+  "json",
+  "xml",
+  "yaml",
+  "yml",
+  "md",
+  "js",
+  "ts",
+  "jsx",
+  "tsx",
+  "html",
+  "css",
+  "scss",
+  "sass",
+  "php",
+  "py",
+  "java",
+  "cpp",
+  "c",
+  "cs",
+  "go",
+  "rs",
+  "rb",
+  "swift",
+  "kt",
+  "sql",
+] as const;
+
 // Check if file is a text file that can be edited
 export function isEditableText(filename: string): boolean {
   const textExtensions = [
@@ -194,6 +236,12 @@ export function isEditableText(filename: string): boolean {
     "sql",
   ];
   return textExtensions.includes(getFileExtension(filename));
+}
+
+// Check if file is a document (for filtering)
+export function isDocument(filename: string): boolean {
+  const extension = getFileExtension(filename);
+  return (DOCUMENT_EXTENSIONS as readonly string[]).includes(extension);
 }
 
 // Format file size

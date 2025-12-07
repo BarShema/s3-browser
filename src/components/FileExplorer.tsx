@@ -24,6 +24,7 @@ import {
   isAudio as isAudioFile,
   isImage as isImageFile,
   isVideo as isVideoFile,
+  isDocument,
   generateStableIdFromString,
 } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
@@ -346,48 +347,8 @@ export function FileExplorer({
           filteredDirectories = [];
         } else if (typeFilter === "docs") {
           // Show only document files (including text files)
-          const docExts = [
-            "pdf",
-            "doc",
-            "docx",
-            "txt",
-            "rtf",
-            "odt",
-            "xls",
-            "xlsx",
-            "csv",
-            "ods",
-            "ppt",
-            "pptx",
-            "odp",
-            "json",
-            "xml",
-            "yaml",
-            "yml",
-            "md",
-            "js",
-            "ts",
-            "jsx",
-            "tsx",
-            "html",
-            "css",
-            "scss",
-            "sass",
-            "php",
-            "py",
-            "java",
-            "cpp",
-            "c",
-            "cs",
-            "go",
-            "rs",
-            "rb",
-            "swift",
-            "kt",
-            "sql",
-          ];
           filteredFiles = fileItems.filter((f: FileItem) =>
-            docExts.includes(getFileExtension(f.name))
+            isDocument(f.name)
           );
           filteredDirectories = [];
         }

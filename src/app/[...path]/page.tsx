@@ -2,18 +2,21 @@
 
 import styles from "@/app/home.module.css";
 import { AuthGuard } from "@/components/AuthGuard";
+import { DriveCard } from "@/components/DriveCard";
 import { FileExplorer } from "@/components/FileExplorer";
 import { PageHeader } from "@/components/pageHeader";
 import { SettingsModal } from "@/components/SettingsModal";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
-import { useParams, useRouter } from "next/navigation";
+import { useDriveSelect, useLogout } from "@/hooks/useLogout";
+import { useParams } from "next/navigation";
 import { useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 export default function Home() {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+  const { handleLogout } = useLogout();
+  const { handleDriveSelect } = useDriveSelect();
   const params = useParams();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -23,20 +26,6 @@ export default function Home() {
     : params.path || "";
 
   const drives = driveConfig.drives;
-
-  const handleDriveSelect = (drive: string) => {
-    router.push(`/${drive}`);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast.success("Logged out successfully");
-      router.push("/login");
-    } catch (error) {
-      toast.error("Failed to logout");
-    }
-  };
 
   return (
     <AuthGuard>
@@ -59,14 +48,11 @@ export default function Home() {
               <h2 className={styles.driveSelectTitle}>Select a Drive</h2>
               <div className={styles.driveGrid}>
                 {drives.map((drive) => (
-                  <button
+                  <DriveCard
                     key={drive}
+                    drive={drive}
                     onClick={() => handleDriveSelect(drive)}
-                    className={styles.driveCard}
-                  >
-                    <span>{drive}</span>
-                    <span className={styles.driveArrow}>→</span>
-                  </button>
+                  />
                 ))}
               </div>
             </div>

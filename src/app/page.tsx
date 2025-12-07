@@ -6,30 +6,17 @@ import { PageHeader } from "@/components/pageHeader";
 import { SettingsModal } from "@/components/SettingsModal";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useDriveSelect, useLogout } from "@/hooks/useLogout";
 import { useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import styles from "./home.module.css";
 
 export default function Home() {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+  const { handleLogout } = useLogout();
+  const { handleDriveSelect } = useDriveSelect();
   const drives = driveConfig.drives;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  const handleDriveSelect = (drive: string) => {
-    router.push(`/${drive}`);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast.success("Logged out successfully");
-      router.push("/login");
-    } catch (error) {
-      toast.error("Failed to logout");
-    }
-  };
 
   return (
     <AuthGuard>

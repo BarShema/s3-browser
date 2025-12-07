@@ -637,8 +637,13 @@ export function FileExplorer({
   // Internal delete directory function without confirmation
   const deleteDirectory = async (directory: DirectoryItem): Promise<boolean> => {
     try {
+      // Ensure directory key ends with "/" for proper deletion
+      const dirKey = directory.key.endsWith("/") 
+        ? directory.key 
+        : `${directory.key}/`;
+      
       await api.drive.directory.delete({
-        path: `${driveName}/${directory.key}`,
+        path: `${driveName}/${dirKey}`,
       });
 
       return true;

@@ -79,6 +79,14 @@ export function Toolbar({
       </div>
 
       <div className={styles.actionsGroup}>
+      <button
+          onClick={onDelete}
+          className={styles.uploadButton}
+          disabled={selectedCount === 0}
+          title={selectedCount === 0 ? "No items selected" : "Delete selected items"}
+        >
+          <Trash2 size={16} />
+        </button>
         <button onClick={onUpload} className={styles.uploadButton}>
           <Upload size={16} />
         </button>
@@ -95,14 +103,6 @@ export function Toolbar({
           title="Refresh directory structure"
         >
           <RefreshCw size={16} />
-        </button>
-        <button
-          onClick={onDelete}
-          className={styles.uploadButton}
-          disabled={selectedCount === 0}
-          title={selectedCount === 0 ? "No items selected" : "Delete selected items"}
-        >
-          <Trash2 size={16} />
         </button>
       </div>
     </div>

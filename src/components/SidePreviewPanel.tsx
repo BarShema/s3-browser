@@ -1,16 +1,6 @@
 "use client";
 
-import { api } from "@/lib/api";
-import { clz } from "@/lib/clz";
-import {
-  FileItem,
-  getFileExtension,
-  isEditableText,
-  isImage,
-  isPDF,
-  isVideo,
-} from "@/lib/utils";
-import { isViewModeEnabled } from "@/lib/preferences";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,7 +14,18 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+
+import { api } from "@/lib/api";
+import { clz } from "@/lib/clz";
+import { isViewModeEnabled } from "@/lib/preferences";
+import {
+  FileItem,
+  getFileExtension,
+  isEditableText,
+  isImage,
+  isPDF,
+  isVideo,
+} from "@/lib/utils";
 import { ImagePreview } from "./ImagePreview";
 import { VideoPreview } from "./VideoPreview";
 import styles from "./sidePreviewPanel.module.css";

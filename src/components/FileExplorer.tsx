@@ -1,6 +1,27 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Loader2, X } from "lucide-react";
+import toast from "react-hot-toast";
+
+import { appConfig } from "@/config/app";
+import { api } from "@/lib/api";
+import { isDeleteProtectionEnabled } from "@/lib/preferences";
+import { useResize } from "@/lib/useResize";
+import type { S3Directory, S3File } from "@/utils/sdk/types";
+import {
+  DirectoryItem,
+  FileItem,
+  ViewMode,
+  generateStableIdFromString,
+  isAudio as isAudioFile,
+  isDocument,
+  isImage as isImageFile,
+  isVideo as isVideoFile,
+} from "@/lib/utils";
 import { Breadcrumb } from "@/components/Breadcrumb";
+import { DeleteProtectionModal } from "@/components/DeleteProtectionModal";
 import { DirectoryTree } from "@/components/DirectoryTree";
 import { EditModal } from "@/components/EditModal";
 import { FileDetailsModal } from "@/components/FileDetailsModal";
@@ -12,44 +33,11 @@ import { PaginationControls } from "@/components/PaginationControls";
 import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
-import { appConfig } from "@/config/app";
-import { api } from "@/lib/api";
-import { isDeleteProtectionEnabled } from "@/lib/preferences";
-import { useResize } from "@/lib/useResize";
-import {
-  DirectoryItem,
-  FileItem,
-  ViewMode,
-  getFileExtension,
-  isAudio as isAudioFile,
-  isImage as isImageFile,
-  isVideo as isVideoFile,
-  isDocument,
-  generateStableIdFromString,
-} from "@/lib/utils";
-import { Loader2, X } from "lucide-react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { DeleteProtectionModal } from "./DeleteProtectionModal";
 import styles from "./fileExplorer.module.css";
 
 interface FileExplorerProps {
   driveName: string;
   onOpenSettings?: () => void;
-}
-
-interface S3File {
-  name: string;
-  key: string;
-  size: number;
-  lastModified: string;
-}
-
-interface S3Directory {
-  name: string;
-  key: string;
-  lastModified: string;
 }
 
 export function FileExplorer({

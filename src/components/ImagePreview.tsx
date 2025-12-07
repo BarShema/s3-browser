@@ -1,7 +1,8 @@
 "use client";
 
-import { api } from "@/lib/api";
 import { useEffect, useRef, useState } from "react";
+
+import { api } from "@/lib/api";
 import styles from "./imagePreview.module.css";
 
 interface ImagePreviewProps {

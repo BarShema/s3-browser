@@ -1,11 +1,12 @@
 "use client";
 
-import { clz } from "@/lib/clz";
-import { api } from "@/lib/api";
-import { FileItem } from "@/lib/utils";
-import { Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Save, X } from "lucide-react";
 import toast from "react-hot-toast";
+
+import { api } from "@/lib/api";
+import { clz } from "@/lib/clz";
+import { FileItem } from "@/lib/utils";
 import styles from "./modal.module.css";
 
 interface EditModalProps {

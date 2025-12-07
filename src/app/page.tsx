@@ -2,7 +2,7 @@
 
 import { AuthGuard } from "@/components/AuthGuard";
 import { DriveCard } from "@/components/DriveCard";
-import { PageHeader } from "@/components/pageHeader";
+import { PageHeader } from "@/components/PageHeader";
 import { SettingsModal } from "@/components/SettingsModal";
 import { driveConfig } from "@/config/drives";
 import { useAuth } from "@/contexts/AuthContext";

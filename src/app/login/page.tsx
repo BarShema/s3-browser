@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { AlertCircle, Lock, User } from "lucide-react";
+import toast from "react-hot-toast";
+
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertCircle, Lock, User } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import styles from "./login.module.css";
 
 export default function LoginPage() {
@@ -32,26 +33,26 @@ export default function LoginPage() {
       await signIn(username, password);
       toast.success("Login successful!");
       router.push("/");
-    } catch (err) {
+    } catch (error) {
       // Parse Cognito error messages
       let errorMessage = "Invalid username or password";
 
       if (
-        err &&
-        typeof err === "object" &&
-        "message" in err &&
-        typeof err.message === "string"
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof error.message === "string"
       ) {
-        if (err.message.includes("UserNotConfirmedException")) {
+        if (error.message.includes("UserNotConfirmedException")) {
           errorMessage = "Please verify your email before signing in";
-        } else if (err.message.includes("PasswordResetRequiredException")) {
+        } else if (error.message.includes("PasswordResetRequiredException")) {
           errorMessage = "Password reset required. Please reset your password";
-        } else if (err.message.includes("UserNotFoundException")) {
+        } else if (error.message.includes("UserNotFoundException")) {
           errorMessage = "User not found. Please check your username";
-        } else if (err.message.includes("NotAuthorizedException")) {
+        } else if (error.message.includes("NotAuthorizedException")) {
           errorMessage = "Incorrect username or password";
         } else {
-          errorMessage = err.message;
+          errorMessage = error.message;
         }
       }
 

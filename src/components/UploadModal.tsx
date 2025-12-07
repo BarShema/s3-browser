@@ -1,8 +1,6 @@
 "use client";
 
-import { api } from "@/lib/api";
-import { clz } from "@/lib/clz";
-import { formatFileSize } from "@/lib/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CheckSquare,
   File,
@@ -13,9 +11,12 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
+
+import { api } from "@/lib/api";
+import { clz } from "@/lib/clz";
+import { formatFileSize } from "@/lib/utils";
 import styles from "./modal.module.css";
 import uploadStyles from "./uploadModal.module.css";
 
@@ -188,7 +189,7 @@ export function UploadModal({
       }
       
       // Build file list with proper paths
-      const newFiles: UploadFile[] = acceptedFiles.map((file, index) => {
+      const newFiles: UploadFile[] = acceptedFiles.map((file) => {
         let relativeKey = file.name;
         
         // First try to use path from DataTransfer entry (most accurate for drag & drop)
@@ -319,8 +320,6 @@ export function UploadModal({
       for (const listPath of pathsToCheck) {
         let page = 1;
         let hasMore = true;
-        let totalPagesFetched = 0;
-        let filesFromThisPath = 0;
 
         while (hasMore) {
           try {
@@ -362,7 +361,6 @@ export function UploadModal({
                     lastModified: file.lastModified,
                   });
                   seenKeys.add(normalizedKey);
-                  filesFromThisPath++;
                 }
               });
             }
@@ -382,15 +380,14 @@ export function UploadModal({
               });
             }
 
-            totalPagesFetched = responseData.totalPages || 1;
-            hasMore = page < totalPagesFetched;
+            hasMore = page < (responseData.totalPages || 1);
             page++;
             
             // Safety check to prevent infinite loops
             if (page > 1000) {
               break;
             }
-          } catch (apiError) {
+          } catch {
             // Continue to next page or path
             hasMore = false;
           }
@@ -401,7 +398,6 @@ export function UploadModal({
       for (const dirPath of directoriesToCheck) {
         let page = 1;
         let hasMore = true;
-        let filesFromThisDir = 0;
 
         while (hasMore) {
           try {
@@ -423,7 +419,6 @@ export function UploadModal({
                     lastModified: file.lastModified,
                   });
                   seenKeys.add(normalizedKey);
-                  filesFromThisDir++;
                 }
               });
             }
@@ -453,10 +448,10 @@ export function UploadModal({
 
       // Check which upload files already exist
       // Normalize keys for comparison (remove leading/trailing slashes, handle relative vs absolute)
-      uploadFiles.forEach((uploadFile, idx) => {
+      uploadFiles.forEach((uploadFile) => {
         const normalizedUploadKey = uploadFile.key.replace(/^\/+|\/+$/g, "");
         
-        const existing = allFiles.find((f, fIdx) => {
+        const existing = allFiles.find((f) => {
           const normalizedExistingKey = f.key.replace(/^\/+|\/+$/g, "");
           const match = normalizedExistingKey === normalizedUploadKey;
           
@@ -543,10 +538,7 @@ export function UploadModal({
     );
   };
 
-  const uploadFile = async (
-    uploadFile: UploadFile,
-    onProgress?: (progress: number, uploaded: number) => void
-  ) => {
+  const uploadFile = async (uploadFile: UploadFile) => {
     try {
       const startTime = Date.now();
       setUploadFiles((prev) =>
@@ -849,7 +841,7 @@ export function UploadModal({
           drive: driveName,
           dirKey: cleanDirKey,
         });
-      } catch (error) {
+      } catch {
         // Directory might already exist, which is fine
       }
     }
@@ -859,18 +851,7 @@ export function UploadModal({
       if (abortRequestedRef.current) break;
 
       try {
-        await uploadFile(file, (progress, uploaded) => {
-          // Update overall progress tracking
-          const currentUploaded = uploadedBytesRef.current;
-          const elapsed = (Date.now() - uploadStartTimeRef.current) / 1000;
-          if (elapsed > 0) {
-            const rate = currentUploaded / elapsed; // bytes per second
-            const remaining = totalBytesRef.current - currentUploaded;
-            const estimatedSeconds =
-              rate > 0 && remaining > 0 ? remaining / rate : 0;
-            // Estimated time is calculated and displayed in the UI
-          }
-        });
+        await uploadFile(file);
         // Final check: ensure progress is 100% after upload completes
         setUploadFiles((prev) =>
           prev.map((f) =>
@@ -883,7 +864,7 @@ export function UploadModal({
               : f
           )
         );
-      } catch (error) {
+      } catch {
         // Error already handled in uploadFile
       }
     }

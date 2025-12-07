@@ -1,9 +1,9 @@
 "use client";
 
-import { appConfig } from "@/config/app";
-import { api } from "@/lib/api";
-import { ChevronDown, ChevronRight, Folder, FolderOpen } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight, Folder, FolderOpen } from "lucide-react";
+
+import { api } from "@/lib/api";
 import styles from "./directoryTree.module.css";
 
 interface DirectoryNode {

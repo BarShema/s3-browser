@@ -1,8 +1,9 @@
 "use client";
 
-import { api } from "@/lib/api";
-import { Calculator, HardDrive, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { Calculator, HardDrive, Loader2 } from "lucide-react";
+
+import { api } from "@/lib/api";
 import styles from "./driveCard.module.css";
 
 interface DriveInfo {
@@ -40,9 +41,9 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
         formattedSize: data.formattedSize,
       });
       setHasCalculated(true);
-    } catch (err) {
+    } catch (error) {
       setError(
-        err instanceof Error ? err.message : "Failed to load drive info"
+        error instanceof Error ? error.message : "Failed to load drive info"
       );
     } finally {
       setIsLoading(false);

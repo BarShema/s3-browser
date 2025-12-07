@@ -1,16 +1,16 @@
 "use client";
 
-import { api } from "@/lib/api";
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
+
+import { api } from "@/lib/api";
 
 interface VideoThumbnailProps {
   src: string;
   alt: string;
-  driveName: string;
 }
 
-export function VideoThumbnail({ src, alt, driveName }: VideoThumbnailProps) {
+export function VideoThumbnail({ src, alt }: VideoThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);

@@ -1,19 +1,20 @@
 "use client";
 
 import {
-  File,
-  Folder,
-  FileText,
-  FileSpreadsheet,
   Archive,
   Cpu,
-  FileImage,
-  FileVideo,
+  File,
   FileAudio,
   FileCode,
+  FileImage,
+  FileSpreadsheet,
+  FileText,
+  FileVideo,
+  Folder,
   Presentation,
 } from "lucide-react";
-import { getFileIcon, getFileExtension } from "@/lib/utils";
+
+import { getFileExtension, getFileIcon } from "@/lib/utils";
 import styles from "./fileIcon.module.css";
 
 interface FileIconProps {

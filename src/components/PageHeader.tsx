@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
+
 import { UserMenu } from "./UserMenu";
-import styles from "./pageHeader.module.css";
+import styles from "./PageHeader.module.css";
 
 export interface PageHeaderProps {
   driveName: string;

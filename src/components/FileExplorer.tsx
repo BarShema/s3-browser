@@ -637,18 +637,23 @@ export function FileExplorer({
   // Internal delete directory function without confirmation
   const deleteDirectory = async (directory: DirectoryItem): Promise<boolean> => {
     try {
-      // Ensure directory key ends with "/" for proper deletion
+      // Remove trailing slash if present for deletion (API expects path without trailing slash)
       const dirKey = directory.key.endsWith("/") 
-        ? directory.key 
-        : `${directory.key}/`;
+        ? directory.key.slice(0, -1)
+        : directory.key;
+      
+      const deletePath = `${driveName}/${dirKey}`;
+      console.log("Deleting directory with path:", deletePath);
       
       await api.drive.directory.delete({
-        path: `${driveName}/${dirKey}`,
+        path: deletePath,
       });
 
       return true;
     } catch (error) {
       console.error("Error deleting directory:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to delete directory: ${errorMessage}`);
       return false;
     }
   };

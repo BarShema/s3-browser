@@ -85,7 +85,11 @@ export class FileAPI extends BaseAPI {
           } catch {
             errorMessage = xhr.statusText || errorMessage;
           }
-          reject(new Error(errorMessage));
+          // Create error with status code attached for easier detection
+          const error = new Error(errorMessage) as Error & { status?: number; response?: { status: number } };
+          error.status = xhr.status;
+          error.response = { status: xhr.status };
+          reject(error);
         }
       });
 

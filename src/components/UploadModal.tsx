@@ -130,13 +130,152 @@ export function UploadModal({
   }, [isOpen]);
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const newFiles: UploadFile[] = acceptedFiles.map((file) => {
-        let relativeKey = file.name;
-        // If directory dropped and browser gives relative path, preserve structure
-        if (file.webkitRelativePath && file.webkitRelativePath !== "") {
-          relativeKey = file.webkitRelativePath;
+    async (acceptedFiles: File[], fileRejections: any[], event: any) => {
+      console.log("=== DROP DEBUG START ===");
+      console.log("Accepted files count:", acceptedFiles.length);
+      console.log("Event:", event);
+      console.log("DataTransfer:", event?.dataTransfer);
+      console.log("DataTransfer items:", event?.dataTransfer?.items);
+      
+      // Build a map of File objects to their full paths using DataTransfer API
+      const filePathMap = new Map<File, string>();
+      const filePromises: Promise<void>[] = [];
+      
+      // Log all accepted files first
+      acceptedFiles.forEach((file, index) => {
+        console.log(`File ${index}:`, {
+          name: file.name,
+          webkitRelativePath: file.webkitRelativePath,
+          path: (file as any).path,
+          size: file.size,
+          type: file.type,
+        });
+      });
+      
+      // Process DataTransfer items to extract full directory structure
+      if (event?.dataTransfer?.items) {
+        const items = Array.from(event.dataTransfer.items);
+        console.log("DataTransfer items count:", items.length);
+        
+        const processEntry = (entry: any, basePath: string = ""): void => {
+          console.log("Processing entry:", {
+            name: entry.name,
+            isFile: entry.isFile,
+            isDirectory: entry.isDirectory,
+            fullPath: entry.fullPath,
+            basePath,
+          });
+          
+          if (entry.isFile) {
+            const filePromise = new Promise<void>((resolve) => {
+              entry.file((file: File) => {
+                const fullPath = basePath ? `${basePath}/${file.name}` : file.name;
+                console.log("File entry processed:", {
+                  fileName: file.name,
+                  basePath,
+                  fullPath,
+                  webkitRelativePath: file.webkitRelativePath,
+                });
+                filePathMap.set(file, fullPath);
+                resolve();
+              });
+            });
+            filePromises.push(filePromise);
+          } else if (entry.isDirectory) {
+            const dirReader = entry.createReader();
+            const dirName = entry.name;
+            const newBasePath = basePath ? `${basePath}/${dirName}` : dirName;
+            console.log("Processing directory:", {
+              dirName,
+              basePath,
+              newBasePath,
+            });
+            
+            const readEntries = (): void => {
+              dirReader.readEntries((entries: any[]) => {
+                console.log(`Directory "${dirName}" has ${entries.length} entries`);
+                if (entries.length === 0) return;
+                
+                for (const subEntry of entries) {
+                  processEntry(subEntry, newBasePath);
+                }
+                
+                // Continue reading if there are more entries
+                readEntries();
+              });
+            };
+            
+            readEntries();
+          }
+        };
+        
+        // Process all items from DataTransfer
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i] as DataTransferItem;
+          console.log(`Processing DataTransfer item ${i}:`, {
+            kind: item.kind,
+            type: item.type,
+            hasWebkitGetAsEntry: !!item.webkitGetAsEntry,
+          });
+          
+          if (item.webkitGetAsEntry) {
+            const entry = item.webkitGetAsEntry();
+            console.log(`Entry ${i}:`, {
+              name: entry?.name,
+              isFile: entry?.isFile,
+              isDirectory: entry?.isDirectory,
+              fullPath: entry?.fullPath,
+            });
+            if (entry) {
+              processEntry(entry);
+            }
+          }
         }
+        
+        // Wait for all file entries to be processed
+        console.log("Waiting for", filePromises.length, "file promises to resolve");
+        await Promise.all(filePromises);
+        console.log("File path map after processing:", Array.from(filePathMap.entries()).map(([file, path]) => ({
+          fileName: file.name,
+          path,
+        })));
+      } else {
+        console.log("No DataTransfer items available");
+      }
+      
+      // Build file list with proper paths
+      const newFiles: UploadFile[] = acceptedFiles.map((file, index) => {
+        let relativeKey = file.name;
+        
+        console.log(`\nProcessing file ${index} for upload:`, {
+          fileName: file.name,
+          webkitRelativePath: file.webkitRelativePath,
+          path: (file as any).path,
+          hasPathInMap: filePathMap.has(file),
+        });
+        
+        // First try to use path from DataTransfer entry (most accurate for drag & drop)
+        if (filePathMap.has(file)) {
+          relativeKey = filePathMap.get(file)!;
+          console.log(`  -> Using DataTransfer path: ${relativeKey}`);
+        }
+        // Try using file.path property (available when dragging files from file system)
+        else if ((file as any).path && (file as any).path !== "") {
+          // Extract relative path from absolute path
+          // Path format: /dir1/dir2/file.txt -> dir1/dir2/file.txt
+          const filePath = (file as any).path;
+          // Remove leading slash and use as relative path
+          relativeKey = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+          console.log(`  -> Using file.path: ${(file as any).path} -> relative: ${relativeKey}`);
+        }
+        // Fallback to webkitRelativePath if available (works for file input)
+        else if (file.webkitRelativePath && file.webkitRelativePath !== "") {
+          relativeKey = file.webkitRelativePath;
+          console.log(`  -> Using webkitRelativePath: ${relativeKey}`);
+        } else {
+          console.log(`  -> Using filename only: ${relativeKey}`);
+        }
+        
         // Preserve the exact local path structure - don't flatten to root
         // If currentPath exists, files should be placed relative to it, maintaining their structure
         const s3key = currentPath
@@ -145,6 +284,9 @@ export function UploadModal({
               ""
             )}`
           : relativeKey.replace(/^[/.]+/, "");
+        
+        console.log(`  -> Final S3 key: ${s3key}`);
+        
         return {
           file,
           key: s3key,
@@ -152,6 +294,10 @@ export function UploadModal({
           progress: 0,
         };
       });
+      
+      console.log("=== DROP DEBUG END ===");
+      console.log("Final files to upload:", newFiles.map(f => ({ name: f.file.name, key: f.key })));
+      
       setUploadFiles((prev) => [...prev, ...newFiles]);
     },
     [currentPath]
@@ -160,13 +306,10 @@ export function UploadModal({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: true,
-    noClick: true, // We'll handle clicks manually with Upload button
+    noClick: false, // Allow clicks on dropzone to open file browser
     noKeyboard: false,
   });
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
 
   // Unified handler for file/directory selection that preserves path structure
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,41 +356,320 @@ export function UploadModal({
     const existingMap = new Map<string, ExistingFile>();
 
     try {
-      // Get all files in the current path
-      const fullPath = currentPath ? `${driveName}/${currentPath}` : driveName;
+      // Get all files - list from current path and root to get all files
+      // The API uses delimiter so it only returns files at the current level
+      // We need to check both the current path and root to find all files
       const allFiles: ExistingFile[] = [];
-
-      // Fetch all pages of files
-      let page = 1;
-      let hasMore = true;
-
-      while (hasMore) {
-        const data = await api.drive.list({
-          path: fullPath,
-          page,
-          limit: 1000,
-        });
-
-        data.files.forEach((file: any) => {
-          allFiles.push({
-            key: file.key,
-            name: file.name,
-            size: file.size,
-            lastModified: file.lastModified,
-          });
-        });
-
-        hasMore = page < (data.totalPages || 1);
-        page++;
-      }
-
-      // Check which upload files already exist
-      uploadFiles.forEach((uploadFile) => {
-        const existing = allFiles.find((f) => f.key === uploadFile.key);
-        if (existing) {
-          existingMap.set(uploadFile.key, existing);
+      const seenKeys = new Set<string>(); // Avoid duplicates
+      
+      // Extract unique directory paths from upload files - only check these directories
+      const uploadDirectories = new Set<string>();
+      uploadFiles.forEach((uf) => {
+        const keyParts = uf.key.split('/');
+        // Extract all parent directories (e.g., "new-test/test/file.jpg" -> ["new-test", "new-test/test"])
+        for (let i = 1; i < keyParts.length; i++) {
+          const dirPath = keyParts.slice(0, i).join('/');
+          uploadDirectories.add(dirPath);
         }
       });
+      
+      console.log("Upload files directories to check:", Array.from(uploadDirectories));
+      
+      // Strategy: List from root to get ALL files recursively
+      // Since the API uses delimiter, we need to recursively list from each subdirectory
+      // But for efficiency, let's first try listing from root and current path
+      // Then recursively list from any subdirectories we find
+      const pathsToCheck: string[] = [];
+      const directoriesToCheck: string[] = [];
+      
+      // Always start from root to get all files
+      pathsToCheck.push(driveName);
+      
+      // Also check current path if it exists
+      if (currentPath) {
+        pathsToCheck.push(`${driveName}/${currentPath}`);
+      }
+
+      console.log("Starting to fetch existing files. Paths to check:", pathsToCheck);
+
+      // First pass: List from root and current path
+      for (const listPath of pathsToCheck) {
+        console.log(`\n=== Fetching files from path: ${listPath} ===`);
+        
+        let page = 1;
+        let hasMore = true;
+        let totalPagesFetched = 0;
+        let filesFromThisPath = 0;
+
+        while (hasMore) {
+          console.log(`  [API CALL] Fetching page ${page} from path: "${listPath}"`);
+          try {
+            const data = await api.drive.list({
+              path: listPath,
+              page,
+              limit: 1000,
+            });
+
+            console.log(`  [API RESPONSE] Page ${page} from "${listPath}":`, {
+              filesCount: data.files?.length || 0,
+              totalFiles: data.totalFiles || 0,
+              totalPages: data.totalPages || 1,
+              currentPage: data.currentPage || page,
+              hasFilesArray: Array.isArray(data.files),
+              filesType: typeof data.files,
+              fullResponseKeys: Object.keys(data || {}),
+            });
+            
+            // Log raw response for first page to debug
+            if (page === 1) {
+              console.log(`  [RAW API RESPONSE] First page from "${listPath}":`, JSON.stringify(data, null, 2));
+            }
+            
+            // Process the response
+            const responseData = data;
+            
+            if (responseData.files && responseData.files.length > 0) {
+              console.log(`  [PROCESSING] Found ${responseData.files.length} files in page ${page} from "${listPath}"`);
+              responseData.files.forEach((file: any) => {
+                // The API returns full S3 keys (absolute from bucket root)
+                // So file.key should already be the full path like "new-test/DSCF2170.jpg"
+                let normalizedKey = file.key;
+                
+                // Remove leading/trailing slashes and normalize
+                normalizedKey = normalizedKey.replace(/^\/+|\/+$/g, "");
+                
+                // If listing from a subdirectory and the key doesn't include the path,
+                // it might be relative - but based on S3 behavior, keys should be absolute
+                // However, let's handle both cases to be safe
+                if (listPath !== driveName && currentPath) {
+                  const pathWithoutDrive = listPath.replace(`${driveName}/`, '');
+                  // If key is just the filename, it's relative to the list path
+                  if (normalizedKey === file.name || !normalizedKey.includes('/')) {
+                    normalizedKey = `${pathWithoutDrive}/${file.name}`;
+                  }
+                  // If key doesn't start with the path, it might be relative
+                  else if (!normalizedKey.startsWith(pathWithoutDrive)) {
+                    // Check if it's a full path that just doesn't match
+                    // In this case, keep it as is (it's already absolute)
+                    console.log(`    [KEY CHECK] key="${normalizedKey}", expected to start with "${pathWithoutDrive}"`);
+                  }
+                }
+                
+                // Avoid duplicates
+                if (!seenKeys.has(normalizedKey)) {
+                  // Log all files for debugging
+                  console.log(`    [FILE] ${allFiles.length} from API (path: ${listPath}):`, {
+                    originalKey: file.key,
+                    normalizedKey: normalizedKey,
+                    name: file.name,
+                    size: file.size,
+                    listPath: listPath,
+                    currentPath: currentPath,
+                  });
+                  allFiles.push({
+                    key: normalizedKey,
+                    name: file.name,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                  });
+                  seenKeys.add(normalizedKey);
+                  filesFromThisPath++;
+                } else {
+                  console.log(`    [DUPLICATE] Skipping duplicate key: ${normalizedKey}`);
+                }
+              });
+            } else {
+              console.log(`  [NO FILES] Page ${page} from "${listPath}" returned 0 files`);
+              // Log the full response for debugging - this is critical to see why no files
+              if (page === 1) {
+                console.log(`  [DEBUG] Full API response (no files):`, JSON.stringify(responseData, null, 2));
+              }
+            }
+
+            // Collect directories for recursive listing - ONLY directories that contain upload files
+            if (responseData.directories && responseData.directories.length > 0) {
+              responseData.directories.forEach((dir: any) => {
+                const dirKey = dir.key.replace(/^\/+|\/+$/g, "");
+                const fullDirPath = `${driveName}/${dirKey}`;
+                
+                // Only add directories that are in the upload files list
+                if (uploadDirectories.has(dirKey)) {
+                  if (!directoriesToCheck.includes(fullDirPath)) {
+                    directoriesToCheck.push(fullDirPath);
+                    console.log(`  [DIRECTORY] Found upload directory to check: ${dirKey}`);
+                  }
+                }
+              });
+            }
+
+            totalPagesFetched = responseData.totalPages || 1;
+            hasMore = page < totalPagesFetched;
+            page++;
+            
+            // Safety check to prevent infinite loops
+            if (page > 1000) {
+              console.warn("Stopped fetching after 1000 pages (safety limit)");
+              break;
+            }
+          } catch (apiError) {
+            console.error(`  [ERROR] Failed to fetch page ${page} from "${listPath}":`, apiError);
+            // Continue to next page or path
+            hasMore = false;
+          }
+        }
+        
+        console.log(`Finished fetching from ${listPath}. Pages: ${totalPagesFetched}, Files: ${filesFromThisPath}`);
+      }
+
+      // Second pass: Recursively list from all subdirectories found
+      console.log(`\n=== Recursively checking ${directoriesToCheck.length} subdirectories ===`);
+      for (const dirPath of directoriesToCheck) {
+        console.log(`\n=== Fetching files from subdirectory: ${dirPath} ===`);
+        
+        let page = 1;
+        let hasMore = true;
+        let filesFromThisDir = 0;
+
+        while (hasMore) {
+          try {
+            const data = await api.drive.list({
+              path: dirPath,
+              page,
+              limit: 1000,
+            });
+
+            if (data.files && data.files.length > 0) {
+              data.files.forEach((file: any) => {
+                const normalizedKey = file.key.replace(/^\/+|\/+$/g, "");
+                
+                if (!seenKeys.has(normalizedKey)) {
+                  console.log(`    [FILE] ${allFiles.length} from subdirectory ${dirPath}:`, {
+                    originalKey: file.key,
+                    normalizedKey: normalizedKey,
+                    name: file.name,
+                  });
+                  allFiles.push({
+                    key: normalizedKey,
+                    name: file.name,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                  });
+                  seenKeys.add(normalizedKey);
+                  filesFromThisDir++;
+                }
+              });
+            }
+
+            // Check for nested subdirectories
+            if (data.directories && data.directories.length > 0) {
+              data.directories.forEach((dir: any) => {
+                const dirKey = dir.key.replace(/^\/+|\/+$/g, "");
+                const fullDirPath = `${driveName}/${dirKey}`;
+                if (!directoriesToCheck.includes(fullDirPath) && dirPath !== fullDirPath) {
+                  directoriesToCheck.push(fullDirPath);
+                  console.log(`    [NESTED DIR] Found nested subdirectory: ${dirKey}`);
+                }
+              });
+            }
+
+            hasMore = page < (data.totalPages || 1);
+            page++;
+            
+            if (page > 1000) {
+              console.warn("Stopped fetching after 1000 pages (safety limit)");
+              break;
+            }
+          } catch (error) {
+            console.error(`  [ERROR] Failed to fetch from subdirectory ${dirPath}:`, error);
+            hasMore = false;
+          }
+        }
+        
+        console.log(`Finished fetching from ${dirPath}. Files: ${filesFromThisDir}`);
+      }
+
+      console.log(`\n=== Total files collected from all paths: ${allFiles.length} ===`);
+
+      console.log("=== EXISTING FILES CHECK DEBUG START ===");
+      console.log("Current path:", currentPath);
+      console.log("Drive name:", driveName);
+      console.log("Paths checked for listing:", pathsToCheck);
+      console.log("Total existing files found:", allFiles.length);
+      console.log("");
+      console.log("Upload files to check:", uploadFiles.length);
+      uploadFiles.forEach((uf, idx) => {
+        console.log(`  Upload file ${idx}:`, {
+          key: uf.key,
+          name: uf.file.name,
+          size: uf.file.size,
+        });
+      });
+      console.log("");
+      console.log("Existing files from API:", allFiles.length);
+      allFiles.slice(0, 20).forEach((ef, idx) => {
+        console.log(`  Existing file ${idx}:`, {
+          key: ef.key,
+          name: ef.name,
+          size: ef.size,
+        });
+      });
+      if (allFiles.length > 20) {
+        console.log(`  ... and ${allFiles.length - 20} more files`);
+      }
+      console.log("");
+
+      // Check which upload files already exist
+      // Normalize keys for comparison (remove leading/trailing slashes, handle relative vs absolute)
+      uploadFiles.forEach((uploadFile, idx) => {
+        const normalizedUploadKey = uploadFile.key.replace(/^\/+|\/+$/g, "");
+        console.log(`\nChecking upload file ${idx}: "${uploadFile.key}"`);
+        console.log(`  Normalized upload key: "${normalizedUploadKey}"`);
+        
+        const existing = allFiles.find((f, fIdx) => {
+          const normalizedExistingKey = f.key.replace(/^\/+|\/+$/g, "");
+          const match = normalizedExistingKey === normalizedUploadKey;
+          
+          if (match) {
+            console.log(`  ✓ MATCH FOUND at index ${fIdx}:`);
+            console.log(`    Upload key: "${normalizedUploadKey}"`);
+            console.log(`    Existing key: "${normalizedExistingKey}"`);
+            console.log(`    Existing file name: "${f.name}"`);
+            console.log(`    Existing file size: ${f.size}`);
+          } else if (fIdx < 5 || normalizedExistingKey.includes(normalizedUploadKey) || normalizedUploadKey.includes(normalizedExistingKey)) {
+            // Log first 5 and any partial matches for debugging
+            console.log(`  - No match (existing ${fIdx}): "${normalizedExistingKey}"`);
+          }
+          
+          return match;
+        });
+        
+        if (existing) {
+          existingMap.set(uploadFile.key, existing);
+          console.log(`  → Added to existingMap`);
+        } else {
+          console.log(`  ✗ No match found for "${normalizedUploadKey}"`);
+          // Try to find similar keys
+          const similarKeys = allFiles.filter(f => {
+            const normalizedExistingKey = f.key.replace(/^\/+|\/+$/g, "");
+            return normalizedExistingKey.includes(normalizedUploadKey.split('/').pop() || '') ||
+                   normalizedUploadKey.includes(normalizedExistingKey.split('/').pop() || '');
+          });
+          if (similarKeys.length > 0) {
+            console.log(`  → Found ${similarKeys.length} similar keys (for debugging):`);
+            similarKeys.slice(0, 3).forEach(sk => {
+              console.log(`    - "${sk.key}"`);
+            });
+          }
+        }
+      });
+
+      console.log("");
+      console.log("=== MATCHING SUMMARY ===");
+      console.log("Total upload files:", uploadFiles.length);
+      console.log("Total existing files from API:", allFiles.length);
+      console.log("Matched existing files:", existingMap.size);
+      console.log("Matched keys:", Array.from(existingMap.keys()));
+      console.log("=== EXISTING FILES CHECK DEBUG END ===");
 
       setExistingFiles(existingMap);
 
@@ -307,6 +729,50 @@ export function UploadModal({
     setUploadFiles((prev) => prev.filter((f) => !f.exists || f.shouldReplace));
     setShowReplaceConfirmation(false);
     startUpload();
+  };
+
+  // Upload file using presigned URL (for large files)
+  const uploadFileViaPresignedUrl = async (
+    uploadFile: UploadFile,
+    uploadUrl: string,
+    onProgress?: (progress: number, loaded: number, total: number) => void
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const fileKey = uploadFile.key;
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable && onProgress) {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          onProgress(progress, e.loaded, e.total);
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        // Check if it's likely a CORS error (status 0 typically indicates CORS failure)
+        if (xhr.status === 0) {
+          reject(new Error("CORS error: S3 bucket CORS configuration may be missing. Please configure CORS on the S3 bucket to allow PUT requests from this origin."));
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("abort", () => {
+        reject(new Error("Upload aborted"));
+      });
+
+      xhr.open("PUT", uploadUrl);
+      xhr.setRequestHeader("Content-Type", uploadFile.file.type || "application/octet-stream");
+      xhr.send(uploadFile.file);
+    });
   };
 
   const uploadFile = async (
@@ -406,20 +872,149 @@ export function UploadModal({
             : f
         )
       );
-    } catch (error) {
-      console.error("Upload error:", error);
-      setUploadFiles((prev) =>
-        prev.map((f) =>
-          f.key === uploadFile.key
-            ? {
-                ...f,
-                status: "error",
-                error: error instanceof Error ? error.message : "Upload failed",
+    } catch (error: any) {
+      // Check if error is 413 (Request Entity Too Large)
+      // Check multiple possible error formats
+      const statusCode = error?.status || error?.response?.status || 
+                        (error?.message?.match(/\b413\b/) ? 413 : null) ||
+                        (error?.message?.toLowerCase().includes("content too large") ? 413 : null) ||
+                        (error?.message?.toLowerCase().includes("request entity too large") ? 413 : null);
+      
+      const is413Error = statusCode === 413 || 
+                        (error instanceof Error && (
+                          error.message.includes("413") ||
+                          error.message.toLowerCase().includes("content too large") ||
+                          error.message.toLowerCase().includes("request entity too large")
+                        ));
+
+      console.log("Upload error detected:", {
+        error,
+        statusCode,
+        is413Error,
+        message: error?.message,
+        status: error?.status,
+        responseStatus: error?.response?.status
+      });
+
+      if (is413Error) {
+        console.log("File too large (413), using presigned URL upload method");
+        
+        const fileKeyForPresigned = uploadFile.key;
+        
+        try {
+          // Get presigned upload URL
+          const uploadUrlResponse = await api.drive.file.getUploadUrl({
+            drive: driveName,
+            key: uploadFile.key,
+            contentType: uploadFile.file.type || "application/octet-stream",
+            expiresIn: 3600, // 1 hour
+          });
+
+          const uploadUrl = uploadUrlResponse.uploadUrl;
+
+          // Upload using presigned URL with progress tracking
+          await uploadFileViaPresignedUrl(
+            uploadFile,
+            uploadUrl,
+            (progress, loaded, total) => {
+              // Don't process progress events if file is already marked as completed
+              if (completedFilesRef.current.has(fileKeyForPresigned)) {
+                return;
               }
-            : f
-        )
-      );
-      throw error;
+
+              const isComplete = loaded === total && total > 0;
+
+              // Calculate bytes delta more accurately
+              setUploadFiles((prev) => {
+                const currentFile = prev.find((f) => f.key === fileKeyForPresigned);
+                // Double-check ref in case it was updated between checks
+                if (completedFilesRef.current.has(fileKeyForPresigned)) {
+                  return prev;
+                }
+
+                const previousBytes = currentFile?.uploadedBytes || 0;
+                const bytesDelta = loaded - previousBytes;
+                if (bytesDelta > 0) {
+                  uploadedBytesRef.current += bytesDelta;
+                }
+
+                // If progress is 100% and file is complete, mark as completed
+                if (isComplete && currentFile?.status === "uploading") {
+                  completedFilesRef.current.add(fileKeyForPresigned);
+                  return prev.map((f) =>
+                    f.key === fileKeyForPresigned
+                      ? {
+                          ...f,
+                          status: "completed",
+                          progress: 100,
+                          uploadedBytes: loaded,
+                        }
+                      : f
+                  );
+                }
+
+                // Otherwise just update progress
+                return prev.map((f) =>
+                  f.key === fileKeyForPresigned
+                    ? {
+                        ...f,
+                        progress,
+                        uploadedBytes: loaded,
+                      }
+                    : f
+                );
+              });
+
+              if (onProgress) {
+                onProgress(progress, loaded);
+              }
+            }
+          );
+
+          // Mark as completed after successful upload via presigned URL
+          completedFilesRef.current.add(fileKeyForPresigned);
+          setUploadFiles((prev) =>
+            prev.map((f) =>
+              f.key === fileKeyForPresigned
+                ? {
+                    ...f,
+                    status: "completed",
+                    progress: 100,
+                  }
+                : f
+            )
+          );
+        } catch (presignedError) {
+          console.error("Presigned URL upload error:", presignedError);
+          setUploadFiles((prev) =>
+            prev.map((f) =>
+              f.key === uploadFile.key
+                ? {
+                    ...f,
+                    status: "error",
+                    error: presignedError instanceof Error ? presignedError.message : "Upload failed",
+                  }
+                : f
+            )
+          );
+          throw presignedError;
+        }
+      } else {
+        // Not a 413 error, handle normally
+        console.error("Upload error:", error);
+        setUploadFiles((prev) =>
+          prev.map((f) =>
+            f.key === uploadFile.key
+              ? {
+                  ...f,
+                  status: "error",
+                  error: error instanceof Error ? error.message : "Upload failed",
+                }
+              : f
+          )
+        );
+        throw error;
+      }
     }
   };
 
@@ -790,17 +1385,32 @@ export function UploadModal({
           {!showReplaceConfirmation && !hasUploadStarted && (
             <>
               <div
-                {...getRootProps()}
+                {...getRootProps({
+                  onClick: (e) => {
+                    // Override default click behavior to use our file input with webkitdirectory support
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  },
+                })}
                 className={`${uploadStyles.dropzone} ${
                   isDragActive ? uploadStyles.active : ""
                 }`}
               >
                 <input {...getInputProps()} className={uploadStyles.hiddenInput} />
+                {/* File input with webkitdirectory support for directory selection */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  {...({ webkitdirectory: "", directory: "" } as any)}
+                  multiple
+                  onChange={handleFileSelect}
+                  className={uploadStyles.hiddenInput}
+                />
                 <Upload size={48} className={uploadStyles.uploadIcon} />
                 <p className={uploadStyles.dropzoneText}>
                   {isDragActive
                     ? "Drop files here"
-                    : "Drag & drop files and directories here"}
+                    : "Click or drag & drop files and directories here"}
                 </p>
                 <p className={uploadStyles.pathHint}>
                   Upload to: {currentPath || driveName}
@@ -809,36 +1419,6 @@ export function UploadModal({
                   Files will maintain their local directory structure
                 </p>
               </div>
-
-              {/* Single Upload Button */}
-              <div className={uploadStyles.uploadButtonContainer}>
-                <button
-                  type="button"
-                  onClick={handleUploadClick}
-                  className={uploadStyles.uploadButton}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      "var(--theme-accent-hover)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      "var(--theme-accent-primary)";
-                  }}
-                >
-                  <Upload size={18} />
-                  Upload
-                </button>
-              </div>
-
-              {/* Hidden file input - supports both files and directories with webkitdirectory */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                {...({ webkitdirectory: "", directory: "" } as any)}
-                multiple
-                onChange={handleFileSelect}
-                className={uploadStyles.hiddenInput}
-              />
             </>
           )}
 

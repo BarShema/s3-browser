@@ -202,8 +202,6 @@ export function FileList({
         <div
           key={item.id}
           className={`${styles.row} ${selectedItems.includes(item.id) ? styles.selected : ''} ${previewedFileId === item.id ? styles.previewed : ''}`}
-          onClick={() => handleItemClick(item)}
-          onDoubleClick={() => handleItemDoubleClick(item)}
         >
           <div className={styles.checkboxCell}>
             <input
@@ -235,7 +233,11 @@ export function FileList({
                   autoFocus
                 />
               ) : (
-                <div className={styles.nameButton}>
+                <div 
+                  className={styles.nameButton}
+                  onClick={() => handleItemClick(item)}
+                  onDoubleClick={() => handleItemDoubleClick(item)}
+                >
                   {item.name}
                 </div>
               )}

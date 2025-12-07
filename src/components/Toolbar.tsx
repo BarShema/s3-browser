@@ -1,12 +1,12 @@
 "use client";
 
-import { isViewModeEnabled } from "@/lib/preferences";
 import { ViewMode } from "@/lib/utils";
 import {
   FolderPlus,
   FolderTree,
   Grid3X3,
   List,
+  RefreshCw,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -91,17 +91,19 @@ export function Toolbar({
         </button>
         <button
           onClick={onRefresh}
-          className={styles.viewButton}
+          className={styles.uploadButton}
           title="Refresh directory structure"
         >
-          ↻
+          <RefreshCw size={16} />
         </button>
-        {selectedCount > 0 && !isViewModeEnabled() && (
-          <button onClick={onDelete} className={styles.deleteButton}>
-            <Trash2 size={16} />
-            <span>Delete ({selectedCount})</span>
-          </button>
-        )}
+        <button
+          onClick={onDelete}
+          className={styles.uploadButton}
+          disabled={selectedCount === 0}
+          title={selectedCount === 0 ? "No items selected" : "Delete selected items"}
+        >
+          <Trash2 size={16} />
+        </button>
       </div>
     </div>
   );

@@ -634,6 +634,20 @@ export function FileExplorer({
     }
   };
 
+  // Internal delete directory function without confirmation
+  const deleteDirectory = async (directory: DirectoryItem): Promise<boolean> => {
+    try {
+      await api.drive.directory.delete({
+        path: `${driveName}/${directory.key}`,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error deleting directory:", error);
+      return false;
+    }
+  };
+
   const handleDelete = async (file: FileItem) => {
     // Check delete protection
     if (isDeleteProtectionEnabled()) {
@@ -832,28 +846,46 @@ export function FileExplorer({
               const selectedFiles = files.filter((f) =>
                 selectedItems.includes(f.id)
               );
+              const selectedDirs = directories.filter((d) =>
+                selectedItems.includes(d.id)
+              );
 
-              // Confirm deletion for multiple files
-              if (
-                !confirm(
-                  `Are you sure you want to delete ${selectedFiles.length} file(s)?`
-                )
-              ) {
+              // Build confirmation message
+              let confirmMessage = "";
+              if (selectedFiles.length > 0 && selectedDirs.length > 0) {
+                confirmMessage = `Delete ${selectedFiles.length} ${selectedFiles.length === 1 ? "file" : "files"} and ${selectedDirs.length} ${selectedDirs.length === 1 ? "directory" : "directories"}?`;
+              } else if (selectedFiles.length > 0) {
+                confirmMessage = `Delete ${selectedFiles.length} ${selectedFiles.length === 1 ? "file" : "files"}?`;
+              } else if (selectedDirs.length > 0) {
+                confirmMessage = `Delete ${selectedDirs.length} ${selectedDirs.length === 1 ? "directory" : "directories"}?`;
+              } else {
+                return; // Nothing selected
+              }
+
+              if (!confirm(confirmMessage)) {
                 return;
               }
 
-              // Delete all files and then refresh once
-              const deletePromises = selectedFiles.map((file) =>
+              // Delete all files and directories
+              const deleteFilePromises = selectedFiles.map((file) =>
                 deleteFile(file)
               );
-              const results = await Promise.all(deletePromises);
+              const deleteDirPromises = selectedDirs.map((dir) =>
+                deleteDirectory(dir)
+              );
+              const results = await Promise.all([
+                ...deleteFilePromises,
+                ...deleteDirPromises,
+              ]);
 
               const successCount = results.filter((r) => r === true).length;
+              const totalCount = selectedFiles.length + selectedDirs.length;
+              
               if (successCount > 0) {
-                toast.success(`${successCount} file(s) deleted successfully`);
+                toast.success(`${successCount} item(s) deleted successfully`);
                 loadFiles(currentPath);
               } else {
-                toast.error("Failed to delete files");
+                toast.error("Failed to delete items");
               }
             }}
             isTreeVisible={isTreeVisible}

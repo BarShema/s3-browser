@@ -206,8 +206,6 @@ export function FilePreview({
             className={`${styles.item} ${
               selectedItems.includes(item.id) ? styles.selected : ""
             } ${previewedFileId === item.id ? styles.previewed : ""}`}
-            onClick={() => handleItemClick(item)}
-            onDoubleClick={() => handleItemDoubleClick(item)}
           >
             {/* Checkbox */}
             <div className={styles.checkbox}>
@@ -265,7 +263,12 @@ export function FilePreview({
                       onClick={(e) => e.stopPropagation()}
                     />
                   ) : (
-                    <div className={styles.nameText} title={item.name}>
+                    <div 
+                      className={styles.nameText} 
+                      title={item.name}
+                      onClick={() => handleItemClick(item)}
+                      onDoubleClick={() => handleItemDoubleClick(item)}
+                    >
                       {item.name}
                     </div>
                   )}

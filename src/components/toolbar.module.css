@@ -169,15 +169,20 @@
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  background: var(--theme-accent-primary);
-  color: var(--theme-text-primary);
+  background: none;
+  color: var(--theme-text-secondary);
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
-.uploadButton:hover {
-  background: var(--theme-accent-hover);
+.uploadButton:hover:not(:disabled) {
+  background: var(--theme-bg-tertiary);
+}
+
+.uploadButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

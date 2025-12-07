@@ -17,6 +17,7 @@ import type {
   GetPreviewUrlParams,
   GetUploadUrlParams,
   UploadUrlResponse,
+  UploadViaPresignedUrlParams,
 } from "../types";
 
 /**
@@ -244,6 +245,62 @@ export class FileAPI extends BaseAPI {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+    });
+  }
+
+  /**
+   * Upload file directly to S3 using presigned URL with progress tracking
+   * This method is needed for large files that require presigned URL uploads
+   * Note: This uploads directly to S3, not to the backend API
+   */
+  uploadViaPresignedUrl(
+    data: UploadViaPresignedUrlParams,
+    onProgress?: (progress: number, loaded: number, total: number) => void
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable && onProgress) {
+          onProgress(
+            Math.round((e.loaded / e.total) * 100),
+            e.loaded,
+            e.total
+          );
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        // Check if it's likely a CORS error (status 0 typically indicates CORS failure)
+        if (xhr.status === 0) {
+          reject(
+            new Error(
+              "CORS error: S3 bucket CORS configuration may be missing. Please configure CORS on the S3 bucket to allow PUT requests from this origin."
+            )
+          );
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("abort", () => {
+        reject(new Error("Upload aborted"));
+      });
+
+      xhr.open("PUT", data.uploadUrl);
+      xhr.setRequestHeader(
+        "Content-Type",
+        data.contentType || data.file.type || "application/octet-stream"
+      );
+      xhr.send(data.file);
     });
   }
 }

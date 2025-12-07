@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/api";
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
 
@@ -24,15 +25,13 @@ export function VideoThumbnail({ src, alt, driveName }: VideoThumbnailProps) {
     setThumbnailUrl(null);
     setVideoUrl(null);
 
-    // Fetch the presigned URL from the API
+    // Fetch the presigned URL from the API using SDK
     const fetchVideoUrl = async () => {
       try {
-        const response = await fetch(src);
-        if (!response.ok) {
-          throw new Error('Failed to get video URL');
-        }
-        const data = await response.json();
-        const presignedUrl = data.downloadUrl;
+        const response = await api.drive.file.download({
+          path: src,
+        });
+        const presignedUrl = response.downloadUrl;
         setVideoUrl(presignedUrl);
         
         // Now load the video for thumbnail generation

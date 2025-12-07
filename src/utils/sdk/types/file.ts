@@ -120,6 +120,15 @@ export interface GetUploadUrlParams {
 }
 
 /**
+ * Request parameters for uploading via presigned URL
+ */
+export interface UploadViaPresignedUrlParams {
+  file: File;
+  uploadUrl: string;
+  contentType?: string;
+}
+
+/**
  * Response for upload URL
  */
 export interface UploadUrlResponse {

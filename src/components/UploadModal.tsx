@@ -527,48 +527,20 @@ export function UploadModal({
     startUpload();
   };
 
-  // Upload file using presigned URL (for large files)
+  // Upload file using presigned URL (for large files) via SDK
   const uploadFileViaPresignedUrl = async (
     uploadFile: UploadFile,
     uploadUrl: string,
     onProgress?: (progress: number, loaded: number, total: number) => void
   ): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      const fileKey = uploadFile.key;
-
-      xhr.upload.addEventListener("progress", (e) => {
-        if (e.lengthComputable && onProgress) {
-          const progress = Math.round((e.loaded / e.total) * 100);
-          onProgress(progress, e.loaded, e.total);
-        }
-      });
-
-      xhr.addEventListener("load", () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve();
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      });
-
-      xhr.addEventListener("error", () => {
-        // Check if it's likely a CORS error (status 0 typically indicates CORS failure)
-        if (xhr.status === 0) {
-          reject(new Error("CORS error: S3 bucket CORS configuration may be missing. Please configure CORS on the S3 bucket to allow PUT requests from this origin."));
-        } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
-        }
-      });
-
-      xhr.addEventListener("abort", () => {
-        reject(new Error("Upload aborted"));
-      });
-
-      xhr.open("PUT", uploadUrl);
-      xhr.setRequestHeader("Content-Type", uploadFile.file.type || "application/octet-stream");
-      xhr.send(uploadFile.file);
-    });
+    return api.drive.file.uploadViaPresignedUrl(
+      {
+        file: uploadFile.file,
+        uploadUrl,
+        contentType: uploadFile.file.type || "application/octet-stream",
+      },
+      onProgress
+    );
   };
 
   const uploadFile = async (

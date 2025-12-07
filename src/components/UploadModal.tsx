@@ -612,10 +612,6 @@ export function UploadModal({
                 : f
             );
           });
-
-          if (onProgress) {
-            onProgress(progress, loaded);
-          }
         }
       );
 
@@ -714,10 +710,6 @@ export function UploadModal({
                     : f
                 );
               });
-
-              if (onProgress) {
-                onProgress(progress, loaded);
-              }
             }
           );
 

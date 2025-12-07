@@ -148,12 +148,6 @@ export function VideoPreview({
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
-        console.error("Error loading video:", {
-          error,
-          message: errorMessage,
-          src,
-          isThumbnail,
-        });
         setHasError(true);
         setIsLoading(false);
         isFetchingRef.current = false;

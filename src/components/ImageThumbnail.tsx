@@ -67,7 +67,6 @@ export function ImageThumbnail({
           testImg.removeEventListener("error", handleError);
         };
       } catch (error) {
-        console.error("Error loading thumbnail:", error);
         setHasError(true);
         setIsLoading(false);
       }

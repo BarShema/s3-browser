@@ -66,7 +66,6 @@ export function DirectoryTree({
         setTreeData([]);
       }
     } catch (error) {
-      console.error("Error fetching directory structure:", error);
     } finally {
       setIsLoading(false);
     }
@@ -143,10 +142,6 @@ export function DirectoryTree({
 
         setLoadedNodes((prev) => new Set(prev).add(directoryKey));
       } catch (error) {
-        console.error(
-          `Error loading subdirectories for ${directoryKey}:`,
-          error
-        );
       } finally {
         setLoadingNodes((prev) => {
           const newSet = new Set(prev);

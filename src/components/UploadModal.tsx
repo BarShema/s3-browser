@@ -131,51 +131,19 @@ export function UploadModal({
 
   const onDrop = useCallback(
     async (acceptedFiles: File[], fileRejections: any[], event: any) => {
-      console.log("=== DROP DEBUG START ===");
-      console.log("Accepted files count:", acceptedFiles.length);
-      console.log("Event:", event);
-      console.log("DataTransfer:", event?.dataTransfer);
-      console.log("DataTransfer items:", event?.dataTransfer?.items);
-      
       // Build a map of File objects to their full paths using DataTransfer API
       const filePathMap = new Map<File, string>();
       const filePromises: Promise<void>[] = [];
       
-      // Log all accepted files first
-      acceptedFiles.forEach((file, index) => {
-        console.log(`File ${index}:`, {
-          name: file.name,
-          webkitRelativePath: file.webkitRelativePath,
-          path: (file as any).path,
-          size: file.size,
-          type: file.type,
-        });
-      });
-      
       // Process DataTransfer items to extract full directory structure
       if (event?.dataTransfer?.items) {
         const items = Array.from(event.dataTransfer.items);
-        console.log("DataTransfer items count:", items.length);
         
         const processEntry = (entry: any, basePath: string = ""): void => {
-          console.log("Processing entry:", {
-            name: entry.name,
-            isFile: entry.isFile,
-            isDirectory: entry.isDirectory,
-            fullPath: entry.fullPath,
-            basePath,
-          });
-          
           if (entry.isFile) {
             const filePromise = new Promise<void>((resolve) => {
               entry.file((file: File) => {
                 const fullPath = basePath ? `${basePath}/${file.name}` : file.name;
-                console.log("File entry processed:", {
-                  fileName: file.name,
-                  basePath,
-                  fullPath,
-                  webkitRelativePath: file.webkitRelativePath,
-                });
                 filePathMap.set(file, fullPath);
                 resolve();
               });
@@ -185,15 +153,9 @@ export function UploadModal({
             const dirReader = entry.createReader();
             const dirName = entry.name;
             const newBasePath = basePath ? `${basePath}/${dirName}` : dirName;
-            console.log("Processing directory:", {
-              dirName,
-              basePath,
-              newBasePath,
-            });
             
             const readEntries = (): void => {
               dirReader.readEntries((entries: any[]) => {
-                console.log(`Directory "${dirName}" has ${entries.length} entries`);
                 if (entries.length === 0) return;
                 
                 for (const subEntry of entries) {
@@ -212,20 +174,9 @@ export function UploadModal({
         // Process all items from DataTransfer
         for (let i = 0; i < items.length; i++) {
           const item = items[i] as DataTransferItem;
-          console.log(`Processing DataTransfer item ${i}:`, {
-            kind: item.kind,
-            type: item.type,
-            hasWebkitGetAsEntry: !!item.webkitGetAsEntry,
-          });
           
           if (item.webkitGetAsEntry) {
             const entry = item.webkitGetAsEntry();
-            console.log(`Entry ${i}:`, {
-              name: entry?.name,
-              isFile: entry?.isFile,
-              isDirectory: entry?.isDirectory,
-              fullPath: entry?.fullPath,
-            });
             if (entry) {
               processEntry(entry);
             }
@@ -233,31 +184,16 @@ export function UploadModal({
         }
         
         // Wait for all file entries to be processed
-        console.log("Waiting for", filePromises.length, "file promises to resolve");
         await Promise.all(filePromises);
-        console.log("File path map after processing:", Array.from(filePathMap.entries()).map(([file, path]) => ({
-          fileName: file.name,
-          path,
-        })));
-      } else {
-        console.log("No DataTransfer items available");
       }
       
       // Build file list with proper paths
       const newFiles: UploadFile[] = acceptedFiles.map((file, index) => {
         let relativeKey = file.name;
         
-        console.log(`\nProcessing file ${index} for upload:`, {
-          fileName: file.name,
-          webkitRelativePath: file.webkitRelativePath,
-          path: (file as any).path,
-          hasPathInMap: filePathMap.has(file),
-        });
-        
         // First try to use path from DataTransfer entry (most accurate for drag & drop)
         if (filePathMap.has(file)) {
           relativeKey = filePathMap.get(file)!;
-          console.log(`  -> Using DataTransfer path: ${relativeKey}`);
         }
         // Try using file.path property (available when dragging files from file system)
         else if ((file as any).path && (file as any).path !== "") {
@@ -266,14 +202,10 @@ export function UploadModal({
           const filePath = (file as any).path;
           // Remove leading slash and use as relative path
           relativeKey = filePath.startsWith("/") ? filePath.slice(1) : filePath;
-          console.log(`  -> Using file.path: ${(file as any).path} -> relative: ${relativeKey}`);
         }
         // Fallback to webkitRelativePath if available (works for file input)
         else if (file.webkitRelativePath && file.webkitRelativePath !== "") {
           relativeKey = file.webkitRelativePath;
-          console.log(`  -> Using webkitRelativePath: ${relativeKey}`);
-        } else {
-          console.log(`  -> Using filename only: ${relativeKey}`);
         }
         
         // Preserve the exact local path structure - don't flatten to root
@@ -285,8 +217,6 @@ export function UploadModal({
             )}`
           : relativeKey.replace(/^[/.]+/, "");
         
-        console.log(`  -> Final S3 key: ${s3key}`);
-        
         return {
           file,
           key: s3key,
@@ -294,9 +224,6 @@ export function UploadModal({
           progress: 0,
         };
       });
-      
-      console.log("=== DROP DEBUG END ===");
-      console.log("Final files to upload:", newFiles.map(f => ({ name: f.file.name, key: f.key })));
       
       setUploadFiles((prev) => [...prev, ...newFiles]);
     },
@@ -373,8 +300,6 @@ export function UploadModal({
         }
       });
       
-      console.log("Upload files directories to check:", Array.from(uploadDirectories));
-      
       // Strategy: List from root to get ALL files recursively
       // Since the API uses delimiter, we need to recursively list from each subdirectory
       // But for efficiency, let's first try listing from root and current path
@@ -390,46 +315,25 @@ export function UploadModal({
         pathsToCheck.push(`${driveName}/${currentPath}`);
       }
 
-      console.log("Starting to fetch existing files. Paths to check:", pathsToCheck);
-
       // First pass: List from root and current path
       for (const listPath of pathsToCheck) {
-        console.log(`\n=== Fetching files from path: ${listPath} ===`);
-        
         let page = 1;
         let hasMore = true;
         let totalPagesFetched = 0;
         let filesFromThisPath = 0;
 
         while (hasMore) {
-          console.log(`  [API CALL] Fetching page ${page} from path: "${listPath}"`);
           try {
             const data = await api.drive.list({
               path: listPath,
               page,
               limit: 1000,
             });
-
-            console.log(`  [API RESPONSE] Page ${page} from "${listPath}":`, {
-              filesCount: data.files?.length || 0,
-              totalFiles: data.totalFiles || 0,
-              totalPages: data.totalPages || 1,
-              currentPage: data.currentPage || page,
-              hasFilesArray: Array.isArray(data.files),
-              filesType: typeof data.files,
-              fullResponseKeys: Object.keys(data || {}),
-            });
-            
-            // Log raw response for first page to debug
-            if (page === 1) {
-              console.log(`  [RAW API RESPONSE] First page from "${listPath}":`, JSON.stringify(data, null, 2));
-            }
             
             // Process the response
             const responseData = data;
             
             if (responseData.files && responseData.files.length > 0) {
-              console.log(`  [PROCESSING] Found ${responseData.files.length} files in page ${page} from "${listPath}"`);
               responseData.files.forEach((file: any) => {
                 // The API returns full S3 keys (absolute from bucket root)
                 // So file.key should already be the full path like "new-test/DSCF2170.jpg"
@@ -447,25 +351,10 @@ export function UploadModal({
                   if (normalizedKey === file.name || !normalizedKey.includes('/')) {
                     normalizedKey = `${pathWithoutDrive}/${file.name}`;
                   }
-                  // If key doesn't start with the path, it might be relative
-                  else if (!normalizedKey.startsWith(pathWithoutDrive)) {
-                    // Check if it's a full path that just doesn't match
-                    // In this case, keep it as is (it's already absolute)
-                    console.log(`    [KEY CHECK] key="${normalizedKey}", expected to start with "${pathWithoutDrive}"`);
-                  }
                 }
                 
                 // Avoid duplicates
                 if (!seenKeys.has(normalizedKey)) {
-                  // Log all files for debugging
-                  console.log(`    [FILE] ${allFiles.length} from API (path: ${listPath}):`, {
-                    originalKey: file.key,
-                    normalizedKey: normalizedKey,
-                    name: file.name,
-                    size: file.size,
-                    listPath: listPath,
-                    currentPath: currentPath,
-                  });
                   allFiles.push({
                     key: normalizedKey,
                     name: file.name,
@@ -474,16 +363,8 @@ export function UploadModal({
                   });
                   seenKeys.add(normalizedKey);
                   filesFromThisPath++;
-                } else {
-                  console.log(`    [DUPLICATE] Skipping duplicate key: ${normalizedKey}`);
                 }
               });
-            } else {
-              console.log(`  [NO FILES] Page ${page} from "${listPath}" returned 0 files`);
-              // Log the full response for debugging - this is critical to see why no files
-              if (page === 1) {
-                console.log(`  [DEBUG] Full API response (no files):`, JSON.stringify(responseData, null, 2));
-              }
             }
 
             // Collect directories for recursive listing - ONLY directories that contain upload files
@@ -496,7 +377,6 @@ export function UploadModal({
                 if (uploadDirectories.has(dirKey)) {
                   if (!directoriesToCheck.includes(fullDirPath)) {
                     directoriesToCheck.push(fullDirPath);
-                    console.log(`  [DIRECTORY] Found upload directory to check: ${dirKey}`);
                   }
                 }
               });
@@ -508,24 +388,17 @@ export function UploadModal({
             
             // Safety check to prevent infinite loops
             if (page > 1000) {
-              console.warn("Stopped fetching after 1000 pages (safety limit)");
               break;
             }
           } catch (apiError) {
-            console.error(`  [ERROR] Failed to fetch page ${page} from "${listPath}":`, apiError);
             // Continue to next page or path
             hasMore = false;
           }
         }
-        
-        console.log(`Finished fetching from ${listPath}. Pages: ${totalPagesFetched}, Files: ${filesFromThisPath}`);
       }
 
       // Second pass: Recursively list from all subdirectories found
-      console.log(`\n=== Recursively checking ${directoriesToCheck.length} subdirectories ===`);
       for (const dirPath of directoriesToCheck) {
-        console.log(`\n=== Fetching files from subdirectory: ${dirPath} ===`);
-        
         let page = 1;
         let hasMore = true;
         let filesFromThisDir = 0;
@@ -543,11 +416,6 @@ export function UploadModal({
                 const normalizedKey = file.key.replace(/^\/+|\/+$/g, "");
                 
                 if (!seenKeys.has(normalizedKey)) {
-                  console.log(`    [FILE] ${allFiles.length} from subdirectory ${dirPath}:`, {
-                    originalKey: file.key,
-                    normalizedKey: normalizedKey,
-                    name: file.name,
-                  });
                   allFiles.push({
                     key: normalizedKey,
                     name: file.name,
@@ -567,7 +435,6 @@ export function UploadModal({
                 const fullDirPath = `${driveName}/${dirKey}`;
                 if (!directoriesToCheck.includes(fullDirPath) && dirPath !== fullDirPath) {
                   directoriesToCheck.push(fullDirPath);
-                  console.log(`    [NESTED DIR] Found nested subdirectory: ${dirKey}`);
                 }
               });
             }
@@ -576,100 +443,30 @@ export function UploadModal({
             page++;
             
             if (page > 1000) {
-              console.warn("Stopped fetching after 1000 pages (safety limit)");
               break;
             }
           } catch (error) {
-            console.error(`  [ERROR] Failed to fetch from subdirectory ${dirPath}:`, error);
             hasMore = false;
           }
         }
-        
-        console.log(`Finished fetching from ${dirPath}. Files: ${filesFromThisDir}`);
       }
-
-      console.log(`\n=== Total files collected from all paths: ${allFiles.length} ===`);
-
-      console.log("=== EXISTING FILES CHECK DEBUG START ===");
-      console.log("Current path:", currentPath);
-      console.log("Drive name:", driveName);
-      console.log("Paths checked for listing:", pathsToCheck);
-      console.log("Total existing files found:", allFiles.length);
-      console.log("");
-      console.log("Upload files to check:", uploadFiles.length);
-      uploadFiles.forEach((uf, idx) => {
-        console.log(`  Upload file ${idx}:`, {
-          key: uf.key,
-          name: uf.file.name,
-          size: uf.file.size,
-        });
-      });
-      console.log("");
-      console.log("Existing files from API:", allFiles.length);
-      allFiles.slice(0, 20).forEach((ef, idx) => {
-        console.log(`  Existing file ${idx}:`, {
-          key: ef.key,
-          name: ef.name,
-          size: ef.size,
-        });
-      });
-      if (allFiles.length > 20) {
-        console.log(`  ... and ${allFiles.length - 20} more files`);
-      }
-      console.log("");
 
       // Check which upload files already exist
       // Normalize keys for comparison (remove leading/trailing slashes, handle relative vs absolute)
       uploadFiles.forEach((uploadFile, idx) => {
         const normalizedUploadKey = uploadFile.key.replace(/^\/+|\/+$/g, "");
-        console.log(`\nChecking upload file ${idx}: "${uploadFile.key}"`);
-        console.log(`  Normalized upload key: "${normalizedUploadKey}"`);
         
         const existing = allFiles.find((f, fIdx) => {
           const normalizedExistingKey = f.key.replace(/^\/+|\/+$/g, "");
           const match = normalizedExistingKey === normalizedUploadKey;
-          
-          if (match) {
-            console.log(`  ✓ MATCH FOUND at index ${fIdx}:`);
-            console.log(`    Upload key: "${normalizedUploadKey}"`);
-            console.log(`    Existing key: "${normalizedExistingKey}"`);
-            console.log(`    Existing file name: "${f.name}"`);
-            console.log(`    Existing file size: ${f.size}`);
-          } else if (fIdx < 5 || normalizedExistingKey.includes(normalizedUploadKey) || normalizedUploadKey.includes(normalizedExistingKey)) {
-            // Log first 5 and any partial matches for debugging
-            console.log(`  - No match (existing ${fIdx}): "${normalizedExistingKey}"`);
-          }
           
           return match;
         });
         
         if (existing) {
           existingMap.set(uploadFile.key, existing);
-          console.log(`  → Added to existingMap`);
-        } else {
-          console.log(`  ✗ No match found for "${normalizedUploadKey}"`);
-          // Try to find similar keys
-          const similarKeys = allFiles.filter(f => {
-            const normalizedExistingKey = f.key.replace(/^\/+|\/+$/g, "");
-            return normalizedExistingKey.includes(normalizedUploadKey.split('/').pop() || '') ||
-                   normalizedUploadKey.includes(normalizedExistingKey.split('/').pop() || '');
-          });
-          if (similarKeys.length > 0) {
-            console.log(`  → Found ${similarKeys.length} similar keys (for debugging):`);
-            similarKeys.slice(0, 3).forEach(sk => {
-              console.log(`    - "${sk.key}"`);
-            });
-          }
         }
       });
-
-      console.log("");
-      console.log("=== MATCHING SUMMARY ===");
-      console.log("Total upload files:", uploadFiles.length);
-      console.log("Total existing files from API:", allFiles.length);
-      console.log("Matched existing files:", existingMap.size);
-      console.log("Matched keys:", Array.from(existingMap.keys()));
-      console.log("=== EXISTING FILES CHECK DEBUG END ===");
 
       setExistingFiles(existingMap);
 
@@ -696,7 +493,6 @@ export function UploadModal({
         startUpload();
       }
     } catch (error) {
-      console.error("Error checking existing files:", error);
       toast.error("Failed to check for existing files");
       setIsChecking(false);
       // Proceed with upload anyway
@@ -887,17 +683,7 @@ export function UploadModal({
                           error.message.toLowerCase().includes("request entity too large")
                         ));
 
-      console.log("Upload error detected:", {
-        error,
-        statusCode,
-        is413Error,
-        message: error?.message,
-        status: error?.status,
-        responseStatus: error?.response?.status
-      });
-
       if (is413Error) {
-        console.log("File too large (413), using presigned URL upload method");
         
         const fileKeyForPresigned = uploadFile.key;
         
@@ -985,7 +771,6 @@ export function UploadModal({
             )
           );
         } catch (presignedError) {
-          console.error("Presigned URL upload error:", presignedError);
           setUploadFiles((prev) =>
             prev.map((f) =>
               f.key === uploadFile.key
@@ -1001,7 +786,6 @@ export function UploadModal({
         }
       } else {
         // Not a 413 error, handle normally
-        console.error("Upload error:", error);
         setUploadFiles((prev) =>
           prev.map((f) =>
             f.key === uploadFile.key
@@ -1095,14 +879,6 @@ export function UploadModal({
         });
       } catch (error) {
         // Directory might already exist, which is fine
-        // Only log if it's a different error
-        if (
-          error instanceof Error &&
-          !error.message.includes("already exists") &&
-          !error.message.includes("exists")
-        ) {
-          console.warn(`Failed to create directory ${dirPath}:`, error);
-        }
       }
     }
 

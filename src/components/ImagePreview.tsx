@@ -27,7 +27,6 @@ export function ImagePreview({
   const effectRef = useRef<string | null>(null);
 
   useEffect(() => {
-    console.log("[ImagePreview] useEffect triggered", { src, maxWidth, maxHeight });
     effectRef.current = src;
     let canceled = false;
 
@@ -35,27 +34,20 @@ export function ImagePreview({
     setIsLoading(true);
     setHasError(false);
     setImageUrl(null);
-    console.log("[ImagePreview] Reset state - loading: true, imageUrl: null");
 
     const fetchThumbnailUrl = async () => {
       try {
-        console.log("[ImagePreview] Getting preview URL for path:", src);
         const previewUrl = api.drive.file.getPreviewUrl({
           path: src,
           maxWidth,
           maxHeight,
         });
-        console.log("[ImagePreview] Preview URL generated:", previewUrl);
 
         // Set the URL immediately and let the browser handle loading
         if (!canceled && effectRef.current === src) {
-          console.log("[ImagePreview] Setting imageUrl, will render img element");
           setImageUrl(previewUrl);
-        } else {
-          console.log("[ImagePreview] Effect canceled or src changed, not setting URL");
         }
       } catch (error) {
-        console.error("[ImagePreview] Error getting preview URL:", error);
         if (!canceled && effectRef.current === src) {
           setHasError(true);
           setIsLoading(false);
@@ -66,7 +58,6 @@ export function ImagePreview({
     fetchThumbnailUrl();
 
     return () => {
-      console.log("[ImagePreview] Cleanup - canceling effect");
       canceled = true;
     };
   }, [src, maxWidth, maxHeight]);
@@ -87,13 +78,6 @@ export function ImagePreview({
     );
   }
 
-  console.log("[ImagePreview] Rendering img element", {
-    imageUrl,
-    hasError,
-    isLoading,
-    willCallOnLoad: !!onLoad,
-  });
-
   return (
     <img
       key={imageUrl}
@@ -101,13 +85,10 @@ export function ImagePreview({
       alt={alt}
       className={className}
       onLoad={() => {
-        console.log("[ImagePreview] img onLoad event fired");
         setIsLoading(false);
-        console.log("[ImagePreview] Calling onLoad callback:", !!onLoad);
         onLoad?.();
       }}
       onError={(e) => {
-        console.error("[ImagePreview] img onError event fired", e);
         setIsLoading(false);
         setHasError(true);
       }}

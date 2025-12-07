@@ -166,7 +166,6 @@ export function CustomVideoPlayer({
             video.removeEventListener("seeked", handleSeeked);
             resolve(dataUrl);
           } catch (error) {
-            console.error("Error capturing frame:", error);
             video.currentTime = originalTime;
             if (wasPlaying) {
               video.play().catch(() => {});
@@ -396,9 +395,7 @@ export function CustomVideoPlayer({
     if (!containerRef.current) return;
 
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(() => {
-        console.error("Error attempting to enable fullscreen");
-      });
+      containerRef.current.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen();
     }

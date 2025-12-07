@@ -55,7 +55,6 @@ export function EditModal({
       });
       setContent(data.content);
     } catch (error) {
-      console.error("Error loading file content:", error);
       toast.error("Failed to load file content");
     } finally {
       setIsLoading(false);
@@ -77,7 +76,6 @@ export function EditModal({
       toast.success("File saved successfully");
       onComplete();
     } catch (error) {
-      console.error("Error saving file:", error);
       toast.error("Failed to save file");
     } finally {
       setIsSaving(false);

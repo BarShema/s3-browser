@@ -33,8 +33,6 @@ export default function LoginPage() {
       toast.success("Login successful!");
       router.push("/");
     } catch (err) {
-      console.error("Login error:", err);
-
       // Parse Cognito error messages
       let errorMessage = "Invalid username or password";
 

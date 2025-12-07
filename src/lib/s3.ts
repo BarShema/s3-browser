@@ -73,7 +73,6 @@ export async function listDrives(): Promise<S3Drive[]> {
       creationDate: bucket.CreationDate,
     }));
   } catch (error) {
-    console.error("Error listing drives:", error);
     throw new Error("Failed to list drives");
   }
 }
@@ -166,7 +165,6 @@ export async function listS3Objects(
 
     return { files, directories };
   } catch (error) {
-    console.error("Error listing S3 objects:", error);
     throw new Error("Failed to list objects from S3");
   }
 }
@@ -185,7 +183,6 @@ export async function getDownloadUrl(
 
     return await getSignedUrl(s3Client, command, { expiresIn });
   } catch (error) {
-    console.error("Error generating download URL:", error);
     throw new Error("Failed to generate download URL");
   }
 }
@@ -207,7 +204,6 @@ export async function uploadToS3(
 
     await s3Client.send(command);
   } catch (error) {
-    console.error("Error uploading to S3:", error);
     throw new Error("Failed to upload file to S3");
   }
 }
@@ -222,7 +218,6 @@ export async function deleteFromS3(drive: string, key: string): Promise<void> {
 
     await s3Client.send(command);
   } catch (error) {
-    console.error("Error deleting from S3:", error);
     throw new Error("Failed to delete file from S3");
   }
 }
@@ -246,7 +241,6 @@ export async function renameS3Object(
     // Delete original object
     await deleteFromS3(drive, oldKey);
   } catch (error) {
-    console.error("Error renaming S3 object:", error);
     throw new Error("Failed to rename file in S3");
   }
 }
@@ -265,7 +259,6 @@ export async function getFileMetadata(
     const response = await s3Client.send(command);
     return response;
   } catch (error) {
-    console.error("Error getting file metadata:", error);
     throw new Error("Failed to get file metadata");
   }
 }
@@ -286,7 +279,6 @@ export async function getUploadUrl(
 
     return await getSignedUrl(s3Client, command, { expiresIn });
   } catch (error) {
-    console.error("Error generating upload URL:", error);
     throw new Error("Failed to generate upload URL");
   }
 }
@@ -301,7 +293,6 @@ export async function getDriveRegion(drive: string): Promise<string> {
     // GetBucketLocation returns null for us-east-1, which is the default
     return response.LocationConstraint || "us-east-1";
   } catch (error) {
-    console.error("Error getting drive region:", error);
     // Fallback to default region
     return process.env.AWS_REGION || "eu-west-1";
   }

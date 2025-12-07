@@ -57,7 +57,6 @@ export function PDFPreview({ src, className }: PDFPreviewProps) {
           testImg.removeEventListener('error', handleError);
         };
       } catch (error) {
-        console.error('Error loading PDF preview:', error);
         setHasError(true);
         setIsLoading(false);
       }

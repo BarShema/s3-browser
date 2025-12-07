@@ -22,7 +22,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentUser = await AuthService.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
-      console.error('Error checking auth:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -53,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await AuthService.signOut();
       setUser(null);
     } catch (error) {
-      console.error('Error signing out:', error);
       setUser(null); // Clear user even if sign out fails
     }
   };

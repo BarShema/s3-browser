@@ -256,7 +256,6 @@ export function FileExplorer({
           }));
         }
       } catch (error) {
-        console.error("Error calculating directory size:", error);
         setDirectorySizes((prev) => ({
           ...prev,
           [dirKey]: {
@@ -401,7 +400,6 @@ export function FileExplorer({
         setTotalDirectoriesCount(data.totalDirectories || 0);
         setSelectedItems([]);
       } catch (error) {
-        console.error("Error loading files:", error);
         toast.error("Failed to load files");
       } finally {
         setIsLoading(false);
@@ -564,7 +562,6 @@ export function FileExplorer({
 
       toast.success("Download started");
     } catch (error) {
-      console.error("Error downloading file:", error);
       toast.error("Failed to download file");
     }
   };
@@ -615,7 +612,6 @@ export function FileExplorer({
         });
       }
     } catch (error) {
-      console.error("Error downloading directory:", error);
       toast.error("Failed to download directory", { id: "zip-creation" });
     }
   };
@@ -629,7 +625,6 @@ export function FileExplorer({
 
       return true;
     } catch (error) {
-      console.error("Error deleting file:", error);
       return false;
     }
   };
@@ -643,7 +638,6 @@ export function FileExplorer({
         : directory.key;
       
       const deletePath = `${driveName}/${dirKey}`;
-      console.log("Deleting directory with path:", deletePath);
       
       await api.drive.directory.delete({
         path: deletePath,
@@ -651,7 +645,6 @@ export function FileExplorer({
 
       return true;
     } catch (error) {
-      console.error("Error deleting directory:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast.error(`Failed to delete directory: ${errorMessage}`);
       return false;
@@ -698,7 +691,6 @@ export function FileExplorer({
       toast.success("File renamed successfully");
       loadFiles(currentPath);
     } catch (error) {
-      console.error("Error renaming file:", error);
       toast.error("Failed to rename file");
     }
   };
@@ -841,7 +833,6 @@ export function FileExplorer({
                 toast.success('Directory created');
                 loadFiles(currentPath);
               } catch (e) {
-                console.error(e);
                 toast.error('Could not create directory');
               }
             }}

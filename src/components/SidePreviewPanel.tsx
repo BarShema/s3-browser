@@ -200,7 +200,6 @@ export function SidePreviewPanel({
           setIsLoadingText(false);
         })
         .catch((error) => {
-          console.error("Error loading text content:", error);
           setTextError(error.message);
           setIsLoadingText(false);
         });
@@ -217,7 +216,6 @@ export function SidePreviewPanel({
   // Handle preview loading state when switching between images/videos
   useEffect(() => {
     if (!file) {
-      console.log("[SidePreviewPanel] No file, clearing loading state");
       setTimeout(() => {
         setIsLoadingPreview(false);
         setCurrentPreviewKey("");
@@ -231,30 +229,19 @@ export function SidePreviewPanel({
     if (isImage(file.name) || isVideo(file.name)) {
       const newKey = `${file.id}-${file.key}`;
 
-      console.log("[SidePreviewPanel] Image/Video detected", {
-        fileName: file.name,
-        newKey,
-        currentPreviewKey,
-        isDifferent: newKey !== currentPreviewKey,
-      });
-
       // If it's a different file, show loader and hide current content
       if (newKey !== currentPreviewKey) {
         // Store the current file as previous before switching
         if (previousFileRef.current) {
           setPreviousFile(previousFileRef.current);
         }
-        console.log("[SidePreviewPanel] Setting loading to TRUE (new file)");
         setIsLoadingPreview(true);
-      } else {
-        console.log("[SidePreviewPanel] Same file, keeping current loading state:", isLoadingPreview);
       }
 
       // Update the ref to track the current file for next switch
       previousFileRef.current = file;
       setCurrentPreviewKey(newKey);
     } else {
-      console.log("[SidePreviewPanel] Not image/video, clearing loading state");
       setTimeout(() => {
         setIsLoadingPreview(false);
         setCurrentPreviewKey("");
@@ -266,7 +253,6 @@ export function SidePreviewPanel({
 
   // Callback to handle when preview finishes loading
   const handlePreviewLoaded = () => {
-    console.log("[SidePreviewPanel] handlePreviewLoaded called - setting loading to FALSE");
     setIsLoadingPreview(false);
   };
 
@@ -415,11 +401,6 @@ export function SidePreviewPanel({
                 {isImage(file.name) ? (
                   (() => {
                     const previewPath = `${driveName}/${file.key}`;
-                    console.log("[SidePreviewPanel] Rendering ImagePreview", {
-                      previewPath,
-                      isLoadingPreview,
-                      hasOnLoad: !!handlePreviewLoaded,
-                    });
                     return (
                       <ImagePreview
                         src={previewPath}

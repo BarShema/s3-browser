@@ -45,7 +45,6 @@ export class AuthService {
           resolve(user);
         },
         onFailure: (err) => {
-          console.error('Authentication failed:', err);
           reject(err);
         },
       });
@@ -76,7 +75,6 @@ export class AuthService {
     return new Promise((resolve, reject) => {
       // Check if Cognito is configured
       if (!poolData.UserPoolId || !poolData.ClientId) {
-        console.warn('Cognito not configured');
         resolve(null);
         return;
       }
@@ -115,7 +113,6 @@ export class AuthService {
 
           resolve(user);
         } catch (error) {
-          console.error('Error extracting user info:', error);
           resolve(null);
         }
       });

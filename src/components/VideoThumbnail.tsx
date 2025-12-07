@@ -80,7 +80,6 @@ export function VideoThumbnail({ src, alt, driveName }: VideoThumbnailProps) {
           video.removeEventListener('error', handleError);
         };
       } catch (error) {
-        console.error('Error fetching video URL:', error);
         setHasError(true);
         setIsLoading(false);
       }

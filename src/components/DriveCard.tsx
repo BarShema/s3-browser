@@ -41,7 +41,6 @@ export function DriveCard({ drive, onClick }: DriveCardProps) {
       });
       setHasCalculated(true);
     } catch (err) {
-      console.error("Error fetching drive size:", err);
       setError(
         err instanceof Error ? err.message : "Failed to load drive info"
       );

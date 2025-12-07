@@ -315,7 +315,6 @@ export function UploadModal({
   ) => {
     try {
       const startTime = Date.now();
-      const previousUploaded = uploadFile.uploadedBytes || 0;
       setUploadFiles((prev) =>
         prev.map((f) =>
           f.key === uploadFile.key
@@ -330,146 +329,83 @@ export function UploadModal({
         )
       );
 
-      // Create XMLHttpRequest for progress tracking
-      const xhr = new XMLHttpRequest();
+      const fileKey = uploadFile.key;
 
-      const formData = new FormData();
-      formData.append("file", uploadFile.file);
-      formData.append("drive", driveName);
-      formData.append("key", uploadFile.key);
+      // Use SDK's uploadWithProgress method which handles XMLHttpRequest internally
+      await api.drive.file.uploadWithProgress(
+        {
+          file: uploadFile.file,
+          drive: driveName,
+          key: uploadFile.key,
+        },
+        (progress, loaded, total) => {
+          // Don't process progress events if file is already marked as completed
+          if (completedFilesRef.current.has(fileKey)) {
+            return;
+          }
 
-      // Get base URL from API instance and build upload URL
-      const baseUrl = (api as any).drive?.file?.getBaseUrl?.() || "";
-      const uploadUrl = baseUrl
-        ? `${baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl}/api/drive`
-        : "/api/drive";
+          const isComplete = loaded === total && total > 0;
 
-      return new Promise<void>((resolve, reject) => {
-        const fileKey = uploadFile.key;
-        
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) {
-            // Don't process progress events if file is already marked as completed
+          // Calculate bytes delta more accurately
+          setUploadFiles((prev) => {
+            const currentFile = prev.find((f) => f.key === fileKey);
+            // Double-check ref in case it was updated between checks
             if (completedFilesRef.current.has(fileKey)) {
-              return;
+              return prev;
             }
-            
-            const progress = Math.round((e.loaded / e.total) * 100);
-            const isComplete = e.loaded === e.total && e.total > 0;
-            
-            // Calculate bytes delta more accurately
-            setUploadFiles((prev) => {
-              const currentFile = prev.find((f) => f.key === fileKey);
-              // Double-check ref in case it was updated between checks
-              if (completedFilesRef.current.has(fileKey)) {
-                return prev;
-              }
-              
-              const previousBytes = currentFile?.uploadedBytes || 0;
-              const bytesDelta = e.loaded - previousBytes;
-              if (bytesDelta > 0) {
-                uploadedBytesRef.current += bytesDelta;
-              }
-              
-              // If progress is 100% and file is complete, mark as completed
-              if (isComplete && currentFile?.status === "uploading") {
-                completedFilesRef.current.add(fileKey);
-                return prev.map((f) =>
-                  f.key === fileKey
-                    ? {
-                        ...f,
-                        status: "completed",
-                        progress: 100,
-                        uploadedBytes: e.loaded,
-                      }
-                    : f
-                );
-              }
-              
-              // Otherwise just update progress
+
+            const previousBytes = currentFile?.uploadedBytes || 0;
+            const bytesDelta = loaded - previousBytes;
+            if (bytesDelta > 0) {
+              uploadedBytesRef.current += bytesDelta;
+            }
+
+            // If progress is 100% and file is complete, mark as completed
+            if (isComplete && currentFile?.status === "uploading") {
+              completedFilesRef.current.add(fileKey);
               return prev.map((f) =>
                 f.key === fileKey
                   ? {
                       ...f,
-                      progress,
-                      uploadedBytes: e.loaded,
+                      status: "completed",
+                      progress: 100,
+                      uploadedBytes: loaded,
                     }
                   : f
               );
-            });
-            if (onProgress) {
-              onProgress(progress, e.loaded);
             }
-          }
-        });
 
-        const markAsCompleted = () => {
-          completedFilesRef.current.add(fileKey);
-          // Force update to completed status with 100% progress
-          setUploadFiles((prev) => {
+            // Otherwise just update progress
             return prev.map((f) =>
               f.key === fileKey
                 ? {
                     ...f,
-                    status: "completed",
-                    progress: 100,
+                    progress,
+                    uploadedBytes: loaded,
                   }
                 : f
             );
           });
-        };
 
-        // Additional safety: timeout to ensure progress is set to 100% if events don't fire
-        let completionTimeout: NodeJS.Timeout | null = null;
-        
-        xhr.addEventListener("load", () => {
-          if (completionTimeout) {
-            clearTimeout(completionTimeout);
-            completionTimeout = null;
+          if (onProgress) {
+            onProgress(progress, loaded);
           }
-          if (xhr.status >= 200 && xhr.status < 300) {
-            markAsCompleted();
-            resolve();
-          } else {
-            const errorMsg =
-              xhr.responseText || `Upload failed with status ${xhr.status}`;
-            reject(new Error(errorMsg));
-          }
-        });
-        
-        // Also handle loadend as a fallback to ensure status is updated
-        // This fires after load/error, so it's a safety net
-        xhr.addEventListener("loadend", () => {
-          if (completionTimeout) {
-            clearTimeout(completionTimeout);
-            completionTimeout = null;
-          }
-          if (xhr.status >= 200 && xhr.status < 300) {
-            markAsCompleted();
-          }
-        });
-        
-        // Safety timeout: if loadend doesn't fire within 2 seconds, check and update
-        completionTimeout = setTimeout(() => {
-          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status >= 200 && xhr.status < 300) {
-            if (!completedFilesRef.current.has(fileKey)) {
-              markAsCompleted();
-            }
-          }
-          completionTimeout = null;
-        }, 2000);
+        }
+      );
 
-        xhr.addEventListener("error", () => {
-          reject(new Error("Upload failed"));
-        });
-
-        xhr.addEventListener("abort", () => {
-          reject(new Error("Upload aborted"));
-        });
-
-        xhr.open("POST", uploadUrl);
-        xhr.send(formData);
-      });
+      // Mark as completed after successful upload
+      completedFilesRef.current.add(fileKey);
+      setUploadFiles((prev) =>
+        prev.map((f) =>
+          f.key === fileKey
+            ? {
+                ...f,
+                status: "completed",
+                progress: 100,
+              }
+            : f
+        )
+      );
     } catch (error) {
       console.error("Upload error:", error);
       setUploadFiles((prev) =>
@@ -681,57 +617,24 @@ export function UploadModal({
     return (
       <div
         onClick={() => setIsMinimized(false)}
-        style={{
-          position: "fixed",
-          right: 16,
-          bottom: 16,
-          zIndex: 2000,
-          background: "var(--theme-bg-primary)",
-          border: "1px solid var(--theme-border-primary)",
-          borderRadius: 8,
-          boxShadow: "var(--theme-shadow-lg)",
-          padding: "10px 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          cursor: "pointer",
-          minWidth: 260,
-        }}
+        className={uploadStyles.minimizedContainer}
         title="Click to open uploader"
       >
         <Upload size={16} />
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              color: "var(--theme-text-secondary)",
-              fontSize: 12,
-              marginBottom: 6,
-            }}
-          >
+        <div className={uploadStyles.minimizedContent}>
+          <div className={uploadStyles.minimizedStatus}>
             {completed}/{total} completed{" "}
             {uploading ? `(uploading ${uploading})` : ""}
             {estimatedSeconds > 0 && (
-              <span style={{ marginLeft: 8 }}>
+              <span className={uploadStyles.minimizedTimeLeft}>
                 ~{formatTimeRemaining(estimatedSeconds)} left
               </span>
             )}
           </div>
-          <div
-            style={{
-              position: "relative",
-              height: 6,
-              background: "var(--theme-bg-tertiary)",
-              borderRadius: 999,
-              overflow: "hidden",
-            }}
-          >
+          <div className={uploadStyles.minimizedProgressContainer}>
             <div
-              style={{
-                height: "100%",
-                width: `${overallProgress}%`,
-                background: "var(--theme-accent-primary)",
-                transition: "width 0.2s ease",
-              }}
+              className={uploadStyles.minimizedProgressFill}
+              style={{ width: `${overallProgress}%` }}
             />
           </div>
         </div>
@@ -741,17 +644,7 @@ export function UploadModal({
             setIsMinimized(false);
           }}
           title="Restore"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            border: "1px solid var(--theme-border-secondary)",
-            background: "var(--theme-bg-secondary)",
-            color: "var(--theme-text-secondary)",
-          }}
+          className={uploadStyles.minimizedButton}
         >
           <Maximize2 size={14} />
         </button>
@@ -762,17 +655,7 @@ export function UploadModal({
           }}
           disabled={isUploading || isChecking}
           title={isUploading || isChecking ? "Upload in progress" : "Close"}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            border: "1px solid var(--theme-border-secondary)",
-            background: "var(--theme-bg-secondary)",
-            color: "var(--theme-text-secondary)",
-          }}
+          className={uploadStyles.minimizedButton}
         >
           <X size={14} />
         </button>
@@ -790,12 +673,11 @@ export function UploadModal({
   return (
     <div className={styles.overlay}>
       <div
-        className={styles.modal}
-        style={{ maxWidth: "800px", width: "90vw" }}
+        className={`${styles.modal} ${uploadStyles.modalLarge}`}
       >
         <div className={styles.header}>
           <h2 className={styles.title}>Upload Files</h2>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className={uploadStyles.headerActions}>
             <button
               onClick={() => setIsMinimized(true)}
               className={clz(styles.closeButton, styles.actionButton)}
@@ -817,111 +699,54 @@ export function UploadModal({
         <div className={styles.flexContainer}>
           {/* Replace Confirmation Screen */}
           {showReplaceConfirmation && existingFilesList.length > 0 && (
-            <div style={{ width: "100%", padding: "20px" }}>
-              <h3
-                style={{
-                  marginBottom: "16px",
-                  color: "var(--theme-text-primary)",
-                }}
-              >
+            <div className={uploadStyles.replaceContainer}>
+              <h3 className={uploadStyles.replaceTitle}>
                 Replace existing files?
               </h3>
-              <p
-                style={{
-                  marginBottom: "16px",
-                  color: "var(--theme-text-secondary)",
-                  fontSize: "14px",
-                }}
-              >
+              <p className={uploadStyles.replaceDescription}>
                 The following files already exist. Select which ones you want to
                 replace:
               </p>
 
-              <div
-                style={{ marginBottom: "12px", display: "flex", gap: "8px" }}
-              >
+              <div className={uploadStyles.replaceActions}>
                 <button
                   onClick={selectAllReplace}
-                  className={styles.buttonCancel}
-                  style={{ fontSize: "12px", padding: "6px 12px" }}
+                  className={`${styles.buttonCancel} ${uploadStyles.replaceButtonSmall}`}
                 >
                   Select All
                 </button>
                 <button
                   onClick={deselectAllReplace}
-                  className={styles.buttonCancel}
-                  style={{ fontSize: "12px", padding: "6px 12px" }}
+                  className={`${styles.buttonCancel} ${uploadStyles.replaceButtonSmall}`}
                 >
                   Deselect All
                 </button>
               </div>
 
-              <div
-                style={{
-                  maxHeight: "500px",
-                  overflowY: "auto",
-                  padding: "8px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(150px, 1fr))",
-                    gap: "12px",
-                  }}
-                >
+              <div className={uploadStyles.replaceGridContainer}>
+                <div className={uploadStyles.replaceGrid}>
                   {existingFilesList.map((uploadFile, index) => {
                     const existing = existingFiles.get(uploadFile.key);
                     return (
                       <div
                         key={index}
-                        style={{
-                          background: "var(--theme-bg-secondary)",
-                          border: uploadFile.shouldReplace
-                            ? "2px solid var(--theme-accent-primary)"
-                            : "1px solid var(--theme-border-primary)",
-                          borderRadius: "8px",
-                          padding: "12px",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          textAlign: "center",
-                          cursor: "pointer",
-                          position: "relative",
-                          minHeight: "160px",
-                          transition: "all 0.2s",
-                        }}
+                        className={`${uploadStyles.replaceTile} ${
+                          uploadFile.shouldReplace
+                            ? uploadStyles.replaceTileSelected
+                            : ""
+                        }`}
                         onClick={() => toggleReplaceFile(uploadFile.key)}
-                        onMouseEnter={(e) => {
-                          if (!uploadFile.shouldReplace) {
-                            e.currentTarget.style.borderColor =
-                              "var(--theme-accent-primary)";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!uploadFile.shouldReplace) {
-                            e.currentTarget.style.borderColor =
-                              "var(--theme-border-primary)";
-                          }
-                        }}
                       >
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "8px",
-                            right: "8px",
-                          }}
-                        >
+                        <div className={uploadStyles.replaceCheckbox}>
                           {uploadFile.shouldReplace ? (
                             <CheckSquare
                               size={20}
-                              style={{ color: "var(--theme-accent-primary)" }}
+                              className={uploadStyles.checkboxIconPrimary}
                             />
                           ) : (
                             <Square
                               size={20}
-                              style={{ color: "var(--theme-text-tertiary)" }}
+                              className={uploadStyles.checkboxIconTertiary}
                             />
                           )}
                         </div>
@@ -930,64 +755,26 @@ export function UploadModal({
                           <img
                             src={URL.createObjectURL(uploadFile.file)}
                             alt={uploadFile.file.name}
-                            style={{
-                              width: "64px",
-                              height: "64px",
-                              objectFit: "cover",
-                              borderRadius: "6px",
-                              marginBottom: "8px",
-                            }}
+                            className={uploadStyles.fileTileImage}
                           />
                         ) : (
                           <File
                             size={48}
-                            style={{
-                              color: "var(--theme-text-secondary)",
-                              marginBottom: "8px",
-                            }}
+                            className={uploadStyles.fileTileIcon}
                           />
                         )}
 
-                        <div
-                          style={{
-                            width: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              fontWeight: 500,
-                              color: "var(--theme-text-primary)",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              width: "100%",
-                              padding: "0 4px",
-                            }}
-                          >
+                        <div className={uploadStyles.fileTileContent}>
+                          <div className={uploadStyles.fileTileName}>
                             {uploadFile.file.name}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "10px",
-                              color: "var(--theme-text-secondary)",
-                            }}
-                          >
+                          <div className={uploadStyles.fileTileSize}>
                             Existing:{" "}
                             {existing
                               ? formatFileSize(existing.size)
                               : "Unknown"}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "10px",
-                              color: "var(--theme-text-secondary)",
-                            }}
-                          >
+                          <div className={uploadStyles.fileTileSize}>
                             New: {formatFileSize(uploadFile.file.size)}
                           </div>
                         </div>
@@ -1008,7 +795,7 @@ export function UploadModal({
                   isDragActive ? uploadStyles.active : ""
                 }`}
               >
-                <input {...getInputProps()} style={{ display: "none" }} />
+                <input {...getInputProps()} className={uploadStyles.hiddenInput} />
                 <Upload size={48} className={uploadStyles.uploadIcon} />
                 <p className={uploadStyles.dropzoneText}>
                   {isDragActive
@@ -1018,42 +805,17 @@ export function UploadModal({
                 <p className={uploadStyles.pathHint}>
                   Upload to: {currentPath || driveName}
                 </p>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--theme-text-tertiary)",
-                    marginTop: "8px",
-                  }}
-                >
+                <p className={uploadStyles.dropzoneHint}>
                   Files will maintain their local directory structure
                 </p>
               </div>
 
               {/* Single Upload Button */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  margin: "20px",
-                }}
-              >
+              <div className={uploadStyles.uploadButtonContainer}>
                 <button
                   type="button"
                   onClick={handleUploadClick}
-                  style={{
-                    padding: "12px 24px",
-                    background: "var(--theme-accent-primary)",
-                    color: "var(--theme-text-primary)",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    transition: "background-color 0.2s",
-                  }}
+                  className={uploadStyles.uploadButton}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background =
                       "var(--theme-accent-hover)";
@@ -1075,7 +837,7 @@ export function UploadModal({
                 {...({ webkitdirectory: "", directory: "" } as any)}
                 multiple
                 onChange={handleFileSelect}
-                style={{ display: "none" }}
+                className={uploadStyles.hiddenInput}
               />
             </>
           )}
@@ -1086,78 +848,21 @@ export function UploadModal({
               <h3 className={uploadStyles.fileListTitle}>
                 Files to Upload ({uploadFiles.length})
                 {isChecking && (
-                  <span
-                    style={{
-                      marginLeft: "8px",
-                      fontSize: "12px",
-                      color: "var(--theme-text-secondary)",
-                    }}
-                  >
+                  <span className={uploadStyles.checkingStatus}>
                     Checking for existing files...
                   </span>
                 )}
               </h3>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-                  gap: "12px",
-                  padding: "0 20px 20px",
-                }}
-              >
+              <div className={uploadStyles.fileGrid}>
                 {uploadFiles.map((uploadFile, index) => (
                   <div
                     key={index}
-                    style={{
-                      background: "var(--theme-bg-secondary)",
-                      border: "1px solid var(--theme-border-primary)",
-                      borderRadius: "8px",
-                      padding: "12px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      textAlign: "center",
-                      position: "relative",
-                      minHeight: "140px",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor =
-                        "var(--theme-accent-primary)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor =
-                        "var(--theme-border-primary)";
-                    }}
+                    className={uploadStyles.fileGridTile}
                   >
                     {uploadFile.status === "pending" && (
                       <button
                         onClick={() => removeFile(index)}
-                        style={{
-                          position: "absolute",
-                          top: "4px",
-                          right: "4px",
-                          color: "var(--theme-text-tertiary)",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "4px",
-                          borderRadius: "4px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          transition: "all 0.2s",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = "var(--theme-error)";
-                          e.currentTarget.style.background =
-                            "var(--theme-bg-error-light)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color =
-                            "var(--theme-text-tertiary)";
-                          e.currentTarget.style.background = "none";
-                        }}
+                        className={uploadStyles.removeFileButton}
                       >
                         <X size={14} />
                       </button>
@@ -1167,121 +872,58 @@ export function UploadModal({
                       <img
                         src={URL.createObjectURL(uploadFile.file)}
                         alt={uploadFile.file.name}
-                        style={{
-                          width: "64px",
-                          height: "64px",
-                          objectFit: "cover",
-                          borderRadius: "6px",
-                          marginBottom: "8px",
-                        }}
+                        className={uploadStyles.fileTileImage}
                       />
                     ) : uploadFile.file.type === "" &&
                       uploadFile.file.name.includes("/") ? (
                       <Folder
                         size={48}
-                        style={{
-                          color: "var(--theme-text-secondary)",
-                          marginBottom: "8px",
-                        }}
+                        className={uploadStyles.fileTileIcon}
                       />
                     ) : (
                       <File
                         size={48}
-                        style={{
-                          color: "var(--theme-text-secondary)",
-                          marginBottom: "8px",
-                        }}
+                        className={uploadStyles.fileTileIcon}
                       />
                     )}
 
-                    <div
-                      style={{
-                        width: "100%",
-                        minHeight: "40px",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 500,
-                          color: "var(--theme-text-primary)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          width: "100%",
-                          padding: "0 4px",
-                        }}
-                      >
+                    <div className={uploadStyles.fileGridTileContent}>
+                      <div className={uploadStyles.fileTileName}>
                         {uploadFile.file.name}
                       </div>
 
                       {uploadFile.exists && (
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            color: "var(--theme-warning)",
-                            background: "var(--theme-bg-quinary)",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                          }}
-                        >
+                        <span className={uploadStyles.fileTileExists}>
                           Exists
                         </span>
                       )}
 
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "var(--theme-text-secondary)",
-                        }}
-                      >
+                      <div className={uploadStyles.fileTileSizeSecondary}>
                         {formatFileSize(uploadFile.file.size)}
                       </div>
 
                       {uploadFile.status === "uploading" && (
-                        <div style={{ width: "100%", marginTop: "8px" }}>
+                        <div className={uploadStyles.fileTileProgressContainer}>
                           <div className={uploadStyles.progressBar}>
                             <div
                               className={uploadStyles.progressFill}
                               style={{ width: `${uploadFile.progress}%` }}
                             />
                           </div>
-                          <div
-                            style={{
-                              fontSize: "10px",
-                              color: "var(--theme-text-secondary)",
-                              marginTop: "4px",
-                            }}
-                          >
+                          <div className={uploadStyles.fileTileProgressText}>
                             {uploadFile.progress}%
                           </div>
                         </div>
                       )}
 
                       {uploadFile.status === "completed" && (
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "var(--theme-success)",
-                            marginTop: "4px",
-                          }}
-                        >
+                        <div className={uploadStyles.fileTileStatusSuccess}>
                           ✓ Uploaded
                         </div>
                       )}
 
                       {uploadFile.status === "error" && (
-                        <div
-                          style={{
-                            fontSize: "10px",
-                            color: "var(--theme-error)",
-                            marginTop: "4px",
-                          }}
-                        >
+                        <div className={uploadStyles.fileTileStatusError}>
                           ✗ Error
                         </div>
                       )}
@@ -1294,33 +936,12 @@ export function UploadModal({
 
           {/* Overall Progress */}
           {isUploading && (
-            <div
-              style={{
-                padding: "20px",
-                borderTop: "1px solid var(--theme-border-primary)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "var(--theme-text-primary)",
-                  }}
-                >
+            <div className={uploadStyles.overallProgressContainer}>
+              <div className={uploadStyles.overallProgressHeader}>
+                <span className={uploadStyles.overallProgressLabel}>
                   Overall Progress
                 </span>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "var(--theme-text-secondary)",
-                  }}
-                >
+                <span className={uploadStyles.overallProgressCount}>
                   {completedFiles.length} / {uploadFiles.length} files
                 </span>
               </div>
@@ -1331,13 +952,7 @@ export function UploadModal({
                 />
               </div>
               {estimatedSeconds > 0 && (
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--theme-text-secondary)",
-                    marginTop: "8px",
-                  }}
-                >
+                <div className={uploadStyles.overallProgressTime}>
                   Estimated time remaining:{" "}
                   {formatTimeRemaining(estimatedSeconds)}
                 </div>
@@ -1351,8 +966,7 @@ export function UploadModal({
           {showReplaceConfirmation ? (
             <button
               onClick={handleReplaceConfirmation}
-              className={styles.buttonSave}
-              style={{ width: "auto" }}
+              className={`${styles.buttonSave} ${uploadStyles.buttonAutoWidth}`}
             >
               Replace Selected ({filesToUpload.length} file
               {filesToUpload.length !== 1 ? "s" : ""})
@@ -1360,12 +974,7 @@ export function UploadModal({
           ) : allDone ? (
             <button
               onClick={handleClose}
-              className={styles.buttonSave}
-              style={{
-                width: "auto",
-                background: "var(--theme-accent-primary)",
-                color: "var(--theme-text-primary)",
-              }}
+              className={`${styles.buttonSave} ${uploadStyles.buttonAutoWidth}`}
             >
               Close
             </button>
@@ -1373,8 +982,7 @@ export function UploadModal({
             <button
               onClick={checkExistingFiles}
               disabled={uploadFiles.length === 0}
-              className={styles.buttonSave}
-              style={{ width: "auto" }}
+              className={`${styles.buttonSave} ${uploadStyles.buttonAutoWidth}`}
             >
               Upload {uploadFiles.length} File
               {uploadFiles.length !== 1 ? "s" : ""}
@@ -1382,12 +990,7 @@ export function UploadModal({
           ) : (
             <button
               onClick={stopUpload}
-              className={styles.buttonSave}
-              style={{
-                width: "auto",
-                background: "var(--theme-bg-quinary)",
-                color: "var(--theme-error)",
-              }}
+              className={`${styles.buttonSave} ${uploadStyles.buttonAutoWidth} ${uploadStyles.stopUploadButton}`}
             >
               Stop Upload
             </button>

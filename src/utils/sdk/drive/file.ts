@@ -39,6 +39,70 @@ export class FileAPI extends BaseAPI {
   }
 
   /**
+   * Upload a file with progress tracking using XMLHttpRequest
+   * This method is needed for progress tracking which fetch() doesn't support
+   */
+  uploadWithProgress(
+    data: UploadFileParams,
+    onProgress?: (progress: number, loaded: number, total: number) => void
+  ): Promise<UploadFileResponse> {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append("file", data.file);
+      formData.append("drive", data.drive);
+      formData.append("key", data.key);
+
+      const url = this.buildUrl("api/drive");
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable && onProgress) {
+          onProgress(
+            Math.round((e.loaded / e.total) * 100),
+            e.loaded,
+            e.total
+          );
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = xhr.responseText
+              ? JSON.parse(xhr.responseText)
+              : {};
+            resolve(response as UploadFileResponse);
+          } catch (error) {
+            resolve({} as UploadFileResponse);
+          }
+        } else {
+          let errorMessage = `Upload failed with status ${xhr.status}`;
+          try {
+            const errorData = JSON.parse(xhr.responseText);
+            if (errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch {
+            errorMessage = xhr.statusText || errorMessage;
+          }
+          reject(new Error(errorMessage));
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        reject(new Error("Upload failed"));
+      });
+
+      xhr.addEventListener("abort", () => {
+        reject(new Error("Upload aborted"));
+      });
+
+      xhr.open("POST", url);
+      xhr.send(formData);
+    });
+  }
+
+  /**
    * Delete a file
    */
   async delete(params: DeleteFileParams): Promise<DeleteFileResponse> {

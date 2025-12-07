@@ -645,8 +645,11 @@ export function FileExplorer({
   };
 
   const handleUploadComplete = () => {
-    loadFiles(currentPath);
     setIsUploadModalOpen(false);
+    // Small delay to ensure backend has processed the upload
+    setTimeout(() => {
+      loadFiles(currentPath);
+    }, 500);
   };
 
   const handleEditComplete = () => {

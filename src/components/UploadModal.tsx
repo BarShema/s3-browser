@@ -538,25 +538,134 @@ export function UploadModal({
     );
   };
 
+  // Helper function to upload via presigned URL with progress tracking
+  const uploadFileViaPresignedUrlWithProgress = async (
+    uploadFile: UploadFile
+  ): Promise<void> => {
+    const fileKeyForPresigned = uploadFile.key;
+
+    // Get presigned upload URL
+    const uploadUrlResponse = await api.drive.file.getUploadUrl({
+      drive: driveName,
+      key: uploadFile.key,
+      contentType: uploadFile.file.type || "application/octet-stream",
+      expiresIn: 3600, // 1 hour
+    });
+
+    const uploadUrl = uploadUrlResponse.uploadUrl;
+
+    // Upload using presigned URL with progress tracking
+    await uploadFileViaPresignedUrl(
+      uploadFile,
+      uploadUrl,
+      (progress, loaded, total) => {
+        // Don't process progress events if file is already marked as completed
+        if (completedFilesRef.current.has(fileKeyForPresigned)) {
+          return;
+        }
+
+        const isComplete = loaded === total && total > 0;
+
+        // Calculate bytes delta more accurately
+        setUploadFiles((prev) => {
+          const currentFile = prev.find((f) => f.key === fileKeyForPresigned);
+          // Double-check ref in case it was updated between checks
+          if (completedFilesRef.current.has(fileKeyForPresigned)) {
+            return prev;
+          }
+
+          const previousBytes = currentFile?.uploadedBytes || 0;
+          const bytesDelta = loaded - previousBytes;
+          if (bytesDelta > 0) {
+            uploadedBytesRef.current += bytesDelta;
+          }
+
+          // If progress is 100% and file is complete, mark as completed
+          if (isComplete && currentFile?.status === "uploading") {
+            completedFilesRef.current.add(fileKeyForPresigned);
+            return prev.map((f) =>
+              f.key === fileKeyForPresigned
+                ? {
+                    ...f,
+                    status: "completed",
+                    progress: 100,
+                    uploadedBytes: loaded,
+                  }
+                : f
+            );
+          }
+
+          // Otherwise just update progress
+          return prev.map((f) =>
+            f.key === fileKeyForPresigned
+              ? {
+                  ...f,
+                  progress,
+                  uploadedBytes: loaded,
+                }
+              : f
+          );
+        });
+      }
+    );
+
+    // Mark as completed after successful upload via presigned URL
+    completedFilesRef.current.add(fileKeyForPresigned);
+    setUploadFiles((prev) =>
+      prev.map((f) =>
+        f.key === fileKeyForPresigned
+          ? {
+              ...f,
+              status: "completed",
+              progress: 100,
+            }
+          : f
+      )
+    );
+  };
+
   const uploadFile = async (uploadFile: UploadFile) => {
+    const startTime = Date.now();
+    setUploadFiles((prev) =>
+      prev.map((f) =>
+        f.key === uploadFile.key
+          ? {
+              ...f,
+              status: "uploading",
+              progress: 0,
+              startTime,
+              uploadedBytes: 0,
+            }
+          : f
+      )
+    );
+
+    const fileKey = uploadFile.key;
+    const FILE_SIZE_THRESHOLD = 4 * 1024 * 1024; // 4MB in bytes
+
+    // If file is larger than 4MB, automatically use presigned URL upload
+    if (uploadFile.file.size > FILE_SIZE_THRESHOLD) {
+      try {
+        await uploadFileViaPresignedUrlWithProgress(uploadFile);
+        return;
+      } catch (presignedError) {
+        setUploadFiles((prev) =>
+          prev.map((f) =>
+            f.key === uploadFile.key
+              ? {
+                  ...f,
+                  status: "error",
+                  error: presignedError instanceof Error ? presignedError.message : "Upload failed",
+                }
+              : f
+          )
+        );
+        throw presignedError;
+      }
+    }
+
+    // For files <= 4MB, try regular upload first
     try {
-      const startTime = Date.now();
-      setUploadFiles((prev) =>
-        prev.map((f) =>
-          f.key === uploadFile.key
-            ? {
-                ...f,
-                status: "uploading",
-                progress: 0,
-                startTime,
-                uploadedBytes: 0,
-              }
-            : f
-        )
-      );
-
-      const fileKey = uploadFile.key;
-
       // Use SDK's uploadWithProgress method which handles XMLHttpRequest internally
       await api.drive.file.uploadWithProgress(
         {
@@ -644,88 +753,9 @@ export function UploadModal({
                         ));
 
       if (is413Error) {
-        
-        const fileKeyForPresigned = uploadFile.key;
-        
+        // Fallback to presigned URL upload for 413 errors
         try {
-          // Get presigned upload URL
-          const uploadUrlResponse = await api.drive.file.getUploadUrl({
-            drive: driveName,
-            key: uploadFile.key,
-            contentType: uploadFile.file.type || "application/octet-stream",
-            expiresIn: 3600, // 1 hour
-          });
-
-          const uploadUrl = uploadUrlResponse.uploadUrl;
-
-          // Upload using presigned URL with progress tracking
-          await uploadFileViaPresignedUrl(
-            uploadFile,
-            uploadUrl,
-            (progress, loaded, total) => {
-              // Don't process progress events if file is already marked as completed
-              if (completedFilesRef.current.has(fileKeyForPresigned)) {
-                return;
-              }
-
-              const isComplete = loaded === total && total > 0;
-
-              // Calculate bytes delta more accurately
-              setUploadFiles((prev) => {
-                const currentFile = prev.find((f) => f.key === fileKeyForPresigned);
-                // Double-check ref in case it was updated between checks
-                if (completedFilesRef.current.has(fileKeyForPresigned)) {
-                  return prev;
-                }
-
-                const previousBytes = currentFile?.uploadedBytes || 0;
-                const bytesDelta = loaded - previousBytes;
-                if (bytesDelta > 0) {
-                  uploadedBytesRef.current += bytesDelta;
-                }
-
-                // If progress is 100% and file is complete, mark as completed
-                if (isComplete && currentFile?.status === "uploading") {
-                  completedFilesRef.current.add(fileKeyForPresigned);
-                  return prev.map((f) =>
-                    f.key === fileKeyForPresigned
-                      ? {
-                          ...f,
-                          status: "completed",
-                          progress: 100,
-                          uploadedBytes: loaded,
-                        }
-                      : f
-                  );
-                }
-
-                // Otherwise just update progress
-                return prev.map((f) =>
-                  f.key === fileKeyForPresigned
-                    ? {
-                        ...f,
-                        progress,
-                        uploadedBytes: loaded,
-                      }
-                    : f
-                );
-              });
-            }
-          );
-
-          // Mark as completed after successful upload via presigned URL
-          completedFilesRef.current.add(fileKeyForPresigned);
-          setUploadFiles((prev) =>
-            prev.map((f) =>
-              f.key === fileKeyForPresigned
-                ? {
-                    ...f,
-                    status: "completed",
-                    progress: 100,
-                  }
-                : f
-            )
-          );
+          await uploadFileViaPresignedUrlWithProgress(uploadFile);
         } catch (presignedError) {
           setUploadFiles((prev) =>
             prev.map((f) =>

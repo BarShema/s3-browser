@@ -95,11 +95,29 @@ export function Component({ prop1, prop2 }: ComponentProps) {
   }
   ```
 
-## Interface Exports
+## Type and Interface Organization
 
-- Export interfaces that are used by other components
-- Keep internal interfaces non-exported
+- **Centralize all types and interfaces** - Do not declare types/interfaces in component or code files
+- All types and interfaces must be declared in dedicated type definition files
+- Organize types by domain/module in `src/types/` or `src/utils/sdk/types/` directories
 - Use `Props` suffix for component props interfaces
+- Export interfaces that are used by other components
+- Keep internal interfaces non-exported (but still in type files, not in component files)
+- ❌ Bad: Declaring interfaces in component files
+  ```typescript
+  // FileExplorer.tsx
+  interface FileExplorerProps { ... }
+  interface DirectorySizeInfo { ... }
+  ```
+- ✅ Good: Centralized type definitions
+  ```typescript
+  // src/types/fileExplorer.ts
+  export interface FileExplorerProps { ... }
+  export interface DirectorySizeInfo { ... }
+  
+  // FileExplorer.tsx
+  import type { FileExplorerProps, DirectorySizeInfo } from "@/types/fileExplorer";
+  ```
 
 ## CSS Module Imports
 

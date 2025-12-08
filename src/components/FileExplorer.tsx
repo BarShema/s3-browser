@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Loader2, X } from "lucide-react";
 import toast from "react-hot-toast";
@@ -29,7 +29,6 @@ import { FileGrid } from "@/components/FileGrid";
 import { FileList } from "@/components/FileList";
 import { FilePreview } from "@/components/FilePreview";
 import { FilterControls } from "@/components/FilterControls";
-import { PaginationControls } from "@/components/PaginationControls";
 import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
@@ -79,13 +78,13 @@ export function FileExplorer({
     };
   }>({});
 
-  // Pagination and filtering state
+  // Infinite scroll state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(
-    appConfig.defaultItemsPerPage
-  );
+  const [itemsPerPage] = useState(100); // Initial batch size
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [nameFilter, setNameFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [extensionFilter, setExtensionFilter] = useState("");
@@ -132,6 +131,13 @@ export function FileExplorer({
     maxWidth: 600,
     storageKey: "idits-drive-tree-width",
   });
+
+  // Ref for scroll container
+  const contentRef = useRef<HTMLDivElement>(null);
+  // Ref to track loading state to prevent race conditions
+  const isLoadingRef = useRef(false);
+  // Ref to track if user has scrolled (to prevent Intersection Observer from firing on initial load)
+  const hasScrolledRef = useRef(false);
 
   // Extract drive and path from URL
   // URL format: /{drive}/{path/to/directory}
@@ -281,15 +287,25 @@ export function FileExplorer({
   );
 
   const loadFiles = useCallback(
-    async (path: string = "") => {
-      setIsLoading(true);
+    async (path: string = "", page: number = 1, append: boolean = false) => {
+      // Prevent duplicate loads
+      if (isLoadingRef.current) {
+        return;
+      }
+      
+      isLoadingRef.current = true;
+      if (append) {
+        setIsLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
       try {
         // Construct the full path: driveName/path
         const fullPath = path ? `${driveName}/${path}` : driveName;
 
         const data = await api.drive.list({
           path: fullPath,
-          page: currentPage,
+          page: page,
           limit: itemsPerPage,
           name: nameFilter || undefined,
           type: typeFilter || undefined,
@@ -341,22 +357,43 @@ export function FileExplorer({
           filteredDirectories = [];
         }
 
-        setFiles(filteredFiles);
-        setDirectories(filteredDirectories);
+        if (append) {
+          // Append to existing items, but filter out duplicates by ID
+          setFiles((prev) => {
+            const existingIds = new Set(prev.map(f => f.id));
+            const newFiles = filteredFiles.filter(f => !existingIds.has(f.id));
+            return [...prev, ...newFiles];
+          });
+          setDirectories((prev) => {
+            const existingIds = new Set(prev.map(d => d.id));
+            const newDirs = filteredDirectories.filter(d => !existingIds.has(d.id));
+            return [...prev, ...newDirs];
+          });
+        } else {
+          // Replace items (initial load or filter change)
+          setFiles(filteredFiles);
+          setDirectories(filteredDirectories);
+          setSelectedItems([]);
+        }
+
         setTotalPages(data.totalPages || 1);
         setTotalItems((data.totalFiles || 0) + (data.totalDirectories || 0));
         setTotalFilesCount(data.totalFiles || 0);
         setTotalDirectoriesCount(data.totalDirectories || 0);
-        setSelectedItems([]);
+        
+        // Check if there are more pages to load
+        const morePagesAvailable = page < (data.totalPages || 1);
+        setHasMore(morePagesAvailable);
       } catch (error) {
         toast.error("Failed to load files");
       } finally {
         setIsLoading(false);
+        setIsLoadingMore(false);
+        isLoadingRef.current = false;
       }
     },
     [
       driveName,
-      currentPage,
       itemsPerPage,
       nameFilter,
       typeFilter,
@@ -364,9 +401,13 @@ export function FileExplorer({
     ]
   );
 
+  // Reset and load initial batch when path or filters change
   useEffect(() => {
-    loadFiles(currentPath);
-  }, [currentPath, loadFiles]);
+    setCurrentPage(1);
+    setHasMore(true);
+    hasScrolledRef.current = false; // Reset scroll tracking
+    loadFiles(currentPath, 1, false);
+  }, [currentPath, nameFilter, typeFilter, extensionFilter, loadFiles]);
 
   useEffect(() => {
     const previewKey = searchParams?.get("preview");
@@ -436,37 +477,176 @@ export function FileExplorer({
     router.push(`/${encodedPath}`);
   };
 
-  // Pagination handlers
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  // Load more items when scrolling
+  const loadMore = useCallback(() => {
+    // Use ref to check loading state to prevent race conditions
+    if (!isLoadingRef.current && !isLoadingMore && !isLoading && hasMore) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      loadFiles(currentPath, nextPage, true);
+    }
+  }, [currentPage, currentPath, isLoadingMore, isLoading, hasMore, loadFiles, files.length, directories.length]);
 
-  const handleItemsPerPageChange = (limit: number) => {
-    setItemsPerPage(limit);
-    setCurrentPage(1); // Reset to first page when changing items per page
-  };
+  // Scroll detection for infinite scroll
+  useEffect(() => {
+    const contentElement = contentRef.current;
+    if (!contentElement) {
+      return;
+    }
+
+    const handleScroll = () => {
+      // Mark that user has scrolled
+      if (!hasScrolledRef.current) {
+        hasScrolledRef.current = true;
+      }
+      
+      const { scrollTop, scrollHeight, clientHeight } = contentElement;
+      const scrollBottom = scrollHeight - scrollTop - clientHeight;
+      
+      // Calculate approximate item height based on view mode
+      let estimatedItemHeight: number;
+      if (viewMode === "list") {
+        estimatedItemHeight = 50;
+      } else if (viewMode === "grid") {
+        const rowHeight = 200;
+        estimatedItemHeight = rowHeight / gridItemsPerRow;
+      } else {
+        const rowHeight = 200;
+        estimatedItemHeight = rowHeight / previewItemsPerRow;
+      }
+      
+      // Calculate threshold: load when 50 items from bottom
+      const threshold = estimatedItemHeight * 50;
+      const pixelThreshold = 2000;
+      const finalThreshold = Math.min(threshold, pixelThreshold);
+      const shouldLoad = scrollBottom <= finalThreshold;
+      
+      // Load more when within threshold from bottom
+      if (shouldLoad && hasMore && !isLoadingMore && !isLoading && !isLoadingRef.current) {
+        loadMore();
+      }
+    };
+
+    // Check initial scroll position after render
+    const checkInitialScroll = () => {
+      if (contentElement && !isLoadingRef.current) {
+        const { scrollHeight, clientHeight } = contentElement;
+        const needsScroll = scrollHeight > clientHeight;
+        
+        // Only check scroll position if content is actually scrollable
+        if (needsScroll) {
+          handleScroll();
+        }
+      }
+    };
+
+    // Check after a delay to account for rendering
+    const timeoutId = setTimeout(checkInitialScroll, 300);
+
+    contentElement.addEventListener("scroll", handleScroll, { passive: true });
+    
+    // Also try listening to window scroll as fallback
+    const windowScrollHandler = () => {
+      // Check if we should trigger loadMore based on window scroll
+      const scrollBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+      if (scrollBottom < 2000 && hasMore && !isLoadingMore && !isLoading && !isLoadingRef.current) {
+        loadMore();
+      }
+    };
+    
+    window.addEventListener("scroll", windowScrollHandler, { passive: true });
+    
+    // Intersection Observer as backup (only after user has scrolled)
+    const triggerElement = document.getElementById("infinite-scroll-trigger");
+    let observer: IntersectionObserver | null = null;
+    
+    const { scrollHeight, clientHeight } = contentElement;
+    const isScrollable = scrollHeight > clientHeight;
+    
+    if (triggerElement && "IntersectionObserver" in window && isScrollable && hasScrolledRef.current) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && hasMore && !isLoadingMore && !isLoading && !isLoadingRef.current && hasScrolledRef.current) {
+              loadMore();
+            }
+          });
+        },
+        {
+          root: contentElement,
+          rootMargin: "1000px",
+          threshold: 0.1,
+        }
+      );
+      
+      observer.observe(triggerElement);
+    }
+    
+    return () => {
+      clearTimeout(timeoutId);
+      contentElement.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", windowScrollHandler);
+      if (observer && triggerElement) {
+        observer.unobserve(triggerElement);
+        observer.disconnect();
+      }
+    };
+  }, [hasMore, isLoadingMore, isLoading, viewMode, gridItemsPerRow, previewItemsPerRow, loadMore, files.length, directories.length]);
+
+  // Re-setup Intersection Observer when items change
+  useEffect(() => {
+    if (!contentRef.current || isLoadingRef.current) return;
+    
+    const contentElement = contentRef.current;
+    const triggerElement = document.getElementById("infinite-scroll-trigger");
+    
+    if (!triggerElement || !("IntersectionObserver" in window)) return;
+    
+    const { scrollHeight, clientHeight } = contentElement;
+    const isScrollable = scrollHeight > clientHeight;
+    
+    if (isScrollable && hasScrolledRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && hasMore && !isLoadingMore && !isLoading && !isLoadingRef.current && hasScrolledRef.current) {
+              loadMore();
+            }
+          });
+        },
+        {
+          root: contentElement,
+          rootMargin: "1000px",
+          threshold: 0.1,
+        }
+      );
+      
+      observer.observe(triggerElement);
+      
+      return () => {
+        observer.unobserve(triggerElement);
+        observer.disconnect();
+      };
+    }
+  }, [files.length, directories.length, hasMore, isLoadingMore, isLoading, loadMore]);
 
   // Filter handlers
   const handleNameFilterChange = (value: string) => {
     setNameFilter(value);
-    setCurrentPage(1); // Reset to first page when filtering
   };
 
   const handleTypeFilterChange = (value: string) => {
     setTypeFilter(value);
-    setCurrentPage(1); // Reset to first page when filtering
   };
 
   const handleExtensionFilterChange = (value: string) => {
     setExtensionFilter(value);
-    setCurrentPage(1); // Reset to first page when filtering
   };
 
   const handleClearFilters = () => {
     setNameFilter("");
     setTypeFilter("");
     setExtensionFilter("");
-    setCurrentPage(1);
   };
 
   const handleFileDoubleClick = (file: FileItem) => {
@@ -619,7 +799,9 @@ export function FileExplorer({
         setIsPreviewOpen(false);
         setPreviewFile(null);
       }
-      loadFiles(currentPath);
+      setCurrentPage(1);
+      setHasMore(true);
+      loadFiles(currentPath, 1, false);
     } else {
       toast.error("Failed to delete file");
     }
@@ -638,7 +820,9 @@ export function FileExplorer({
       });
 
       toast.success("File renamed successfully");
-      loadFiles(currentPath);
+      setCurrentPage(1);
+      setHasMore(true);
+      loadFiles(currentPath, 1, false);
     } catch (error) {
       toast.error("Failed to rename file");
     }
@@ -648,12 +832,16 @@ export function FileExplorer({
     setIsUploadModalOpen(false);
     // Small delay to ensure backend has processed the upload
     setTimeout(() => {
-      loadFiles(currentPath);
+      setCurrentPage(1);
+      setHasMore(true);
+      loadFiles(currentPath, 1, false);
     }, 500);
   };
 
   const handleEditComplete = () => {
-    loadFiles(currentPath);
+    setCurrentPage(1);
+    setHasMore(true);
+    loadFiles(currentPath, 1, false);
     setIsEditModalOpen(false);
     setEditingFile(null);
   };
@@ -783,7 +971,9 @@ export function FileExplorer({
                   dirKey,
                 });
                 toast.success('Directory created');
-                loadFiles(currentPath);
+                setCurrentPage(1);
+                setHasMore(true);
+                loadFiles(currentPath, 1, false);
               } catch (e) {
                 toast.error('Could not create directory');
               }
@@ -836,14 +1026,20 @@ export function FileExplorer({
               
               if (successCount > 0) {
                 toast.success(`${successCount} item(s) deleted successfully`);
-                loadFiles(currentPath);
+                setCurrentPage(1);
+                setHasMore(true);
+                loadFiles(currentPath, 1, false);
               } else {
                 toast.error("Failed to delete items");
               }
             }}
             isTreeVisible={isTreeVisible}
             onTreeToggle={handleTreeToggle}
-            onRefresh={() => loadFiles(currentPath)}
+            onRefresh={() => {
+              setCurrentPage(1);
+              setHasMore(true);
+              loadFiles(currentPath, 1, false);
+            }}
           />
 
           <FilterControls
@@ -865,7 +1061,7 @@ export function FileExplorer({
           />
         </div>
 
-        <div className={styles.content}>
+        <div className={styles.content} ref={contentRef}>
           {isLoading ? (
             <div className={styles.loadingContainer}>
               <div className={styles.loader}></div>
@@ -934,18 +1130,30 @@ export function FileExplorer({
                   previewedFileId={previewFile?.id || null}
                 />
               )}
+
+              {/* Infinite scroll trigger element - using Intersection Observer */}
+              {hasMore && !isLoadingMore && (
+                <div 
+                  id="infinite-scroll-trigger" 
+                  style={{ height: '1px', width: '100%' }}
+                />
+              )}
+              
+              {/* Infinite scroll loading indicator */}
+              {isLoadingMore && (
+                <div className={styles.loadingMoreContainer}>
+                  <div className={styles.loader}></div>
+                  <span className={styles.loadingText}>Loading more...</span>
+                </div>
+              )}
+              {!hasMore && files.length + directories.length > 0 && (
+                <div className={styles.endOfList}>
+                  Showing all {files.length + directories.length} items
+                </div>
+              )}
             </>
           )}
         </div>
-
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          totalItems={totalItems}
-          onPageChange={handlePageChange}
-          onItemsPerPageChange={handleItemsPerPageChange}
-        />
 
         <UploadModal
           isOpen={isUploadModalOpen}

@@ -14,16 +14,10 @@ import {
   isPDF,
   isVideo,
 } from "@/lib/utils";
+import type { FileDetailsModalProps } from "@/types";
 import { FileIcon } from "./FileIcon";
 import fileDetailsStyles from "./fileDetailsModal.module.css";
 import styles from "./modal.module.css";
-
-interface FileDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  file: FileItem | null;
-  driveName: string;
-}
 
 export function FileDetailsModal({
   isOpen,

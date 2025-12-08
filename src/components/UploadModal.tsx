@@ -19,41 +19,13 @@ import { api } from "@/lib/api";
 import { clz } from "@/lib/clz";
 import { formatFileSize } from "@/lib/utils";
 import type { S3Directory, S3File } from "@/utils/sdk/types";
+import type {
+  UploadModalProps,
+  UploadFile,
+  ExistingFile,
+} from "@/types";
 import styles from "./modal.module.css";
 import uploadStyles from "./uploadModal.module.css";
-
-interface UploadModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onComplete: () => void;
-  driveName: string;
-  currentPath: string;
-}
-
-interface UploadFile {
-  file: File;
-  key: string;
-  status:
-    | "pending"
-    | "checking"
-    | "exists"
-    | "uploading"
-    | "completed"
-    | "error";
-  progress: number;
-  error?: string;
-  exists?: boolean;
-  shouldReplace?: boolean;
-  startTime?: number;
-  uploadedBytes?: number;
-}
-
-interface ExistingFile {
-  key: string;
-  name: string;
-  size: number;
-  lastModified: string;
-}
 
 // Format time remaining
 function formatTimeRemaining(seconds: number): string {

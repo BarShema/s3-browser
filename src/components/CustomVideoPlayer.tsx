@@ -11,15 +11,8 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { CustomVideoPlayerProps } from "@/types";
 import styles from "./customVideoPlayer.module.css";
-
-interface CustomVideoPlayerProps {
-  src: string;
-  className?: string;
-  autoPlay?: boolean;
-  onLoad?: () => void;
-  orientation?: "vertical" | "horizontal" | null;
-}
 
 export function CustomVideoPlayer({
   src,

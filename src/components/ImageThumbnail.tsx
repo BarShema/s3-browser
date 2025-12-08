@@ -4,14 +4,8 @@ import { api } from "@/lib/api";
 import { getFileExtension } from "@/lib/utils";
 import { Image } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { ImageThumbnailProps } from "@/types";
 import styles from "./fileIcon.module.css";
-
-interface ImageThumbnailProps {
-  src: string;
-  alt: string;
-  maxWidth?: number;
-  maxHeight?: number;
-}
 
 export function ImageThumbnail({
   src,

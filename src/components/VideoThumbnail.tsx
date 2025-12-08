@@ -4,11 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
 
 import { api } from "@/lib/api";
-
-interface VideoThumbnailProps {
-  src: string;
-  alt: string;
-}
+import type { VideoThumbnailProps } from "@/types";
 
 export function VideoThumbnail({ src, alt }: VideoThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);

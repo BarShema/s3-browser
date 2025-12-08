@@ -1,14 +1,7 @@
 "use client";
 
+import type { BreadcrumbProps } from "@/types";
 import styles from "./breadcrumb.module.css";
-
-interface BreadcrumbProps {
-  currentPath: string;
-  driveName: string;
-  onPathClick: (path: string) => void;
-  totalFiles?: number;
-  totalDirectories?: number;
-}
 
 export function Breadcrumb({
   currentPath,

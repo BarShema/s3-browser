@@ -32,12 +32,8 @@ import { FilterControls } from "@/components/FilterControls";
 import { SidePreviewPanel } from "@/components/SidePreviewPanel";
 import { Toolbar } from "@/components/Toolbar";
 import { UploadModal } from "@/components/UploadModal";
+import type { FileExplorerProps, DirectorySizeInfo } from "@/types";
 import styles from "./fileExplorer.module.css";
-
-interface FileExplorerProps {
-  driveName: string;
-  onOpenSettings?: () => void;
-}
 
 export function FileExplorer({
   driveName,
@@ -68,17 +64,10 @@ export function FileExplorer({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteProtectionModalOpen, setIsDeleteProtectionModalOpen] =
     useState(false);
-  interface DirectorySizeInfo {
-    size: number;
-    objects: number;
-    formattedSize: string | React.ReactNode;
-    isLoading?: boolean;
-    hasError?: boolean;
-  }
 
-  const [directorySizes, setDirectorySizes] = useState<{
-    [key: string]: DirectorySizeInfo;
-  }>({});
+  const [directorySizes, setDirectorySizes] = useState<
+    Record<string, DirectorySizeInfo>
+  >({});
 
   // Infinite scroll state
   const [currentPage, setCurrentPage] = useState(1);

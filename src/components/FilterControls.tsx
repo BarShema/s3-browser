@@ -1,16 +1,7 @@
 "use client";
 
+import type { FilterControlsProps } from "@/types";
 import styles from "./filterControls.module.css";
-
-interface FilterControlsProps {
-  nameFilter: string;
-  typeFilter: string;
-  extensionFilter: string;
-  onNameFilterChange: (value: string) => void;
-  onTypeFilterChange: (value: string) => void;
-  onExtensionFilterChange: (value: string) => void;
-  onClearFilters: () => void;
-}
 
 export function FilterControls({
   nameFilter,

@@ -3,11 +3,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
+import type { AuthGuardProps } from "@/types";
 import styles from "./authGuard.module.css";
-
-interface AuthGuardProps {
-  children: React.ReactNode;
-}
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, loading } = useAuth();

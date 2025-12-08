@@ -4,28 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Folder, FolderOpen } from "lucide-react";
 
 import { api } from "@/lib/api";
+import type {
+  DirectoryNode,
+  DirectoryTreeProps,
+  DirectoryInfo,
+} from "@/types";
 import styles from "./directoryTree.module.css";
-
-interface DirectoryNode {
-  key: string;
-  name: string;
-  children?: DirectoryNode[];
-  isExpanded?: boolean;
-  level: number;
-  isEmpty?: boolean;
-}
-
-interface DirectoryTreeProps {
-  driveName: string;
-  currentPath: string;
-  onPathClick: (path: string) => void;
-  isVisible: boolean;
-}
-
-interface DirectoryInfo {
-  key: string;
-  name: string;
-}
 
 export function DirectoryTree({
   driveName,

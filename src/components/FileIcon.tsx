@@ -15,15 +15,8 @@ import {
 } from "lucide-react";
 
 import { getFileExtension, getFileIcon } from "@/lib/utils";
+import type { FileIconProps } from "@/types";
 import styles from "./fileIcon.module.css";
-
-interface FileIconProps {
-  filename: string;
-  isDirectory?: boolean;
-  size?: number;
-  className?: string;
-  showExtension?: boolean;
-}
 
 export function FileIcon({
   filename,

@@ -7,15 +7,8 @@ import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import { clz } from "@/lib/clz";
 import { FileItem } from "@/lib/utils";
+import type { EditModalProps } from "@/types";
 import styles from "./modal.module.css";
-
-interface EditModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onComplete: () => void;
-  file: FileItem | null;
-  driveName: string;
-}
 
 export function EditModal({
   isOpen,

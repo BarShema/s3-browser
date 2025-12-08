@@ -77,12 +77,9 @@ export async function listDrives(): Promise<S3Drive[]> {
   }
 }
 
-// List objects in a drive with optional prefix (folder)
-interface ListS3ObjectsResponse {
-  files: S3File[];
-  directories: S3Directory[];
-}
+import type { ListS3ObjectsResponse } from "@/types";
 
+// List objects in a drive with optional prefix (folder)
 export async function listS3Objects(
   drive: string,
   prefix: string = ""

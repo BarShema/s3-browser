@@ -2,14 +2,8 @@
 
 import { FileItem, isImage, isVideo } from "@/lib/utils";
 import { Clock, Loader2, Ruler } from "lucide-react";
+import type { FileDetailsCellProps } from "@/types";
 import styles from "./fileList.module.css";
-
-interface FileDetailsCellProps {
-  file: FileItem;
-  loadingMetadata: Set<string>;
-  metadataCache: Map<string, string>;
-  onLoadMetadata: (fileId: string) => void;
-}
 
 export function FileDetailsCell({
   file,

@@ -29,28 +29,10 @@ import {
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
 import styles from "./filePreview.module.css";
+import type { FilePreviewProps } from "@/types";
 import { ImageThumbnail } from "./ImageThumbnail";
 import { PDFPreview } from "./PDFPreview";
 import { VideoPreview } from "./VideoPreview";
-
-interface FilePreviewProps {
-  items: Item[];
-  selectedItems: string[];
-  onSelectionChange: (items: string[]) => void;
-  onDirectoryClick: (directory: DirectoryItem) => void;
-  onFileClick: (file: FileItem) => void;
-  onFileDoubleClick: (file: FileItem) => void;
-  onDownload: (file: FileItem) => void;
-  onDirectoryDownload: (directory: DirectoryItem) => void;
-  onDelete: (file: FileItem) => void;
-  onRename: (file: FileItem, newName: string) => void;
-  onDetailsClick?: (file: FileItem) => void;
-  driveName: string;
-  onDirectorySizeClick?: (directory: DirectoryItem) => void;
-  itemsPerRow: number;
-  onItemsPerRowChange: (count: number) => void;
-  previewedFileId?: string | null;
-}
 
 export function FilePreview({
   items,

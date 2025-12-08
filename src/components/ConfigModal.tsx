@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import configStyles from "./configModal.module.css";
 import styles from "./modal.module.css";
 

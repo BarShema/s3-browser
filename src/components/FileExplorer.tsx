@@ -68,14 +68,16 @@ export function FileExplorer({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteProtectionModalOpen, setIsDeleteProtectionModalOpen] =
     useState(false);
+  interface DirectorySizeInfo {
+    size: number;
+    objects: number;
+    formattedSize: string | React.ReactNode;
+    isLoading?: boolean;
+    hasError?: boolean;
+  }
+
   const [directorySizes, setDirectorySizes] = useState<{
-    [key: string]: {
-      size: number;
-      objects: number;
-      formattedSize: string | React.ReactNode;
-      isLoading?: boolean;
-      hasError?: boolean;
-    };
+    [key: string]: DirectorySizeInfo;
   }>({});
 
   // Infinite scroll state

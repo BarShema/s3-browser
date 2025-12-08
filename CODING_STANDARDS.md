@@ -103,8 +103,9 @@ export function Component({ prop1, prop2 }: ComponentProps) {
 
 ## CSS Module Imports
 
-- Always use `styles` as the import name for CSS modules
+- Always use `styles` as the import name for the primary CSS module
 - Import styles at the end of the import section
+- **Exception**: When a component uses multiple CSS modules, use `styles` for the primary/component-specific CSS module, and use descriptive names (e.g., `modalStyles`, `uploadStyles`) for shared or secondary CSS modules
 
 ## Comments
 
@@ -130,7 +131,17 @@ export function Component({ prop1, prop2 }: ComponentProps) {
 - Use explicit types for function parameters and return types
 - Prefer `interface` over `type` for object shapes
 - Use `as const` for literal types when appropriate
-- Avoid `any` - use `unknown` or proper types instead
+- **Never use `any`** - use `unknown` or proper types instead
+- **No inline types** - Always declare types/interfaces separately, do not use inline object types in function parameters or return types
+  - ❌ Bad: `function process(data: { name: string; age: number }) { ... }`
+  - ✅ Good: 
+    ```typescript
+    interface ProcessData {
+      name: string;
+      age: number;
+    }
+    function process(data: ProcessData) { ... }
+    ```
 
 ## Async/Await
 

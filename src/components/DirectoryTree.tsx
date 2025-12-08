@@ -22,6 +22,11 @@ interface DirectoryTreeProps {
   isVisible: boolean;
 }
 
+interface DirectoryInfo {
+  key: string;
+  name: string;
+}
+
 export function DirectoryTree({
   driveName,
   currentPath,
@@ -92,7 +97,7 @@ export function DirectoryTree({
 
         // Filter out the origin directory and any parent directories from the results
         const filteredDirectories =
-          data.directories?.filter((dir: { key: string; name: string }) => {
+          data.directories?.filter((dir: DirectoryInfo) => {
             // Remove the origin directory itself
             if (dir.key === directoryKey) return false;
 
@@ -118,7 +123,7 @@ export function DirectoryTree({
                 return {
                   ...node,
                   children: filteredDirectories.map(
-                    (dir: { key: string; name: string }) => ({
+                    (dir: DirectoryInfo) => ({
                       key: dir.key,
                       name: dir.name,
                       level: node.level + 1,
@@ -155,7 +160,7 @@ export function DirectoryTree({
 
   // Build hierarchical tree structure from flat directory list
   const buildTreeStructure = (
-    directories: { key: string; name: string }[]
+    directories: DirectoryInfo[]
   ): DirectoryNode[] => {
     const nodeMap = new Map<string, DirectoryNode>();
     const rootNodes: DirectoryNode[] = [];

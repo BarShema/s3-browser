@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import {
   CheckSquare,
   File,
@@ -11,12 +12,13 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useDropzone } from "react-dropzone";
+import { FileRejection, useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
 
 import { api } from "@/lib/api";
 import { clz } from "@/lib/clz";
 import { formatFileSize } from "@/lib/utils";
+import type { S3Directory, S3File } from "@/utils/sdk/types";
 import styles from "./modal.module.css";
 import uploadStyles from "./uploadModal.module.css";
 
@@ -131,7 +133,7 @@ export function UploadModal({
   }, [isOpen]);
 
   const onDrop = useCallback(
-    async (acceptedFiles: File[], fileRejections: any[], event: any) => {
+    async (acceptedFiles: File[], fileRejections: FileRejection[], event: DragEvent) => {
       // Build a map of File objects to their full paths using DataTransfer API
       const filePathMap = new Map<File, string>();
       const filePromises: Promise<void>[] = [];
@@ -140,7 +142,7 @@ export function UploadModal({
       if (event?.dataTransfer?.items) {
         const items = Array.from(event.dataTransfer.items);
         
-        const processEntry = (entry: any, basePath: string = ""): void => {
+        const processEntry = (entry: FileSystemEntry, basePath: string = ""): void => {
           if (entry.isFile) {
             const filePromise = new Promise<void>((resolve) => {
               entry.file((file: File) => {
@@ -156,7 +158,7 @@ export function UploadModal({
             const newBasePath = basePath ? `${basePath}/${dirName}` : dirName;
             
             const readEntries = (): void => {
-              dirReader.readEntries((entries: any[]) => {
+              dirReader.readEntries((entries: FileSystemEntry[]) => {
                 if (entries.length === 0) return;
                 
                 for (const subEntry of entries) {
@@ -333,7 +335,7 @@ export function UploadModal({
             const responseData = data;
             
             if (responseData.files && responseData.files.length > 0) {
-              responseData.files.forEach((file: any) => {
+              responseData.files.forEach((file: S3File) => {
                 // The API returns full S3 keys (absolute from bucket root)
                 // So file.key should already be the full path like "new-test/DSCF2170.jpg"
                 let normalizedKey = file.key;
@@ -367,7 +369,7 @@ export function UploadModal({
 
             // Collect directories for recursive listing - ONLY directories that contain upload files
             if (responseData.directories && responseData.directories.length > 0) {
-              responseData.directories.forEach((dir: any) => {
+              responseData.directories.forEach((dir: S3Directory) => {
                 const dirKey = dir.key.replace(/^\/+|\/+$/g, "");
                 const fullDirPath = `${driveName}/${dirKey}`;
                 
@@ -408,7 +410,7 @@ export function UploadModal({
             });
 
             if (data.files && data.files.length > 0) {
-              data.files.forEach((file: any) => {
+              data.files.forEach((file: S3File) => {
                 const normalizedKey = file.key.replace(/^\/+|\/+$/g, "");
                 
                 if (!seenKeys.has(normalizedKey)) {
@@ -425,7 +427,7 @@ export function UploadModal({
 
             // Check for nested subdirectories
             if (data.directories && data.directories.length > 0) {
-              data.directories.forEach((dir: any) => {
+              data.directories.forEach((dir: S3Directory) => {
                 const dirKey = dir.key.replace(/^\/+|\/+$/g, "");
                 const fullDirPath = `${driveName}/${dirKey}`;
                 if (!directoriesToCheck.includes(fullDirPath) && dirPath !== fullDirPath) {
@@ -737,13 +739,14 @@ export function UploadModal({
             : f
         )
       );
-    } catch (error: any) {
+    } catch (error) {
       // Check if error is 413 (Request Entity Too Large)
       // Check multiple possible error formats
-      const statusCode = error?.status || error?.response?.status || 
-                        (error?.message?.match(/\b413\b/) ? 413 : null) ||
-                        (error?.message?.toLowerCase().includes("content too large") ? 413 : null) ||
-                        (error?.message?.toLowerCase().includes("request entity too large") ? 413 : null);
+      const errorObj = error as { status?: number; response?: { status?: number }; message?: string };
+      const statusCode = errorObj?.status || errorObj?.response?.status || 
+                        (errorObj?.message?.match(/\b413\b/) ? 413 : null) ||
+                        (errorObj?.message?.toLowerCase().includes("content too large") ? 413 : null) ||
+                        (errorObj?.message?.toLowerCase().includes("request entity too large") ? 413 : null);
       
       const is413Error = statusCode === 413 || 
                         (error instanceof Error && (

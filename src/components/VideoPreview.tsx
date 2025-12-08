@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import { api } from "@/lib/api";
 import { clz } from "@/lib/clz";
 import { getFileExtension } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
 import fileIconStyles from "./fileIcon.module.css";
 import styles from "./videoPreview.module.css";

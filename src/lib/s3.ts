@@ -78,10 +78,15 @@ export async function listDrives(): Promise<S3Drive[]> {
 }
 
 // List objects in a drive with optional prefix (folder)
+interface ListS3ObjectsResponse {
+  files: S3File[];
+  directories: S3Directory[];
+}
+
 export async function listS3Objects(
   drive: string,
   prefix: string = ""
-): Promise<{ files: S3File[]; directories: S3Directory[] }> {
+): Promise<ListS3ObjectsResponse> {
   try {
     const command = new ListObjectsV2Command({
       Bucket: drive,

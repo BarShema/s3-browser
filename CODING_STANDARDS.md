@@ -113,6 +113,18 @@ export function Component({ prop1, prop2 }: ComponentProps) {
 - Use JSDoc comments for exported functions/classes
 - Remove commented-out code before committing
 
+## Code Cleanliness
+
+- **Never keep unused code**: Remove all unused variables, functions, files, and imports
+- Unused code creates confusion, increases maintenance burden, and can lead to bugs
+- Before committing, ensure:
+  - All unused variables are removed
+  - All unused functions are removed
+  - All unused files are deleted
+  - All unused imports are removed
+  - All linter warnings about unused code are resolved
+- If code is temporarily unused but may be needed later, add a TODO comment explaining why it's kept, otherwise remove it
+
 ## TypeScript
 
 - Use explicit types for function parameters and return types

@@ -81,8 +81,6 @@ export function FileExplorer({
   // Infinite scroll state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(100); // Initial batch size
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [nameFilter, setNameFilter] = useState("");
@@ -250,7 +248,7 @@ export function FileExplorer({
             },
           }));
         }
-      } catch (error) {
+      } catch {
         setDirectorySizes((prev) => ({
           ...prev,
           [dirKey]: {
@@ -376,15 +374,13 @@ export function FileExplorer({
           setSelectedItems([]);
         }
 
-        setTotalPages(data.totalPages || 1);
-        setTotalItems((data.totalFiles || 0) + (data.totalDirectories || 0));
         setTotalFilesCount(data.totalFiles || 0);
         setTotalDirectoriesCount(data.totalDirectories || 0);
         
         // Check if there are more pages to load
         const morePagesAvailable = page < (data.totalPages || 1);
         setHasMore(morePagesAvailable);
-      } catch (error) {
+      } catch {
         toast.error("Failed to load files");
       } finally {
         setIsLoading(false);
@@ -485,7 +481,7 @@ export function FileExplorer({
       setCurrentPage(nextPage);
       loadFiles(currentPath, nextPage, true);
     }
-  }, [currentPage, currentPath, isLoadingMore, isLoading, hasMore, loadFiles, files.length, directories.length]);
+  }, [currentPage, currentPath, isLoadingMore, isLoading, hasMore, loadFiles]);
 
   // Scroll detection for infinite scroll
   useEffect(() => {
@@ -690,7 +686,7 @@ export function FileExplorer({
       document.body.removeChild(link);
 
       toast.success("Download started");
-    } catch (error) {
+    } catch {
       toast.error("Failed to download file");
     }
   };
@@ -740,7 +736,7 @@ export function FileExplorer({
           duration: 10000,
         });
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to download directory", { id: "zip-creation" });
     }
   };
@@ -753,7 +749,7 @@ export function FileExplorer({
       });
 
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
@@ -823,7 +819,7 @@ export function FileExplorer({
       setCurrentPage(1);
       setHasMore(true);
       loadFiles(currentPath, 1, false);
-    } catch (error) {
+    } catch {
       toast.error("Failed to rename file");
     }
   };
@@ -974,7 +970,7 @@ export function FileExplorer({
                 setCurrentPage(1);
                 setHasMore(true);
                 loadFiles(currentPath, 1, false);
-              } catch (e) {
+              } catch {
                 toast.error('Could not create directory');
               }
             }}
@@ -1022,7 +1018,6 @@ export function FileExplorer({
               ]);
 
               const successCount = results.filter((r) => r === true).length;
-              const totalCount = selectedFiles.length + selectedDirs.length;
               
               if (successCount > 0) {
                 toast.success(`${successCount} item(s) deleted successfully`);

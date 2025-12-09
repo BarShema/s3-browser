@@ -23,6 +23,8 @@ import type {
   UploadModalProps,
   UploadFile,
   ExistingFile,
+  FileSystemFileEntry,
+  FileSystemDirectoryEntry,
 } from "@/types";
 import styles from "./modal.module.css";
 import uploadStyles from "./uploadModal.module.css";
@@ -116,8 +118,9 @@ export function UploadModal({
         
         const processEntry = (entry: FileSystemEntry, basePath: string = ""): void => {
           if (entry.isFile) {
+            const fileEntry = entry as FileSystemFileEntry;
             const filePromise = new Promise<void>((resolve) => {
-              entry.file((file: File) => {
+              fileEntry.file((file: File) => {
                 const fullPath = basePath ? `${basePath}/${file.name}` : file.name;
                 filePathMap.set(file, fullPath);
                 resolve();
@@ -125,7 +128,8 @@ export function UploadModal({
             });
             filePromises.push(filePromise);
           } else if (entry.isDirectory) {
-            const dirReader = entry.createReader();
+            const dirEntry = entry as FileSystemDirectoryEntry;
+            const dirReader = dirEntry.createReader();
             const dirName = entry.name;
             const newBasePath = basePath ? `${basePath}/${dirName}` : dirName;
             
@@ -414,7 +418,7 @@ export function UploadModal({
             if (page > 1000) {
               break;
             }
-          } catch (error) {
+          } catch {
             hasMore = false;
           }
         }
@@ -461,7 +465,7 @@ export function UploadModal({
         // No existing files, proceed directly to upload
         startUpload();
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to check for existing files");
       setIsChecking(false);
       // Proceed with upload anyway

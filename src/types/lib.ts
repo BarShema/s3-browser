@@ -15,3 +15,16 @@ export interface UseResizeOptions {
   onResize?: (width: number) => void;
 }
 
+// File System API types
+export interface FileSystemFileEntry extends FileSystemEntry {
+  file(callback: (file: File) => void): void;
+}
+
+export interface FileSystemDirectoryEntry extends FileSystemEntry {
+  createReader(): FileSystemDirectoryReader;
+}
+
+export interface FileSystemDirectoryReader {
+  readEntries(callback: (entries: FileSystemEntry[]) => void): void;
+}
+

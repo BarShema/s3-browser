@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import type { DirectoryItem, FileItem, Item, ViewMode } from "@/lib/utils";
-import type { S3File } from "@/lib/s3";
 
 // FileExplorer
 export interface FileExplorerProps {
@@ -301,5 +300,20 @@ export interface PDFPreviewProps {
 // AuthGuard
 export interface AuthGuardProps {
   children: ReactNode;
+}
+
+// PageHeader
+export interface PageHeaderProps {
+  driveName: string;
+  user: { username?: string; email?: string } | null;
+  handleLogout: () => void;
+  setIsSettingsOpen: (isOpen: boolean) => void;
+}
+
+// UserMenu
+export interface UserMenuProps {
+  user: { username?: string; email?: string } | null;
+  onLogout: () => void;
+  onOpenSettings: () => void;
 }
 

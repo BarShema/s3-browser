@@ -46,6 +46,13 @@ Imports should be organized in the following order with blank lines between grou
    import styles from "./component.module.css";
    ```
 
+- **Never leave unused imports** - Remove all unused imports before committing
+  - Unused imports increase bundle size, create confusion, and can lead to maintenance issues
+  - Use your IDE's "organize imports" feature or manually remove unused imports
+  - All linter warnings about unused imports must be resolved
+  - ❌ Bad: `import { useState, useEffect, useCallback } from "react";` (if `useCallback` is not used)
+  - ✅ Good: `import { useState, useEffect } from "react";` (only import what you use)
+
 ## Component Structure
 
 ```typescript

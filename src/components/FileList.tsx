@@ -20,7 +20,7 @@ import type { FileListProps } from "@/types";
 import { FileIcon } from './FileIcon';
 import { FileDetailsCell } from './FileDetailsCell';
 import styles from './fileList.module.css';
-import api from '@/utils/sdk';
+import { api } from '@/lib/api';
 
 export function FileList({
   items,

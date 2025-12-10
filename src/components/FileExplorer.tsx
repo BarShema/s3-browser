@@ -9,7 +9,7 @@ import { appConfig } from "@/config/app";
 import { api } from "@/lib/api";
 import { isDeleteProtectionEnabled } from "@/lib/preferences";
 import { useResize } from "@/lib/useResize";
-import type { S3Directory, S3File } from "@/utils/sdk/types";
+import type { S3Directory, S3File } from "@idits/sdk";
 import {
   DirectoryItem,
   FileItem,

@@ -30,6 +30,7 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.917.0",
     "@aws-sdk/client-s3": "^3.917.0",
     "@aws-sdk/s3-request-presigner": "^3.917.0",
+    "@idits/sdk": "file:../IditsSDK",
     "@types/archiver": "^7.0.0",
     "@types/multer": "^2.0.0",
     "amazon-cognito-identity-js": "^6.3.15",

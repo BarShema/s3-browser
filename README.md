@@ -85,13 +85,15 @@ No static generation is used - all pages are rendered on-demand.
 
 ### SDK
 
-The application uses a centralized SDK located in `src/utils/sdk/` that handles all API communication. The SDK:
+The application uses the **@idits/sdk** package (a separate repository) that handles all API communication. The SDK:
 
 - Uses `NEXT_PUBLIC_API_BASE_URL` for the API base URL
 - Provides type-safe API methods
 - Handles all HTTP requests to the external API
 
-See `src/utils/sdk/README.md` for detailed SDK documentation.
+The SDK is imported via `src/lib/api.ts` which exports a centralized SDK instance. All components should import from this file.
+
+SDK Repository: [git@github.com:BarShema/IditsSDK.git](git@github.com:BarShema/IditsSDK.git)
 
 ## Project Structure
 
@@ -104,9 +106,7 @@ src/
 ├── components/       # React components
 ├── contexts/         # React contexts (Auth, Theme)
 ├── config/           # Configuration files
-├── lib/              # Utilities and SDK instance
-└── utils/
-    └── sdk/          # API SDK (standalone, reusable)
+└── lib/              # Utilities and SDK instance (imports @idits/sdk)
 ```
 
 ## Deployment

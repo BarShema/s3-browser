@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import { clz } from "@/lib/clz";
 import { formatFileSize } from "@/lib/utils";
-import type { S3Directory, S3File } from "@/utils/sdk/types";
+import type { S3Directory, S3File } from "@idits/sdk";
 import type {
   UploadModalProps,
   UploadFile,

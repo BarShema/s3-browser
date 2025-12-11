@@ -3,16 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { api } from "@/lib/api";
+import type { ImagePreviewProps } from "@/types";
 import styles from "./imagePreview.module.css";
-
-interface ImagePreviewProps {
-  src: string;
-  alt: string;
-  className?: string;
-  maxWidth?: number;
-  maxHeight?: number;
-  onLoad?: () => void;
-}
 
 export function ImagePreview({
   src,

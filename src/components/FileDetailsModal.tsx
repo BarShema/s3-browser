@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import { Clock, Loader2, Ruler, X } from "lucide-react";
+
 import { api } from "@/lib/api";
 import {
   FileItem,
@@ -10,18 +14,10 @@ import {
   isPDF,
   isVideo,
 } from "@/lib/utils";
-import { Clock, Loader2, Ruler, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import fileDetailsStyles from "./fileDetailsModal.module.css";
+import type { FileDetailsModalProps } from "@/types";
 import { FileIcon } from "./FileIcon";
+import fileDetailsStyles from "./fileDetailsModal.module.css";
 import styles from "./modal.module.css";
-
-interface FileDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  file: FileItem | null;
-  driveName: string;
-}
 
 export function FileDetailsModal({
   isOpen,

@@ -1,13 +1,8 @@
 import { LogOut, Menu, Settings, User } from "lucide-react";
 import { useState } from "react";
+import type { UserMenuProps } from "@/types";
 import { ThemeSelector } from "./ThemeSelector";
 import styles from "./userMenu.module.css";
-
-export interface UserMenuProps {
-  user: { username?: string; email?: string } | null;
-  onLogout: () => void;
-  onOpenSettings: () => void;
-}
 
 export function UserMenu({ user, onLogout, onOpenSettings }: UserMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);

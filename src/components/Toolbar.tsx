@@ -10,18 +10,8 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import type { ToolbarProps } from "@/types";
 import styles from "./toolbar.module.css";
-interface ToolbarProps {
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
-  onUpload: () => void;
-  onNewDirectory: () => void;
-  selectedCount: number;
-  onDelete: () => void;
-  isTreeVisible: boolean;
-  onTreeToggle: () => void;
-  onRefresh: () => void;
-}
 
 export function Toolbar({
   viewMode,

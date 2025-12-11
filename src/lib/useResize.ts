@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-
-interface UseResizeOptions {
-  initialWidth: number;
-  minWidth?: number;
-  maxWidth?: number;
-  storageKey?: string;
-  onResize?: (width: number) => void;
-}
+import type { UseResizeOptions } from '@/types';
 
 export function useResize({
   initialWidth,

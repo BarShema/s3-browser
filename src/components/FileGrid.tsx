@@ -24,26 +24,9 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { FileIcon } from "./FileIcon";
+import type { FileGridProps } from "@/types";
 import { appConfig } from "@/config/app";
 import styles from "./fileGrid.module.css";
-
-interface FileGridProps {
-  items: Item[];
-  selectedItems: string[];
-  onSelectionChange: (items: string[]) => void;
-  onDirectoryClick: (directory: DirectoryItem) => void;
-  onFileClick: (file: FileItem) => void;
-  onFileDoubleClick: (file: FileItem) => void;
-  onDownload: (file: FileItem) => void;
-  onDirectoryDownload: (directory: DirectoryItem) => void;
-  onDelete: (file: FileItem) => void;
-  onRename: (file: FileItem, newName: string) => void;
-  onDetailsClick?: (file: FileItem) => void;
-  onDirectorySizeClick?: (directory: DirectoryItem) => void;
-  itemsPerRow: number;
-  onItemsPerRowChange: (count: number) => void;
-  previewedFileId?: string | null;
-}
 
 export function FileGrid({
   items,

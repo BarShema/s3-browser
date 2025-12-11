@@ -1,15 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import type { ConfigModalProps } from "@/types";
 import configStyles from "./configModal.module.css";
 import styles from "./modal.module.css";
-
-interface ConfigModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (drive: string) => void;
-  initialDrive?: string;
-}
 
 export function ConfigModal({
   isOpen,

@@ -87,7 +87,11 @@ export class FileAPI extends BaseAPI {
             errorMessage = xhr.statusText || errorMessage;
           }
           // Create error with status code attached for easier detection
-          const error = new Error(errorMessage) as Error & { status?: number; response?: { status: number } };
+          interface ErrorWithStatus extends Error {
+            status?: number;
+            response?: { status: number };
+          }
+          const error = new Error(errorMessage) as ErrorWithStatus;
           error.status = xhr.status;
           error.response = { status: xhr.status };
           reject(error);
@@ -159,7 +163,12 @@ export class FileAPI extends BaseAPI {
       path: `${data.drive}/${data.key}`,
     });
 
-    const body: any = {
+    const body: {
+      drive: string;
+      key: string;
+      content: string;
+      contentType?: string;
+    } = {
       drive: data.drive,
       key: data.key,
       content: data.content,
@@ -227,7 +236,12 @@ export class FileAPI extends BaseAPI {
    * Get upload URL (presigned URL)
    */
   async getUploadUrl(data: GetUploadUrlParams): Promise<UploadUrlResponse> {
-    const body: any = {
+    const body: {
+      drive: string;
+      key: string;
+      contentType?: string;
+      expiresIn?: number;
+    } = {
       drive: data.drive,
       key: data.key,
     };

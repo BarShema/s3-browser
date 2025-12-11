@@ -8,12 +8,8 @@ import {
   savePreferences,
   type UserPreferences,
 } from "@/lib/preferences";
+import type { SettingsModalProps } from "@/types";
 import styles from "./settingsModal.module.css";
-
-interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [preferences, setPreferences] = useState<UserPreferences>(

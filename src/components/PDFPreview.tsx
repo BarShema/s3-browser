@@ -3,12 +3,8 @@
 import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { getFileExtension } from "@/lib/utils";
+import type { PDFPreviewProps } from "@/types";
 import styles from "./fileIcon.module.css";
-
-interface PDFPreviewProps {
-  src: string;
-  className?: string;
-}
 
 export function PDFPreview({ src, className }: PDFPreviewProps) {
   const [isLoading, setIsLoading] = useState(true);

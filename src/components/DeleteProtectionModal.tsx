@@ -2,13 +2,8 @@
 
 import { Settings } from "lucide-react";
 import { useEffect } from "react";
+import type { DeleteProtectionModalProps } from "@/types";
 import styles from "./deleteProtectionModal.module.css";
-
-interface DeleteProtectionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onGoToSettings: () => void;
-}
 
 export function DeleteProtectionModal({
   isOpen,

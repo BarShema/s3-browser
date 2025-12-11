@@ -1,19 +1,9 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-
-export type Theme = "default" | "night" | "forest" | "ocean" | "rose" | "desert" | "sunset" | "lavender" | "charcoal" | "emerald" | "aws" | "vscode";
-
-interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
+import { createContext, useContext, useEffect, useState } from "react";
+import type { Theme, ThemeContextType, ThemeProviderProps } from "@/types";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-interface ThemeProviderProps {
-  children: ReactNode;
-}
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {

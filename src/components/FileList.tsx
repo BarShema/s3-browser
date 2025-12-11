@@ -16,30 +16,11 @@ import {
   Info
 } from 'lucide-react';
 import { isViewModeEnabled } from '@/lib/preferences';
+import type { FileListProps } from "@/types";
 import { FileIcon } from './FileIcon';
 import { FileDetailsCell } from './FileDetailsCell';
 import styles from './fileList.module.css';
 import api from '@/utils/sdk';
-
-interface FileListProps {
-  items: Item[];
-  selectedItems: string[];
-  onSelectionChange: (items: string[]) => void;
-  onDirectoryClick: (directory: DirectoryItem) => void;
-  onFileClick: (file: FileItem) => void;
-  onFileDoubleClick: (file: FileItem) => void;
-  onDownload: (file: FileItem) => void;
-  onDirectoryDownload: (directory: DirectoryItem) => void;
-  onDelete: (file: FileItem) => void;
-  onRename: (file: FileItem, newName: string) => void;
-  onDetailsClick?: (file: FileItem) => void;
-  onDirectorySizeClick?: (directory: DirectoryItem) => void;
-  sortColumn?: string | null;
-  sortDirection?: 'asc' | 'desc' | null;
-  onSort?: (column: string) => void;
-  driveName?: string;
-  previewedFileId?: string | null;
-}
 
 export function FileList({
   items,

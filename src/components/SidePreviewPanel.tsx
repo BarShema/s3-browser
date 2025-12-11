@@ -26,25 +26,10 @@ import {
   isPDF,
   isVideo,
 } from "@/lib/utils";
+import type { SidePreviewPanelProps } from "@/types";
 import { ImagePreview } from "./ImagePreview";
 import { VideoPreview } from "./VideoPreview";
 import styles from "./sidePreviewPanel.module.css";
-
-interface SidePreviewPanelProps {
-  file: FileItem | null;
-  driveName: string;
-  isOpen: boolean;
-  onClose: () => void;
-  onDownload: (file: FileItem) => void;
-  onRename: (file: FileItem, newName: string) => void;
-  onDelete: (file: FileItem) => void;
-  onEdit: (file: FileItem) => void;
-  onDetailsClick?: (file: FileItem) => void;
-  onPrev?: () => void;
-  onNext?: () => void;
-  canPrev?: boolean;
-  canNext?: boolean;
-}
 
 export function SidePreviewPanel({
   file,

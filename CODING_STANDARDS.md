@@ -46,6 +46,13 @@ Imports should be organized in the following order with blank lines between grou
    import styles from "./component.module.css";
    ```
 
+- **Never leave unused imports** - Remove all unused imports before committing
+  - Unused imports increase bundle size, create confusion, and can lead to maintenance issues
+  - Use your IDE's "organize imports" feature or manually remove unused imports
+  - All linter warnings about unused imports must be resolved
+  - ❌ Bad: `import { useState, useEffect, useCallback } from "react";` (if `useCallback` is not used)
+  - ✅ Good: `import { useState, useEffect } from "react";` (only import what you use)
+
 ## Component Structure
 
 ```typescript
@@ -95,16 +102,35 @@ export function Component({ prop1, prop2 }: ComponentProps) {
   }
   ```
 
-## Interface Exports
+## Type and Interface Organization
 
-- Export interfaces that are used by other components
-- Keep internal interfaces non-exported
+- **Centralize all types and interfaces** - Do not declare types/interfaces in component or code files
+- All types and interfaces must be declared in dedicated type definition files
+- Organize types by domain/module in `src/types/` or `src/utils/sdk/types/` directories
 - Use `Props` suffix for component props interfaces
+- Export interfaces that are used by other components
+- Keep internal interfaces non-exported (but still in type files, not in component files)
+- ❌ Bad: Declaring interfaces in component files
+  ```typescript
+  // FileExplorer.tsx
+  interface FileExplorerProps { ... }
+  interface DirectorySizeInfo { ... }
+  ```
+- ✅ Good: Centralized type definitions
+  ```typescript
+  // src/types/fileExplorer.ts
+  export interface FileExplorerProps { ... }
+  export interface DirectorySizeInfo { ... }
+  
+  // FileExplorer.tsx
+  import type { FileExplorerProps, DirectorySizeInfo } from "@/types/fileExplorer";
+  ```
 
 ## CSS Module Imports
 
-- Always use `styles` as the import name for CSS modules
+- Always use `styles` as the import name for the primary CSS module
 - Import styles at the end of the import section
+- **Exception**: When a component uses multiple CSS modules, use `styles` for the primary/component-specific CSS module, and use descriptive names (e.g., `modalStyles`, `uploadStyles`) for shared or secondary CSS modules
 
 ## Comments
 
@@ -113,12 +139,34 @@ export function Component({ prop1, prop2 }: ComponentProps) {
 - Use JSDoc comments for exported functions/classes
 - Remove commented-out code before committing
 
+## Code Cleanliness
+
+- **Never keep unused code**: Remove all unused variables, functions, files, and imports
+- Unused code creates confusion, increases maintenance burden, and can lead to bugs
+- Before committing, ensure:
+  - All unused variables are removed
+  - All unused functions are removed
+  - All unused files are deleted
+  - All unused imports are removed
+  - All linter warnings about unused code are resolved
+- If code is temporarily unused but may be needed later, add a TODO comment explaining why it's kept, otherwise remove it
+
 ## TypeScript
 
 - Use explicit types for function parameters and return types
 - Prefer `interface` over `type` for object shapes
 - Use `as const` for literal types when appropriate
-- Avoid `any` - use `unknown` or proper types instead
+- **Never use `any`** - use `unknown` or proper types instead
+- **No inline types** - Always declare types/interfaces separately, do not use inline object types in function parameters or return types
+  - ❌ Bad: `function process(data: { name: string; age: number }) { ... }`
+  - ✅ Good: 
+    ```typescript
+    interface ProcessData {
+      name: string;
+      age: number;
+    }
+    function process(data: ProcessData) { ... }
+    ```
 
 ## Async/Await
 

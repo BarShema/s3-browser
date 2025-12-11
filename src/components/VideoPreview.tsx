@@ -1,20 +1,14 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import { api } from "@/lib/api";
 import { clz } from "@/lib/clz";
 import { getFileExtension } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import type { VideoPreviewProps } from "@/types";
 import { CustomVideoPlayer } from "./CustomVideoPlayer";
 import fileIconStyles from "./fileIcon.module.css";
 import styles from "./videoPreview.module.css";
-
-interface VideoPreviewProps {
-  src: string;
-  className?: string;
-  isThumbnail?: boolean; // If true, show thumbnail image; if false, show video player
-  autoPlay?: boolean;
-  onLoad?: () => void;
-}
 
 export function VideoPreview({
   src,

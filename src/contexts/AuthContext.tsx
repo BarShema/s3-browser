@@ -1,19 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { AuthService, AuthUser } from '@/lib/auth';
-
-interface AuthContextType {
-  user: AuthUser | null;
-  loading: boolean;
-  signIn: (username: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  isAuthenticated: boolean;
-}
+import type { AuthContextType, AuthProviderProps } from '@/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 

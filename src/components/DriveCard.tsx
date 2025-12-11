@@ -4,19 +4,8 @@ import { useState } from "react";
 import { Calculator, HardDrive, Loader2 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import type { DriveInfo, DriveCardProps } from "@/types";
 import styles from "./driveCard.module.css";
-
-interface DriveInfo {
-  drive: string;
-  totalSize: number;
-  totalObjects: number;
-  formattedSize: string;
-}
-
-interface DriveCardProps {
-  drive: string;
-  onClick: () => void;
-}
 
 export function DriveCard({ drive, onClick }: DriveCardProps) {
   const [driveInfo, setDriveInfo] = useState<DriveInfo | null>(null);

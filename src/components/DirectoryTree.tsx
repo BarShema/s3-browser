@@ -4,23 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Folder, FolderOpen } from "lucide-react";
 
 import { api } from "@/lib/api";
+import type {
+  DirectoryNode,
+  DirectoryTreeProps,
+  DirectoryInfo,
+} from "@/types";
 import styles from "./directoryTree.module.css";
-
-interface DirectoryNode {
-  key: string;
-  name: string;
-  children?: DirectoryNode[];
-  isExpanded?: boolean;
-  level: number;
-  isEmpty?: boolean;
-}
-
-interface DirectoryTreeProps {
-  driveName: string;
-  currentPath: string;
-  onPathClick: (path: string) => void;
-  isVisible: boolean;
-}
 
 export function DirectoryTree({
   driveName,
@@ -92,7 +81,7 @@ export function DirectoryTree({
 
         // Filter out the origin directory and any parent directories from the results
         const filteredDirectories =
-          data.directories?.filter((dir: { key: string; name: string }) => {
+          data.directories?.filter((dir: DirectoryInfo) => {
             // Remove the origin directory itself
             if (dir.key === directoryKey) return false;
 
@@ -118,7 +107,7 @@ export function DirectoryTree({
                 return {
                   ...node,
                   children: filteredDirectories.map(
-                    (dir: { key: string; name: string }) => ({
+                    (dir: DirectoryInfo) => ({
                       key: dir.key,
                       name: dir.name,
                       level: node.level + 1,
@@ -155,7 +144,7 @@ export function DirectoryTree({
 
   // Build hierarchical tree structure from flat directory list
   const buildTreeStructure = (
-    directories: { key: string; name: string }[]
+    directories: DirectoryInfo[]
   ): DirectoryNode[] => {
     const nodeMap = new Map<string, DirectoryNode>();
     const rootNodes: DirectoryNode[] = [];
